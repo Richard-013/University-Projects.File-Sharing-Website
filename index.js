@@ -104,6 +104,15 @@ router.post('/login', async ctx => {
 	}
 })
 
+router.get('/upload', async ctx => {
+	try {
+		if (ctx.session.authorised !== true) return ctx.redirect('/login?msg=you need to log in')
+		await ctx.render('upload')
+	} catch (err) {
+		await ctx.render('error', { message: err.message })
+	}
+})
+
 router.get('/logout', async ctx => {
 	ctx.session.authorised = null
 	ctx.redirect('/?msg=you are now logged out')
