@@ -1,25 +1,29 @@
-# Assignment Template
+# 340CT Coursework
+## File Sharing
 
-This repository contains the base files for the assignment. You will need to create a _private duplicate_ in your module organisation. Carry out the following steps, taken from the [GitHub documentation](https://help.github.com/en/enterprise/2.16/user/articles/duplicating-a-repository):
+This is the repository for my 340CT Coursework which will be a dynamic website
+that allows users to upload, download, and share files between one another.
 
-Temporarily clone this repository to your development computer. This will create a directory on your computer called `temp` which contains the repository files:
+The website is based off of the template provided by Mark Tyers which can be found
+[here](https://github.coventry.ac.uk/web/template-dynamic-websites), however all
+functionality beyond what is provided by the template is my own work.
 
-`git clone https://github.coventry.ac.uk/web/template-dynamic-websites.git temp`
+## Outline of Tasks
+### Basic
 
-Create a new **private** repository in the module organisation on the GitHub server and copy the _clone url_ to the clipboard (the one that begins with `https://` and ends in `.git`. The repository name should be your username (the one you use to log into the University computers).
+1. Allow logged-in users to upload files to the server.
+2. They should be able to email a link to their friends who can use this to download the file.
+3. The files should not be stored in the public directory
+4. The download link should include a hash string, not the file name.
 
-Mirror Push to this new repository, replacing xxx with the url from the clipboard making sure you are _in_ the `temp/` directory:
+### Intermediate
 
-`cd temp/ && git push --mirror xxx`
+1. Any files should be deleted once they have been downloaded or after 3 days (whichever comes first).
+2. All files should download (even if they could display in the web browser).
 
-Once you are sure the code is in your new repository, delete the temporary local repository.
+### Advanced
 
-`cd .. && rm -rf temp/`
-
-Your private repository on GitHub will now contain a complete copy of this template including the commits that were already made. You can now start your assignment by carrying out the following steps:
-
-Clone your private repository
-
-Change your [local config settings](https://git-scm.com/book/en/v2/Getting-Started-First-Time-Git-Setup). This is a vital step otherwise your commits won't show on the GitHub _graph_ and your grade will be affected.
-
-Start working on the assignment.
+1. The person uploading the file can choose the username of the user who can access it.
+2. This username must already exist.
+3. Users need to log in to see a list of the files they can download.
+4. All files in the list should have an appropriate icon reflecting what type of file they are and include information such as the file size and the date and time the file was uploaded as well as how long before it will be deleted.
