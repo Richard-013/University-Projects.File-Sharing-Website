@@ -10,7 +10,14 @@
 		<link href="style.css" type="text/css" rel="stylesheet" />
 	</head>
 	<body>
-		<h1>Home</h1>
-		<p>This is a secure page. Users need to have a valid account and be logged in to see it.</p>
+		<h1>File Share</h1>
+		<h3>Welcome to File Share</h3>
+		<p>This is a simple site that allows you to upload your files and share them with your friends</p>
+
+		<form action="/upload" method="post">
+			<p>File:<br/><input type="file" name="filetoupload"></p>
+			<input type="submit">
+		</form>
+
 		<p><a href="/logout">log out</a></p>
 </html>
