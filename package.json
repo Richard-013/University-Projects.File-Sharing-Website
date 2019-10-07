@@ -25,7 +25,7 @@
     "bcrypt": "^3.0.6",
     "bcrypt-promise": "^2.0.0",
     "fs-extra": "^7.0.1",
-    "handlebars": "^4.1.2",
+    "handlebars": "^4.4.2",
     "koa": "^2.6.2",
     "koa-body": "^4.0.8",
     "koa-bodyparser": "^4.2.1",
@@ -34,7 +34,8 @@
     "koa-static": "^5.0.0",
     "koa-views": "^6.1.5",
     "mime-types": "^2.1.22",
-    "sqlite-async": "^1.0.11"
+    "sqlite-async": "^1.0.11",
+    "sqlite3": "^4.1.0"
   },
   "devDependencies": {
     "eslint": "^5.15.2",
