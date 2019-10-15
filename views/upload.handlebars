@@ -5,7 +5,7 @@
 <head>
     <meta charset="utf-8">
     <title>Home Page</title>
-    <meta name="description" content="form to add new books">
+    <meta name="description" content="Form to upload a file">
     <meta name="author" content="Richard Horton">
     <link href="style.css" type="text/css" rel="stylesheet" />
 </head>
@@ -14,7 +14,7 @@
     <h1>File Share</h1>
     <h3>Welcome to File Share - Upload Page</h3>
 
-    <form action="/upload" method="post">
+    <form action="/upload" enctype="multipart/form-data" method="post">
         <p>File:<br /><input type="file" name="filetoupload"></p>
         <input type="submit">
     </form>
