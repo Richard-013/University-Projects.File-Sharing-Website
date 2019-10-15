@@ -115,6 +115,15 @@ router.get('/upload', async ctx => {
 	}
 })
 
+router.post('/upload', koaBody, async ctx => {
+	try {
+		if (ctx.session.authorised !== true) return ctx.redirect('/login?msg=you need to log in')
+	} catch (err) {
+		console.log(`error ${err.message}`)
+		await ctx.render('error', { message: err.message })
+	}
+})
+
 router.get('/logout', async ctx => {
 	ctx.session.authorised = null
 	ctx.redirect('/?msg=you are now logged out')
