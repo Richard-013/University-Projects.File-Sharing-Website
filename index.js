@@ -20,6 +20,7 @@ const mime = require('mime-types')
 
 /* IMPORT CUSTOM MODULES */
 const User = require('./modules/user')
+const Upload = require('./modules/upload')
 
 const app = new Koa()
 const router = new Router()
