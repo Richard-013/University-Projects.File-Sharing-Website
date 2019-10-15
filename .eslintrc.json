@@ -15,7 +15,7 @@
     "arrow-spacing": ["warn", {"before": true, "after": true}],
     "brace-style": 2,
     "camelcase": [2, {"properties": "never"}],
-    "complexity": ["error", 5],
+    "complexity": ["warn", 5],
     "eol-last": "warn",
     "eqeqeq": "error",
     "func-call-spacing": ["error", "never"],
