@@ -70,6 +70,40 @@ describe('uploadFile()', () => {
 		done()
 	})
 
+	test('directory path is not created if it already exists', async done => {
+		expect.assertions(3)
+		const upload = await new Upload()
+
+		// Creates file to use as dummy upload
+		const text = 'This is a file to test the uploadFile function'
+		await fs.writeFile('testing/dummy.txt', text, err => {
+			if (err) throw err
+		})
+
+		// Creates the folder
+		fs.mkdirSync('files/uploads/testing')
+
+		expect(fs.existsSync('files/uploads/testing')).toBeTruthy()
+
+		// Upload file to directory
+		upload.uploadFile('testing/dummy.txt', 'dummy.txt', 'testing')
+
+		// Checks that the folder was not removed
+		expect(fs.existsSync('files/uploads/testing')).toBeTruthy()
+		// Checks that the folder was not created inside the existing directory
+		expect(fs.existsSync('files/uploads/testing/testing')).toBeFalsy()
+
+		// Deletes files after test
+		await fs.unlink('testing/dummy.txt', err => {
+			if (err) throw err
+		})
+		await fs.unlink('files/uploads/testing/dummy.txt', err => {
+			if (err) throw err
+		})
+		await fs.rmdir('files/uploads/testing', err => {
+			if (err) throw err
+		})
+
 		done()
 	})
 })
