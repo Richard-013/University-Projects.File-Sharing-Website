@@ -117,11 +117,11 @@ router.get('/upload', async ctx => {
 
 router.post('/upload', koaBody, async ctx => {
 	try {
-		if (ctx.session.authorised !== true) return ctx.redirect('/login?msg=you need to log in')
+		if (ctx.session.authorised !== true) return ctx.redirect('/login?msg=you need to log in') // Prevents users who aren't logged in from uploading files
 		const { path, name, type } = ctx.request.files.filetoupload // Gets details from file
-		const fileExtension = mime.extension(type) // Gets extension from file
+		//const fileExtension = mime.extension(type) // Gets extension from file
 		const upload = new Upload()
-		await upload.uploadFile(path, name, ctx.session.username)
+		await upload.uploadFile(path, name, ctx.session.username) // Uploads file to server
 		ctx.redirect('/')
 	} catch (err) {
 		console.log(`error ${err.message}`)
