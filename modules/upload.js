@@ -8,8 +8,17 @@ module.exports = class Upload {
 		if (pathExists !== true) {
 			fs.mkdirSync(`files/uploads/${user}`, { recursive: true })
 		}
-
-		await fs.copy(path, `files/uploads/${user}/${name}`)
+		
+		if (path === undefined || name === undefined) {
+			return 1 // No file or no path specified for upload
+		} else {
+			if(fs.existsSync(path) === false) {
+				return -1 // Selected file does not exist
+			} else {
+				await fs.copy(path, `files/uploads/${user}/${name}`)
+				return 0
+			}
+		}
 	}
 
 }
