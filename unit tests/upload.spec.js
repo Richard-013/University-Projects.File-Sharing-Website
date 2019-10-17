@@ -1,6 +1,6 @@
 'use strict'
 
-const fs = require('fs') // Replace this and all fs function calls with mock of fs
+const fs = require('fs')
 const Upload = require('../modules/upload.js')
 
 describe('uploadFile()', () => {
@@ -80,8 +80,10 @@ describe('uploadFile()', () => {
 			if (err) throw err
 		})
 
-		// Creates the folder
-		fs.mkdirSync('files/uploads/testing')
+		if (fs.existsSync('files/uploads/testing') === false) {
+			// Creates the folder
+			fs.mkdirSync('files/uploads/testing')
+		}
 
 		expect(fs.existsSync('files/uploads/testing')).toBeTruthy()
 
