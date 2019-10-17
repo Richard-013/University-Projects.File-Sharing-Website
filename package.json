@@ -33,9 +33,14 @@
     "koa-session": "^5.10.1",
     "koa-static": "^5.0.0",
     "koa-views": "^6.1.5",
+    "markdown": "^0.5.0",
+    "markdownlint-cli": "^0.18.0",
     "mime-types": "^2.1.22",
-    "sqlite-async": "^1.0.11",
-    "sqlite3": "^4.1.0"
+    "remark-cli": "^7.0.0",
+    "remark-lint": "^6.0.5",
+    "remark-preset-lint-markdown-style-guide": "^2.1.3",
+    "remark-preset-lint-recommended": "^3.0.3",
+    "sqlite-async": "^1.0.12"
   },
   "devDependencies": {
     "eslint": "^5.15.2",
@@ -43,6 +48,7 @@
     "http-status-codes": "^1.3.2",
     "jest": "^24.1.0",
     "jsdoc": "^3.6.3",
-    "jsdoc-route-plugin": "^0.1.0"
+    "jsdoc-route-plugin": "^0.1.0",
+    "markdownlint": "^0.17.0"
   }
 }
