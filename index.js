@@ -125,7 +125,9 @@ router.post('/upload', koaBody, async ctx => {
 			// Handle no file selected
 		} else {
 			const upload = new Upload()
-			await upload.uploadFile(path, name, ctx.session.username) // Uploads file to server
+			// Attempts to upload file to the server, returns a status code to work with
+			const uploadStatus = await upload.uploadFile(path, name, ctx.session.username)
+			// If 0 go to success page, if 1 show message, if -1 show alternate message, anything else show error message
 			ctx.redirect('/')
 		}
 	} catch (err) {
