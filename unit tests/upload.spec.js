@@ -75,4 +75,48 @@ describe('uploadFile()', () => {
 		expect(returnVal).toBe(0)
 		done()
 	})
+
+	test('handles no selected file and no stated path correctly', async done => {
+		expect.assertions(1)
+		const upload = await new Upload()
+		const returnVal = await upload.uploadFile(undefined, undefined, 'testing')
+		
+		// Tests to see if the correct error is thrown when upload attempts
+		expect(returnVal).toBe(1)
+
+		done() // Finish the test
+	})
+
+	test('handles no selected file correctly', async done => {
+		expect.assertions(1)
+		const upload = await new Upload()
+		const returnVal = await upload.uploadFile('testing/dummy.txt', undefined, 'testing')
+		
+		// Tests to see if the correct error is thrown when upload attempts
+		expect(returnVal).toBe(1)
+
+		done() // Finish the test
+	})
+
+	test('handles no stated path correctly', async done => {
+		expect.assertions(1)
+		const upload = await new Upload()
+		const returnVal = await upload.uploadFile(undefined, 'dummy.txt', 'testing')
+		
+		// Tests to see if the correct error is thrown when upload attempts
+		expect(returnVal).toBe(1)
+
+		done() // Finish the test
+	})
+
+	test('selected file does not exist', async done => {
+		expect.assertions(1)
+		const upload = await new Upload()
+		const returnVal = await upload.uploadFile('testing/alpha.txt', 'alpha.txt', 'testing')
+		
+		// Tests to see if the correct error is thrown when upload attempts
+		expect(returnVal).toBe(-1)
+
+		done() // Finish the test
+	})
 })
