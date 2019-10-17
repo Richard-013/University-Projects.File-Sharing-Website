@@ -9,7 +9,7 @@ module.exports = class Upload {
 			fs.mkdirSync(`files/uploads/${user}`, { recursive: true })
 		}
 
-		fs.copy(path, `files/uploads/${user}/${name}`)
+		await fs.copy(path, `files/uploads/${user}/${name}`)
 	}
 
 }
