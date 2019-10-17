@@ -46,18 +46,6 @@ describe('uploadFile()', () => {
 		// Upload file to directory and check directory was created
 		await upload.uploadFile('testing/dummy.txt', 'dummy.txt', 'testing')
 		expect(fs.existsSync('files/uploads/testing')).toBeTruthy() // Checks that the folder was created successfully
-/*
-		// Cleans up
-		if (fs.existsSync('files/uploads/testing/dummy.txt')) {
-			await fs.unlink('files/uploads/testing/dummy.txt', err => {
-				if (err) throw err
-			})
-		}
-		if (fs.existsSync('files/uploads/testing')) {
-			await fs.rmdir('files/uploads/testing', err => {
-				if (err) throw err
-			})
-		}*/
 
 		done()
 	})
@@ -80,18 +68,6 @@ describe('uploadFile()', () => {
 		expect(fs.existsSync('files/uploads/testing')).toBeTruthy()
 		// Checks that the folder was not created inside the existing directory
 		expect(fs.existsSync('files/uploads/testing/testing')).toBeFalsy()
-/*
-		// Cleans up
-		if (fs.existsSync('files/uploads/testing/dummy.txt')) {
-			await fs.unlink('files/uploads/testing/dummy.txt', err => {
-				if (err) throw err
-			})
-		}
-		if (fs.existsSync('files/uploads/testing')) {
-			await fs.rmdir('files/uploads/testing', err => {
-				if (err) throw err
-			})
-		}*/
 
 		done()
 	})
