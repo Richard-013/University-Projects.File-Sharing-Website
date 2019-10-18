@@ -1,22 +1,19 @@
 'use strict'
 
 const fs = require('fs')
+const mock = require('mock-fs')
 const Upload = require('../modules/upload.js')
 
 describe('uploadFile()', () => {
-	afterEach(() => {
-		// Cleans up
-		if (fs.existsSync('files/uploads/testing/dummy.txt')) {
-			fs.unlinkSync('files/uploads/testing/dummy.txt')/*, err => {
-				if (err) throw err
-			})*/
-		}
-		if (fs.existsSync('files/uploads/testing')) {
-			fs.rmdirSync('files/uploads/testing')/*, err => {
-				if (err) throw err
-			})*/
-		}
+	beforeEach(() => {
+		mock({
+			'testing': {
+				'dummy.txt': 'file content here'
+			}
+		})
 	})
+
+	afterEach(mock.restore)
 
 	test('file is uploaded to the server', async done => {
 		expect.assertions(2)
@@ -40,7 +37,7 @@ describe('uploadFile()', () => {
 
 		// Checks that the folder does not exist
 		if (fs.existsSync('files/uploads/testing')) {
-			fs.rmdirSync('files/uploads/testing')
+			fs.rmdirSync('files/uploads/testing', { recursive: true })
 		}
 
 		expect(fs.existsSync('files/uploads/testing')).toBeFalsy()
@@ -59,7 +56,7 @@ describe('uploadFile()', () => {
 
 		if (fs.existsSync('files/uploads/testing') === false) {
 			// Creates the folder
-			fs.mkdirSync('files/uploads/testing')
+			fs.mkdirSync('files/uploads/testing', { recursive: true })
 		}
 
 		expect(fs.existsSync('files/uploads/testing')).toBeTruthy()
