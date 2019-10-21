@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+/* eslint-disable complexity */
 
 //Routes File
 
@@ -20,6 +21,7 @@ const mime = require('mime-types')
 
 /* IMPORT CUSTOM MODULES */
 const User = require('./modules/user')
+const Upload = require('./modules/upload')
 
 const app = new Koa()
 const router = new Router()
@@ -98,9 +100,45 @@ router.post('/login', async ctx => {
 		const user = await new User(dbName)
 		await user.login(body.user, body.pass)
 		ctx.session.authorised = true
+		ctx.session.username = body.user // Stores username in cookie for reference
 		return ctx.redirect('/?msg=you are now logged in...')
 	} catch(err) {
 		await ctx.render('error', {message: err.message})
+	}
+})
+
+router.get('/upload', async ctx => {
+	try {
+		if (ctx.session.authorised !== true) return ctx.redirect('/login?msg=you need to log in')
+		const data = {}
+		if (ctx.query.message) data.message = ctx.query.message
+		await ctx.render('upload', data)
+	} catch (err) {
+		await ctx.render('error', { message: err.message })
+	}
+})
+
+// eslint-disable-next-line max-lines-per-function
+router.post('/upload', koaBody, async ctx => {
+	try {
+		// Prevents users who aren't logged in from uploading files
+		if (ctx.session.authorised !== true) return ctx.redirect('/login?msg=you need to log in')
+		const { path, name } = ctx.request.files.filetoupload // Gets details from file
+		const upload = new Upload()
+		// Attempts to upload file to the server, returns a status code to work with
+		const uploadStatus = await upload.uploadFile(path, name, ctx.session.username)
+		if (uploadStatus === 0) {
+			ctx.redirect('/upload?message=Upload successful') // Successful upload
+		} else if (uploadStatus === 1) {
+			ctx.redirect('/upload?message=No file selected') // No file selected
+		} else if (uploadStatus === -1) {
+			ctx.redirect('/upload?message=Selected file does not exist') // File does not exist
+		} else { 
+			ctx.redirect('/upload?message=Something went wrong') // Generic error
+		}
+	} catch (err) {
+		console.log(`error ${err.message}`)
+		await ctx.render('error', { message: err.message })
 	}
 })
 
