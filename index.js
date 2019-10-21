@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+/* eslint-disable complexity */
 
 //Routes File
 
@@ -109,26 +110,31 @@ router.post('/login', async ctx => {
 router.get('/upload', async ctx => {
 	try {
 		if (ctx.session.authorised !== true) return ctx.redirect('/login?msg=you need to log in')
-		await ctx.render('upload')
+		const data = {}
+		if (ctx.query.message) data.message = ctx.query.message
+		await ctx.render('upload', data)
 	} catch (err) {
 		await ctx.render('error', { message: err.message })
 	}
 })
 
+// eslint-disable-next-line max-lines-per-function
 router.post('/upload', koaBody, async ctx => {
 	try {
 		// Prevents users who aren't logged in from uploading files
 		if (ctx.session.authorised !== true) return ctx.redirect('/login?msg=you need to log in')
 		const { path, name } = ctx.request.files.filetoupload // Gets details from file
-		//const fileExtension = mime.extension(type) // Gets extension from file
-		if(name === '') {
-			// Handle no file selected
-		} else {
-			const upload = new Upload()
-			// Attempts to upload file to the server, returns a status code to work with
-			const uploadStatus = await upload.uploadFile(path, name, ctx.session.username)
-			// If 0 go to success page, if 1 show message, if -1 show alternate message, anything else show error message
-			ctx.redirect('/')
+		const upload = new Upload()
+		// Attempts to upload file to the server, returns a status code to work with
+		const uploadStatus = await upload.uploadFile(path, name, ctx.session.username)
+		if (uploadStatus === 0) {
+			ctx.redirect('/upload?message=Upload successful') // Successful upload
+		} else if (uploadStatus === 1) {
+			ctx.redirect('/upload?message=No file selected') // No file selected
+		} else if (uploadStatus === -1) {
+			ctx.redirect('/upload?message=Selected file does not exist') // File does not exist
+		} else { 
+			ctx.redirect('/upload?message=Something went wrong') // Generic error
 		}
 	} catch (err) {
 		console.log(`error ${err.message}`)
