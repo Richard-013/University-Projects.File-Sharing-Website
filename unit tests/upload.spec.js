@@ -128,6 +128,24 @@ describe('hashFileName()', () => {
 
 		done() // Finish the test
 	})
+
+	test('correct error is thrown when file doesn\'t have an extension', async done => {
+		expect.assertions(1)
+		const upload = await new Upload()
+		// Checks correct error is thrown when function is called with wrong argument
+		await expect(upload.hashFileName('testing')).rejects.toEqual(Error('File name is invalid: No extension found (fileName)'))
+
+		done()
+	})
+
+	test('correct error is thrown when no file name is given', async done => {
+		expect.assertions(1)
+		const upload = await new Upload()
+		// Checks correct error is thrown when function is called with wrong argument
+		await expect(upload.hashFileName()).rejects.toEqual(Error('No file name passed (fileName)'))
+
+		done()
+	})
 })
 
 describe('getExtension()', () => {
