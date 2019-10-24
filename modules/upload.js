@@ -15,8 +15,11 @@ module.exports = class Upload {
 				if (pathExists !== true) {
 					fs.mkdirSync(`files/uploads/${user}`, { recursive: true })
 				}
-				
-				await fs.copy(path, `files/uploads/${user}/${name}`)
+
+				const fileName = await this.hashFileName(name)
+				const ext = await this.getExtension(name)
+				const saveName = `${fileName}.${ext}`
+				await fs.copy(path, `files/uploads/${user}/${saveName}`)
 				return 0
 			}
 		}
