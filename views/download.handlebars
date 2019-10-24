@@ -1,0 +1,23 @@
+<!doctype html>
+
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>Home Page</title>
+    <meta name="description" content="Page for user to download their chosen file">
+    <meta name="author" content="Richard Horton">
+    <link href="style.css" type="text/css" rel="stylesheet" />
+</head>
+
+<body>
+    <h1>File Share</h1>
+    <h3>Welcome to File Share - Download Page</h3>
+    {{#if message}}
+    <p class="msg">{{message}}</p>
+    <!-- If a message is passed to the page, display it here -->
+    {{/if}}
+
+    <p><a href="/views/fileList.handlebars">Back</a></p>
+
+</html>
