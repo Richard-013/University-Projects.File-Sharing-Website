@@ -21,9 +21,9 @@ describe('uploadFile()', () => {
 
 		// Upload
 		const returnVal = await upload.uploadFile('testing/dummy.txt', 'dummy.txt', 'testing')
-
+		const expectName = await upload.hashFileName('dummy.txt')
 		// Check upload success
-		const existing = fs.existsSync('files/uploads/testing/dummy.txt')
+		const existing = fs.existsSync(`files/uploads/testing/${expectName}.txt`)
 		expect(existing).toBeTruthy()
 		// Checks return value was correct
 		expect(returnVal).toBe(0)
