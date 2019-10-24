@@ -1,5 +1,6 @@
 'use strict'
 const fs = require('fs-extra')
+const crypto = require('crypto')
 
 module.exports = class Upload {
 
@@ -19,6 +20,15 @@ module.exports = class Upload {
 				return 0
 			}
 		}
+	}
+
+	async hashFileName(name) {
+		const nameSplit = name.split('.')
+		nameSplit.pop()
+		const nameNoExt = nameSplit.join()
+		const hashName = crypto.createHash('sha1')
+		hashName.update(nameNoExt)
+		return hashName.digest('hex')
 	}
 
 }
