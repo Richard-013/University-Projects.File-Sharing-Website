@@ -26,12 +26,19 @@ module.exports = class Upload {
 	}
 
 	async hashFileName(name) {
+		if (!name) {
+			throw new Error('No file name passed (fileName)')
+		}
 		const nameSplit = name.split('.')
-		nameSplit.pop()
-		const nameNoExt = nameSplit.join()
-		const hashName = crypto.createHash('sha1')
-		hashName.update(nameNoExt)
-		return hashName.digest('hex')
+		if (nameSplit.length <= 1) {
+			throw new Error('File name is invalid: No extension found (fileName)')
+		} else {
+			nameSplit.pop()
+			const nameNoExt = nameSplit.join()
+			const hashName = crypto.createHash('sha1')
+			hashName.update(nameNoExt)
+			return hashName.digest('hex')
+		}
 	}
 
 	async getExtension(name) {
