@@ -142,6 +142,19 @@ router.post('/upload', koaBody, async ctx => {
 	}
 })
 
+router.get('/fileList', async ctx => {
+	try {
+		if (ctx.session.authorised !== true) return ctx.redirect('/login?msg=you need to log in')
+		const data = {
+			files: ['File 1', 'File 2', 'File 3'],
+		}
+		if (ctx.query.message) data.message = ctx.query.message
+		await ctx.render('fileList', data)
+	} catch (err) {
+		await ctx.render('error', { message: err.message })
+	}
+})
+
 router.get('/logout', async ctx => {
 	ctx.session.authorised = null
 	ctx.redirect('/?msg=you are now logged out')
