@@ -133,7 +133,7 @@ router.post('/upload', koaBody, async ctx => {
 			ctx.redirect('/upload?message=No file selected') // No file selected
 		} else if (uploadStatus === -1) {
 			ctx.redirect('/upload?message=Selected file does not exist') // File does not exist
-		} else { 
+		} else {
 			ctx.redirect('/upload?message=Something went wrong') // Generic error
 		}
 	} catch (err) {
