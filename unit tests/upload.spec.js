@@ -130,3 +130,14 @@ describe('hashFileName()', () => {
 	})
 })
 
+describe('getExtension()', () => {
+	test('gets extension from the file', async done => {
+		expect.assertions(1)
+		const upload = await new Upload()
+		const returnVal = await upload.getExtension('testing.txt')
+
+		expect(returnVal).toBe('txt')
+
+		done() // Finish the test
+	})
+})
