@@ -124,7 +124,7 @@ router.post('/upload', koaBody, async ctx => {
 		// Prevents users who aren't logged in from uploading files
 		if (ctx.session.authorised !== true) return ctx.redirect('/login?msg=you need to log in')
 		const { path, name } = ctx.request.files.filetoupload // Gets details from file
-		const upload = new Upload()
+		const upload = await new Upload(dbName)
 		// Attempts to upload file to the server, returns a status code to work with
 		const uploadStatus = await upload.uploadFile(path, name, ctx.session.username)
 		if (uploadStatus === 0) {
