@@ -117,3 +117,16 @@ describe('uploadFile()', () => {
 		done() // Finish the test
 	})
 })
+
+describe('hashFileName()', () => {
+	test('gets file name without extension', async done => {
+		expect.assertions(1)
+		const upload = await new Upload()
+		const returnVal = await upload.hashFileName('testing.txt')
+
+		expect(returnVal).toBe('dc724af18fbdd4e59189f5fe768a5f8311527050')
+
+		done() // Finish the test
+	})
+})
+
