@@ -31,4 +31,9 @@ module.exports = class Upload {
 		return hashName.digest('hex')
 	}
 
+	async getExtension(name) {
+		const ext = name.split('.').pop()
+		return ext
+	}
+
 }
