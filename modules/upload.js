@@ -24,7 +24,7 @@ module.exports = class Upload {
 			} else {
 				const pathExists = fs.existsSync(`files/uploads/${user}`)
 				if (pathExists !== true) {
-					fs.mkdirSync(`files/uploads/${user}`, { recursive: true })
+					fs.mkdirSync(`files/uploads/${user}`, { recursive: true }) // Make a directory if it doesn't exist
 				}
 
 				const fileName = await this.hashFileName(name) // Hashes the file name without the extension
@@ -38,29 +38,34 @@ module.exports = class Upload {
 	}
 
 	async hashFileName(name) {
+		// Throws an error if there is no file name
 		if (!name) {
 			throw new Error('No file name passed (fileName)')
 		}
 		const nameSplit = name.split('.')
+		// Throws an error if there is no extension
 		if (nameSplit.length <= 1) {
 			throw new Error('File name is invalid: No extension found (fileName)')
 		} else {
 			nameSplit.pop()
 			const nameNoExt = nameSplit.join()
-			const hashName = crypto.createHash('sha1')
-			hashName.update(nameNoExt)
-			return hashName.digest('hex')
+			const hashName = crypto.createHash('sha1') // Creates a hash using sha1 standards
+			hashName.update(nameNoExt) // Hashes the file name
+			return hashName.digest('hex') // Returns the hashed file name in hexidecimal format
 		}
 	}
 
 	async getExtension(name) {
+		// If no name is given throw an error
 		if (!name) {
 			throw new Error('No file name passed (getExtension)')
 		}
 		const nameSplit = name.split('.')
+		// If a file doesn't have an extension throw an error
 		if (nameSplit.length <= 1) {
 			throw new Error('File name is invalid: No extension found (getExtension)')
 		} else {
+			// Gets the extension from the end of the file name
 			const ext = nameSplit.pop()
 			return ext
 		}
