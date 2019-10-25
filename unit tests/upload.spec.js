@@ -188,6 +188,7 @@ describe('getExtension()', () => {
 		done()
 	})
 })
+
 describe('addToDB()', () => {
 	test('adds records to the database', async done => {
 		// Tests to see if records are successfully added to the database
@@ -199,4 +200,27 @@ describe('addToDB()', () => {
 		done()
 	})
 
+	test('checks correct code is returned when a duplicate file is added', async done => {
+		// Tests to see if records are successfully added to the database
+		expect.assertions(2)
+		const upload = await new Upload()
+		// Uploads the file for the first time
+		const returnVal1 = await upload.addToDB('123abc', 'dummy', 'txt', 'testing')
+		expect(returnVal1).toBe(0)
+
+		const returnVal2 = await upload.addToDB('123abc', 'dummy', 'txt', 'testing')
+		expect(returnVal2).toBe(-2)
+		done()
+	})
+
+	test('checks correct code is returned there is a data or database issue', async done => {
+		// Tests to see if records are successfully added to the database
+		expect.assertions(1)
+		const upload = await new Upload()
+		// Uploads the file for the first time
+		const returnVal = await upload.addToDB()
+		expect(returnVal).toBe(-3)
+
+		done()
+	})
 })
