@@ -27,11 +27,12 @@ module.exports = class Upload {
 					fs.mkdirSync(`files/uploads/${user}`, { recursive: true })
 				}
 
-				const fileName = await this.hashFileName(name)
-				const ext = await this.getExtension(name)
-				const saveName = `${fileName}.${ext}`
-				await fs.copy(path, `files/uploads/${user}/${saveName}`)
-				return 0
+				const fileName = await this.hashFileName(name) // Hashes the file name without the extension
+				const ext = await this.getExtension(name) // Gets the extension
+				const saveName = `${fileName}.${ext}` // Recombines the extension and hashed file name
+				await fs.copy(path, `files/uploads/${user}/${saveName}`) // Copies the file to the server
+				const dbInsert = await this.addToDB(fileName, name, ext, user) // Adds file details to the database
+				return dbInsert // Returns status code from addToDB
 			}
 		}
 	}
