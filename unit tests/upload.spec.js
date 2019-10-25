@@ -188,3 +188,15 @@ describe('getExtension()', () => {
 		done()
 	})
 })
+describe('addToDB()', () => {
+	test('adds records to the database', async done => {
+		// Tests to see if records are successfully added to the database
+		expect.assertions(1)
+		const upload = await new Upload()
+		const returnVal = await upload.addToDB('123abc', 'dummy', 'txt', 'testing')
+		// Checks return value of the function
+		expect(returnVal).toBe(0)
+		done()
+	})
+
+})
