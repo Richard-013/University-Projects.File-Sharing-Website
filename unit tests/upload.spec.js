@@ -116,6 +116,22 @@ describe('uploadFile()', () => {
 
 		done() // Finish the test
 	})
+
+	test('user has already uploaded the file to the database', async done => {
+		expect.assertions(2)
+		const upload = await new Upload()
+		const hashName = await upload.hashFileName('dummy.txt')
+		
+		// Adds file to the database
+		const initialInsert = await upload.addToDB(hashName, 'dummy', 'txt', 'testing')
+		expect(initialInsert).toBe(0)
+
+		// Upload file which will attempt to add it to the database again
+		const returnVal = await upload.uploadFile('testing/dummy.txt', 'dummy.txt', 'testing')
+		expect(returnVal).toBe(-2)
+
+		done()
+	})
 })
 
 describe('hashFileName()', () => {
