@@ -124,7 +124,7 @@ router.post('/upload', koaBody, async ctx => {
 		// Prevents users who aren't logged in from uploading files
 		if (ctx.session.authorised !== true) return ctx.redirect('/login?msg=you need to log in')
 		const { path, name } = ctx.request.files.filetoupload // Gets details from file
-		const upload = new Upload()
+		const upload = await new Upload(dbName)
 		// Attempts to upload file to the server, returns a status code to work with
 		const uploadStatus = await upload.uploadFile(path, name, ctx.session.username)
 		if (uploadStatus === 0) {
@@ -133,7 +133,11 @@ router.post('/upload', koaBody, async ctx => {
 			ctx.redirect('/upload?message=No file selected') // No file selected
 		} else if (uploadStatus === -1) {
 			ctx.redirect('/upload?message=Selected file does not exist') // File does not exist
-		} else { 
+		} else if (uploadStatus === -2) {
+			ctx.redirect('/upload?message=User has already uploaded a file with the same name') // User has uploaded file with the same name
+		} else if (uploadStatus === -3) {
+			ctx.redirect('/upload?message=Database error has occurred, please try again') // Database error encountered
+		} else {
 			ctx.redirect('/upload?message=Something went wrong') // Generic error
 		}
 	} catch (err) {

@@ -116,6 +116,22 @@ describe('uploadFile()', () => {
 
 		done() // Finish the test
 	})
+
+	test('user has already uploaded the file to the database', async done => {
+		expect.assertions(2)
+		const upload = await new Upload()
+		const hashName = await upload.hashFileName('dummy.txt')
+		
+		// Adds file to the database
+		const initialInsert = await upload.addToDB(hashName, 'dummy', 'txt', 'testing')
+		expect(initialInsert).toBe(0)
+
+		// Upload file which will attempt to add it to the database again
+		const returnVal = await upload.uploadFile('testing/dummy.txt', 'dummy.txt', 'testing')
+		expect(returnVal).toBe(-2)
+
+		done()
+	})
 })
 
 describe('hashFileName()', () => {
@@ -184,6 +200,42 @@ describe('getExtension()', () => {
 		const returnVal = await upload.getExtension('testing.txt.zip')
 
 		expect(returnVal).toBe('zip')
+
+		done()
+	})
+})
+
+describe('addToDB()', () => {
+	test('adds records to the database', async done => {
+		// Tests to see if records are successfully added to the database
+		expect.assertions(1)
+		const upload = await new Upload()
+		const returnVal = await upload.addToDB('123abc', 'dummy', 'txt', 'testing')
+		// Checks return value of the function
+		expect(returnVal).toBe(0)
+		done()
+	})
+
+	test('checks correct code is returned when a duplicate file is added', async done => {
+		// Tests to see if records are successfully added to the database
+		expect.assertions(2)
+		const upload = await new Upload()
+		// Uploads the file for the first time
+		const returnVal1 = await upload.addToDB('123abc', 'dummy', 'txt', 'testing')
+		expect(returnVal1).toBe(0)
+
+		const returnVal2 = await upload.addToDB('123abc', 'dummy', 'txt', 'testing')
+		expect(returnVal2).toBe(-2)
+		done()
+	})
+
+	test('checks correct code is returned there is a data or database issue', async done => {
+		// Tests to see if records are successfully added to the database
+		expect.assertions(1)
+		const upload = await new Upload()
+		// Uploads the file for the first time
+		const returnVal = await upload.addToDB()
+		expect(returnVal).toBe(-3)
 
 		done()
 	})
