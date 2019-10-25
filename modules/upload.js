@@ -65,4 +65,27 @@ module.exports = class Upload {
 		}
 	}
 
+	async addToDB(hashID, fileName, ext, username) {
+		// Insert data into the database in the files table
+		try {
+			if (hashID === undefined || fileName === undefined || ext === undefined || username === undefined) {
+				throw new Error('Empty data cannot be added to the database')
+			}
+
+			let sql = 'SELECT COUNT(hash_id) as records FROM files WHERE user_upload = ? AND hash_id = ?;'
+			const data = await this.db.get(sql, username, hashID)
+			if (data.records !== 0) throw new RangeError(`File of the same name already uploaded by ${username}`)
+
+			sql = 'INSERT INTO files (hash_id, file_name, extension, user_upload) VALUES(?, ?, ?, ?)'
+			await this.db.run(sql, hashID, fileName, ext, username)
+			return 0
+		} catch (err) {
+			if (err instanceof RangeError) {
+				return -2
+			} else {
+				return -3
+			}
+		}
+	}
+
 }
