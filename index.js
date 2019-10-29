@@ -21,7 +21,7 @@ const mime = require('mime-types')
 
 /* IMPORT CUSTOM MODULES */
 const User = require('./modules/user')
-const Upload = require('./modules/upload')
+const FileManagement = require('./modules/fileManagement.js')
 
 const app = new Koa()
 const router = new Router()
@@ -124,9 +124,9 @@ router.post('/upload', koaBody, async ctx => {
 		// Prevents users who aren't logged in from uploading files
 		if (ctx.session.authorised !== true) return ctx.redirect('/login?msg=you need to log in')
 		const { path, name } = ctx.request.files.filetoupload // Gets details from file
-		const upload = await new Upload(dbName)
+		const uploadManager = await new FileManagement(dbName)
 		// Attempts to upload file to the server, returns a status code to work with
-		const uploadStatus = await upload.uploadFile(path, name, ctx.session.username)
+		const uploadStatus = await uploadManager.uploadFile(path, name, ctx.session.username)
 		if (uploadStatus === 0) {
 			ctx.redirect('/upload?message=Upload successful') // Successful upload
 		} else if (uploadStatus === 1) {
