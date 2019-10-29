@@ -256,9 +256,10 @@ describe('getFilePath()', () => {
 	test('Gets the file path to the requested resource', async done => {
 		expect.assertions(1)
 		const downloadManager = await new FileManagement()
-
-		// Download
-		const returnVal = await downloadManager.getFilePath()
+		// Upload file to test with
+		await downloadManager.uploadFile('testing/test.txt', 'test.txt', 'tester')
+		// Get path to the file
+		const returnVal = await downloadManager.getFilePath('tester', 'test.txt')
 
 		expect(returnVal).toBe('files/uploads/tester/a94a8fe5ccb19ba61c4c0873d391e987982fbbd3.txt')
 
