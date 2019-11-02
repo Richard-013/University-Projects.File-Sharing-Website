@@ -159,6 +159,21 @@ router.get('/fileList', async ctx => {
 	}
 })
 
+router.get('/file', async ctx => {
+	try {
+		if (ctx.session.authorised !== true) return ctx.redirect('/login?msg=you need to log in')
+		// Use query to pass in hash-id of the requested file and the username of who uploaded it
+		// Use that information to get the file path and allow the user to download the file
+		const downloadManager = await new FileManagement(dbName)
+		// u is user and h is hash-id
+		const filePath = await downloadManager.getFilePath(ctx.query.u, ctx.query.h)
+		ctx.attachment(filePath)
+		await ctx.render('download')
+	} catch (err) {
+		await ctx.render('error', { message: err.message })
+	}
+})
+
 router.get('/logout', async ctx => {
 	ctx.session.authorised = null
 	ctx.redirect('/?msg=you are now logged out')
