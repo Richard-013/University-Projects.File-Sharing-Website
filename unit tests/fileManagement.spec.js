@@ -299,3 +299,49 @@ describe('getFilePath()', () => {
 		done()
 	})
 })
+
+describe('getAllFiles()', () => {
+
+	beforeEach(() => {
+		mock({
+			'testing': {
+				'test.txt': 'This file is for testing download related functionality',
+				'main.cpp': '#include <iostream>\nint main() {\nreturn 0\n}\n',
+				'print.py': 'print("Hello World!")\n'
+			}
+		})
+	})
+
+	afterEach(mock.restore)
+
+	test('retrieves list of files successfully', async done => {
+		expect.assertions(6)
+		const fileManager = await new FileManagement()
+
+		await fileManager.uploadFile('testing/test.txt', 'test.txt', 'tester')
+		await fileManager.uploadFile('testing/main.cpp', 'main.cpp', 'tester')
+		await fileManager.uploadFile('testing/print.py', 'print.py', 'omega')
+
+		const allFiles = await fileManager.getAllFiles()
+		// Test type returned
+		expect(Array.isArray(allFiles)).toBeTruthy()
+		// Test length of array returned
+		expect(allFiles.length).toBe(3)
+		// Test first item of array - Test each element hash_id, file_name, user_upload, extension (in order)
+		const file1 = allFiles[0]
+		expect(file1[0]).toBe('a94a8fe5ccb19ba61c4c0873d391e987982fbbd3')
+		expect(file1[1]).toBe('test.txt')
+		expect(file1[2]).toBe('tester')
+		expect(file1[3]).toBe('txt')
+		
+		done()
+	})
+
+	/*test('throws error successfully if there is a database issue', async done => {
+		expect.assertions(1)
+		const fileManager = await new FileManagement()
+		await expect(fileManager.getAllFiles()).rejects
+			.toEqual(Error('Requested file could not be found'))
+		done()
+	})*/
+})
