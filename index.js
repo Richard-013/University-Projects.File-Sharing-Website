@@ -146,6 +146,19 @@ router.post('/upload', koaBody, async ctx => {
 	}
 })
 
+router.get('/shareFile', async ctx => {
+	try {
+		const shareLink = `http://localhost:8080/file?h=${ctx.query.h}&u=${ctx.session.username}`
+		const data = {
+			link: shareLink
+		}
+		await ctx.render('share', data)
+	} catch (err) {
+		console.log(`error ${err.message}`)
+		await ctx.render('error', { message: err.message })
+	}
+})
+
 router.get('/fileList', async ctx => {
 	try {
 		if (ctx.session.authorised !== true) return ctx.redirect('/login?msg=you need to log in')
