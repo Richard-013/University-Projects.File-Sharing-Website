@@ -163,8 +163,11 @@ router.get('/shareFile', async ctx => {
 router.get('/fileList', async ctx => {
 	try {
 		if (ctx.session.authorised !== true) return ctx.redirect('/login?msg=you need to log in')
+		const downloadManager = await new FileManagement(dbName)
+		const allFiles = await downloadManager.getAllFiles()
+		console.log(allFiles)
 		const data = {
-			files: ['File 1', 'File 2', 'File 3'],
+			files: allFiles,
 		}
 		if (ctx.query.message) data.message = ctx.query.message
 		await ctx.render('fileList', data)
