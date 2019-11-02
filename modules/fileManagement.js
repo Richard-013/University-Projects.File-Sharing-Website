@@ -107,4 +107,16 @@ module.exports = class FileManagement {
 		const filePath = `files/uploads/${user}/${hashName}.${ext}`
 		return filePath
 	}
+
+	async getAllFiles() {
+		// Gets the file name and user for all available files
+		const sql = 'SELECT * FROM files;'
+		const files = []
+		await this.db.each(sql, [], (err, row) => {
+			if(err) throw err
+			const file = [row.hash_id, row.file_name, row.user_upload, row.extension]
+			files.push(file)
+		})
+		return files
+	}
 }
