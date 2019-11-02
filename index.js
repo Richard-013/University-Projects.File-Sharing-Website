@@ -36,6 +36,7 @@ app.use(views(`${__dirname}/views`, { extension: 'handlebars' }, {map: { handleb
 const defaultPort = 8080
 const port = process.env.PORT || defaultPort
 const dbName = 'website.db'
+const domainName = 'http://localhost:8080'
 const saltRounds = 10
 
 /**
@@ -149,7 +150,7 @@ router.post('/upload', koaBody, async ctx => {
 
 router.get('/shareFile', async ctx => {
 	try {
-		const shareLink = `http://localhost:8080/file?h=${ctx.query.h}&u=${ctx.session.username}`
+		const shareLink = `${domainName}/file?h=${ctx.query.h}&u=${ctx.session.username}`
 		const data = {
 			link: shareLink
 		}
