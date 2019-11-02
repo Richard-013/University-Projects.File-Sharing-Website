@@ -259,7 +259,7 @@ describe('getFilePath()', () => {
 		// Upload file to test with
 		await downloadManager.uploadFile('testing/test.txt', 'test.txt', 'tester')
 		// Get path to the file
-		const returnVal = await downloadManager.getFilePath('tester', 'test.txt')
+		const returnVal = await downloadManager.getFilePath('tester', 'a94a8fe5ccb19ba61c4c0873d391e987982fbbd3')
 
 		expect(returnVal).toBe('files/uploads/tester/a94a8fe5ccb19ba61c4c0873d391e987982fbbd3.txt')
 
