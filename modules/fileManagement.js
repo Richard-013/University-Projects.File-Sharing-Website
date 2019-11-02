@@ -94,12 +94,11 @@ module.exports = class FileManagement {
 		}
 	}
 
-	async getFilePath(user, reqFile) {
+	async getFilePath(user, hashName) {
 		// Get the file path for the download
 		// Runs sql to find stored file name
-		const sql = 'SELECT hash_id, extension FROM files WHERE user_upload = ? AND file_name = ?;'
-		const record = await this.db.get(sql, user, reqFile)
-		const hashName = record.hash_id
+		const sql = 'SELECT * FROM files WHERE user_upload = ? AND hash_id = ?;'
+		const record = await this.db.get(sql, user, hashName)
 		const ext = record.extension
 		// Combines the hashed file name and extension with the user's username to generate the file path
 		const filePath = `files/uploads/${user}/${hashName}.${ext}`
