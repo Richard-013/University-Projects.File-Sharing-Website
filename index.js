@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+/* eslint-disable complexity */
 
 //Routes File
 
@@ -20,6 +21,7 @@ const mime = require('mime-types')
 
 /* IMPORT CUSTOM MODULES */
 const User = require('./modules/user')
+const FileManagement = require('./modules/fileManagement.js')
 
 const app = new Koa()
 const router = new Router()
@@ -34,6 +36,7 @@ app.use(views(`${__dirname}/views`, { extension: 'handlebars' }, {map: { handleb
 const defaultPort = 8080
 const port = process.env.PORT || defaultPort
 const dbName = 'website.db'
+const domainName = 'http://localhost:8080'
 const saltRounds = 10
 
 /**
@@ -98,9 +101,94 @@ router.post('/login', async ctx => {
 		const user = await new User(dbName)
 		await user.login(body.user, body.pass)
 		ctx.session.authorised = true
+		ctx.session.username = body.user // Stores username in cookie for reference
 		return ctx.redirect('/?msg=you are now logged in...')
 	} catch(err) {
 		await ctx.render('error', {message: err.message})
+	}
+})
+
+router.get('/upload', async ctx => {
+	try {
+		if (ctx.session.authorised !== true) return ctx.redirect('/login?msg=you need to log in')
+		const data = {}
+		if (ctx.query.message) data.message = ctx.query.message
+		await ctx.render('upload', data)
+	} catch (err) {
+		await ctx.render('error', { message: err.message })
+	}
+})
+
+// eslint-disable-next-line max-lines-per-function
+router.post('/upload', koaBody, async ctx => {
+	try {
+		// Prevents users who aren't logged in from uploading files
+		if (ctx.session.authorised !== true) return ctx.redirect('/login?msg=you need to log in')
+		const { path, name } = ctx.request.files.filetoupload // Gets details from file
+		const uploadManager = await new FileManagement(dbName)
+		// Attempts to upload file to the server, returns a status code to work with
+		const uploadStatus = await uploadManager.uploadFile(path, name, ctx.session.username)
+		if (uploadStatus === 0) {
+			const hash = await uploadManager.hashFileName(name)
+			ctx.redirect(`/shareFile?h=${hash}`) // Successful upload
+		} else if (uploadStatus === 1) {
+			ctx.redirect('/upload?message=No file selected') // No file selected
+		} else if (uploadStatus === -1) {
+			ctx.redirect('/upload?message=Selected file does not exist') // File does not exist
+		} else if (uploadStatus === -2) {
+			ctx.redirect('/upload?message=User has already uploaded a file with the same name') // User has uploaded file with the same name
+		} else if (uploadStatus === -3) {
+			ctx.redirect('/upload?message=Database error has occurred, please try again') // Database error encountered
+		} else {
+			ctx.redirect('/upload?message=Something went wrong') // Generic error
+		}
+	} catch (err) {
+		console.log(`error ${err.message}`)
+		await ctx.render('error', { message: err.message })
+	}
+})
+
+router.get('/shareFile', async ctx => {
+	try {
+		const shareLink = `${domainName}/file?h=${ctx.query.h}&u=${ctx.session.username}`
+		const data = {
+			link: shareLink
+		}
+		await ctx.render('share', data)
+	} catch (err) {
+		console.log(`error ${err.message}`)
+		await ctx.render('error', { message: err.message })
+	}
+})
+
+router.get('/fileList', async ctx => {
+	try {
+		if (ctx.session.authorised !== true) return ctx.redirect('/login?msg=you need to log in')
+		const downloadManager = await new FileManagement(dbName)
+		const allFiles = await downloadManager.getAllFiles()
+		console.log(allFiles)
+		const data = {
+			files: allFiles,
+		}
+		if (ctx.query.message) data.message = ctx.query.message
+		await ctx.render('fileList', data)
+	} catch (err) {
+		await ctx.render('error', { message: err.message })
+	}
+})
+
+router.get('/file', async ctx => {
+	try {
+		if (ctx.session.authorised !== true) return ctx.redirect('/login?msg=you need to log in')
+		// Use query to pass in hash-id of the requested file and the username of who uploaded it
+		// Use that information to get the file path and allow the user to download the file
+		const downloadManager = await new FileManagement(dbName)
+		// u is user and h is hash-id
+		const filePath = await downloadManager.getFilePath(ctx.query.u, ctx.query.h)
+		ctx.attachment(filePath)
+		await ctx.render('download')
+	} catch (err) {
+		await ctx.render('error', { message: err.message })
 	}
 })
 

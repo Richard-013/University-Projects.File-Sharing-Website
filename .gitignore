@@ -5,3 +5,4 @@ coverage/
 *.db
 screenshots/*
 docs/
+package-lock.json

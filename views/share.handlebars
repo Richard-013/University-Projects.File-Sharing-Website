@@ -1,0 +1,32 @@
+<!doctype html>
+
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>Home Page</title>
+    <meta name="description" content="Allows the user to share the file that they just uploaded">
+    <meta name="author" content="Richard Horton">
+    <link href="style.css" type="text/css" rel="stylesheet" />
+</head>
+
+<body>
+    <h1>Share Your File</h1>
+    <h3>Use this link to share your file with others</h3>
+    {{#if message}}
+    <p class="msg">{{message}}</p>
+    <!-- If a message is passed to the page, display it here -->
+    {{/if}}
+
+    {{#if link}}
+    <p>Here is your link: {{link}}</p>
+    <!-- Displays the link to the user -->
+    
+    <a href="mailto:?subject=I wanted you to see this site&amp;body=Here's a file I wanted to share with you {{link}}"
+        title="Share by Email">
+    Share this link by email</a>
+    {{/if}}
+
+    <p><a href="/">Back</a></p>
+
+</html>

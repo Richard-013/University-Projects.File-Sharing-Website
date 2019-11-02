@@ -1,0 +1,4 @@
+#!/bin/sh
+
+echo "running the 'pre-commit' script"
+./node_modules/.bin/eslint .
