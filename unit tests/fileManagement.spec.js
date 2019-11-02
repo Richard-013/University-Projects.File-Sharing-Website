@@ -265,4 +265,34 @@ describe('getFilePath()', () => {
 
 		done() // Finish the test
 	})
+
+	test('throws correct error when there is no username', async done => {
+		expect.assertions(1)
+		const downloadManager = await new FileManagement()
+
+		await expect(downloadManager.getFilePath(undefined, 'a94a8fe5')).rejects
+			.toEqual(Error('No username given, file cannot be located'))
+
+		done()
+	})
+
+	test('throws correct error when there is no hash name', async done => {
+		expect.assertions(1)
+		const downloadManager = await new FileManagement()
+
+		await expect(downloadManager.getFilePath('tester', undefined)).rejects
+			.toEqual(Error('No file name given, file cannot be located'))
+
+		done()
+	})
+
+	test('throws correct error when the file does not exist', async done => {
+		expect.assertions(1)
+		const downloadManager = await new FileManagement()
+
+		await expect(downloadManager.getFilePath('tester', '5p00p5')).rejects
+			.toEqual(Error('Requested file could not be found'))
+
+		done()
+	})
 })
