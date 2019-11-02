@@ -95,10 +95,13 @@ module.exports = class FileManagement {
 	}
 
 	async getFilePath(user, hashName) {
+		if (user === undefined || user === '') throw new Error('No username given, file cannot be located')
+		if (hashName === undefined || hashName === '') throw new Error('No file name given, file cannot be located')
 		// Get the file path for the download
 		// Runs sql to find stored file name
 		const sql = 'SELECT * FROM files WHERE user_upload = ? AND hash_id = ?;'
 		const record = await this.db.get(sql, user, hashName)
+		if (record === undefined) throw new Error('Requested file could not be found')
 		const ext = record.extension
 		// Combines the hashed file name and extension with the user's username to generate the file path
 		const filePath = `files/uploads/${user}/${hashName}.${ext}`
