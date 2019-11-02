@@ -77,7 +77,6 @@ describe('uploadFile()', () => {
 		expect.assertions(1)
 		const uploadManager = await new FileManagement()
 		const returnVal = await uploadManager.uploadFile(undefined, undefined, 'testing')
-		
 		// Tests to see if the correct error is thrown when upload attempts
 		expect(returnVal).toBe(1)
 
@@ -149,7 +148,8 @@ describe('hashFileName()', () => {
 		expect.assertions(1)
 		const uploadManager = await new FileManagement()
 		// Checks correct error is thrown when function is called with wrong argument
-		await expect(uploadManager.hashFileName('testing')).rejects.toEqual(Error('File name is invalid: No extension found (fileName)'))
+		await expect(uploadManager.hashFileName('testing')).rejects
+			.toEqual(Error('File name is invalid: No extension found (fileName)'))
 
 		done()
 	})
@@ -158,7 +158,8 @@ describe('hashFileName()', () => {
 		expect.assertions(1)
 		const uploadManager = await new FileManagement()
 		// Checks correct error is thrown when function is called with wrong argument
-		await expect(uploadManager.hashFileName()).rejects.toEqual(Error('No file name passed (fileName)'))
+		await expect(uploadManager.hashFileName()).rejects
+			.toEqual(Error('No file name passed (fileName)'))
 
 		done()
 	})
@@ -179,7 +180,8 @@ describe('getExtension()', () => {
 		expect.assertions(1)
 		const uploadManager = await new FileManagement()
 		// Checks correct error is thrown when function is called with wrong argument
-		await expect(uploadManager.getExtension('testing')).rejects.toEqual(Error('File name is invalid: No extension found (getExtension)'))
+		await expect(uploadManager.getExtension('testing')).rejects
+			.toEqual(Error('File name is invalid: No extension found (getExtension)'))
 
 		done()
 	})
@@ -188,7 +190,8 @@ describe('getExtension()', () => {
 		expect.assertions(1)
 		const uploadManager = await new FileManagement()
 		// Checks correct error is thrown when function is called with wrong argument
-		await expect(uploadManager.getExtension()).rejects.toEqual(Error('No file name passed (getExtension)'))
+		await expect(uploadManager.getExtension()).rejects
+			.toEqual(Error('No file name passed (getExtension)'))
 
 		done()
 	})
@@ -253,7 +256,7 @@ describe('getFilePath()', () => {
 
 	afterEach(mock.restore)
 
-	test('Gets the file path to the requested resource', async done => {
+	test('gets the file path to the requested resource', async done => {
 		expect.assertions(1)
 		const downloadManager = await new FileManagement()
 		// Upload file to test with
