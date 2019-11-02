@@ -128,7 +128,8 @@ router.post('/upload', koaBody, async ctx => {
 		// Attempts to upload file to the server, returns a status code to work with
 		const uploadStatus = await uploadManager.uploadFile(path, name, ctx.session.username)
 		if (uploadStatus === 0) {
-			ctx.redirect('/upload?message=Upload successful') // Successful upload
+			const hash = await uploadManager.hashFileName(name)
+			ctx.redirect(`/shareFile?h=${hash}`) // Successful upload
 		} else if (uploadStatus === 1) {
 			ctx.redirect('/upload?message=No file selected') // No file selected
 		} else if (uploadStatus === -1) {
