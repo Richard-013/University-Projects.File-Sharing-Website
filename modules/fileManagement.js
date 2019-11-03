@@ -15,26 +15,28 @@ module.exports = class FileManagement {
 		})()
 	}
 
-	async uploadFile(path, name, user) {
-		if (path === undefined || name === undefined) {
-			return 1 // No file or no path specified for upload
-		} else {
-			if(fs.existsSync(path) === false) {
-				return -1 // Selected file does not exist
-			} else {
-				const pathExists = fs.existsSync(`files/uploads/${user}`)
-				if (pathExists !== true) {
-					fs.mkdirSync(`files/uploads/${user}`, { recursive: true }) // Make a directory if it doesn't exist
-				}
-
-				const fileName = await this.hashFileName(name) // Hashes the file name without the extension
-				const ext = await this.getExtension(name) // Gets the extension
-				const saveName = `${fileName}.${ext}` // Recombines the extension and hashed file name
-				await fs.copy(path, `files/uploads/${user}/${saveName}`) // Copies the file to the server
-				const dbInsert = await this.addToDB(fileName, name, ext, user) // Adds file details to the database
-				return dbInsert // Returns status code from addToDB
-			}
+	async uploadFile(path, originalName, user) {
+		if (path === undefined || originalName === undefined) return 1 // No file or no path specified for upload
+		if(fs.existsSync(path) === false) return -1 // Selected file does not exist
+		// Checks if a directory already exists for the user
+		if (fs.existsSync(`files/uploads/${user}`) !== true) {
+			fs.mkdirSync(`files/uploads/${user}`, { recursive: true }) // Make a directory if it doesn't exist
 		}
+		// Generates the required file information
+		const fileDetails = await this.generateFileDetails(originalName)
+		// Copies the file to the server
+		await fs.copy(path, `files/uploads/${user}/${fileDetails[0]}`)
+		// Adds file details to the database
+		const dbInsert = await this.addToDB(fileDetails[1], originalName, fileDetails[2], user)
+		return dbInsert // Returns status code from addToDB
+	}
+
+	async generateFileDetails(name) {
+		const hashID = await this.hashFileName(name) // Hashes the file name without the extension
+		const ext = await this.getExtension(name) // Gets the extension
+		const saveName = `${hashID}.${ext}` // Recombines the extension and hashed file name
+		const fileDetails = [saveName, hashID, ext]
+		return fileDetails
 	}
 
 	async hashFileName(name) {
