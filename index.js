@@ -73,16 +73,15 @@ router.get('/register', async ctx => await ctx.render('register'))
  */
 router.post('/register', koaBody, async ctx => {
 	try {
-		// extract the data from the request
+		// Extracts data from page
 		const body = ctx.request.body
-		console.log(body)
 		const {path, type} = ctx.request.files.avatar
-		// call the functions in the module
+		// Calls required functions from user module
 		const user = await new User(dbName)
 		await user.register(body.user, body.pass)
 		// await user.uploadPicture(path, type)
-		// redirect to the home page
-		ctx.redirect(`/?msg=new user "${body.name}" added`)
+		// Redirects user to the login page
+		ctx.redirect('/login?msg=new user added, please log in')
 	} catch(err) {
 		await ctx.render('error', {message: err.message})
 	}
@@ -127,6 +126,7 @@ router.post('/upload', koaBody, async ctx => {
 		const { path, name } = ctx.request.files.filetoupload // Gets details from file
 		const uploadManager = await new FileManagement(dbName)
 		// Attempts to upload file to the server, returns a status code to work with
+		// REQUIRES REFACTORING TO REMOVE LOGIC FROM INDEX FILE
 		const uploadStatus = await uploadManager.uploadFile(path, name, ctx.session.username)
 		if (uploadStatus === 0) {
 			const hash = await uploadManager.hashFileName(name)
@@ -143,7 +143,6 @@ router.post('/upload', koaBody, async ctx => {
 			ctx.redirect('/upload?message=Something went wrong') // Generic error
 		}
 	} catch (err) {
-		console.log(`error ${err.message}`)
 		await ctx.render('error', { message: err.message })
 	}
 })
@@ -151,12 +150,9 @@ router.post('/upload', koaBody, async ctx => {
 router.get('/shareFile', async ctx => {
 	try {
 		const shareLink = `${domainName}/file?h=${ctx.query.h}&u=${ctx.session.username}`
-		const data = {
-			link: shareLink
-		}
+		const data = { link: shareLink }
 		await ctx.render('share', data)
 	} catch (err) {
-		console.log(`error ${err.message}`)
 		await ctx.render('error', { message: err.message })
 	}
 })
@@ -167,9 +163,7 @@ router.get('/fileList', async ctx => {
 		const downloadManager = await new FileManagement(dbName)
 		const allFiles = await downloadManager.getAllFiles()
 		console.log(allFiles)
-		const data = {
-			files: allFiles,
-		}
+		const data = { files: allFiles }
 		if (ctx.query.message) data.message = ctx.query.message
 		await ctx.render('fileList', data)
 	} catch (err) {
