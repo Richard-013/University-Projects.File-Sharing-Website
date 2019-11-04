@@ -15,25 +15,56 @@ module.exports = class FileManagement {
 		})()
 	}
 
-	async uploadFile(path, name, user) {
-		if (path === undefined || name === undefined) {
-			return 1 // No file or no path specified for upload
-		} else {
-			if(fs.existsSync(path) === false) {
-				return -1 // Selected file does not exist
-			} else {
-				const pathExists = fs.existsSync(`files/uploads/${user}`)
-				if (pathExists !== true) {
-					fs.mkdirSync(`files/uploads/${user}`, { recursive: true }) // Make a directory if it doesn't exist
-				}
+	async uploadFile(path, originalName, user) {
+		if (path === undefined || originalName === undefined) return [1, 'No file or path specified for upload']
+		if(fs.existsSync(path) === false) return [1, 'Selected file does not exist']
+		// Checks if a directory already exists for the user
+		if (fs.existsSync(`files/uploads/${user}`) !== true) {
+			fs.mkdirSync(`files/uploads/${user}`, { recursive: true }) // Make a directory if it doesn't exist
+		}
+		// Generates the required file information
+		const fileDetails = await this.generateFileDetails(originalName)
+		if (fileDetails === 1) return [1, 'An error occurred whilst prepping your file for upload']
+		// Copies the file to the server
+		await fs.copy(path, `files/uploads/${user}/${fileDetails[0]}`)
+		// Adds file details to the database
+		const dbInsert = await this.addToDB(fileDetails[1], originalName, fileDetails[2], user)
+		const serverMessage = await this.checkUploadRes(dbInsert, fileDetails[1])
+		return serverMessage // Returns message for server to use
+	}
 
-				const fileName = await this.hashFileName(name) // Hashes the file name without the extension
-				const ext = await this.getExtension(name) // Gets the extension
-				const saveName = `${fileName}.${ext}` // Recombines the extension and hashed file name
-				await fs.copy(path, `files/uploads/${user}/${saveName}`) // Copies the file to the server
-				const dbInsert = await this.addToDB(fileName, name, ext, user) // Adds file details to the database
-				return dbInsert // Returns status code from addToDB
-			}
+	async generateFileDetails(name) {
+		try {
+			const hashID = await this.hashFileName(name) // Hashes the file name without the extension
+			const ext = await this.getExtension(name) // Gets the extension
+			const saveName = `${hashID}.${ext}` // Recombines the extension and hashed file name
+			const fileDetails = [saveName, hashID, ext]
+			return fileDetails
+		} catch (err) {
+			return 1
+		}
+	}
+
+	async checkUploadRes(statusCode, hashID) {
+		let message = ''
+		// Uses the status code from addToDB to determine the appropriate message to give the user
+		switch (statusCode) {
+			case 0:
+				if (hashID === undefined || hashID === '') {
+					message = 'No hashID given'
+				} else {
+					message = hashID
+				}
+				return [0, message]
+			case -2:
+				message = 'User has already uploaded a file with the same name'
+				return [1, message]
+			case -3:
+				message = 'Database error has occurred, please try again'
+				return [1, message]
+			default:
+				message = 'Something went wrong'
+				return [1, message]
 		}
 	}
 
