@@ -126,21 +126,13 @@ router.post('/upload', koaBody, async ctx => {
 		const { path, name } = ctx.request.files.filetoupload // Gets details from file
 		const uploadManager = await new FileManagement(dbName)
 		// Attempts to upload file to the server, returns a status code to work with
-		// REQUIRES REFACTORING TO REMOVE LOGIC FROM INDEX FILE
-		const uploadStatus = await uploadManager.uploadFile(path, name, ctx.session.username)
-		if (uploadStatus === 0) {
-			const hash = await uploadManager.hashFileName(name)
-			ctx.redirect(`/shareFile?h=${hash}`) // Successful upload
-		} else if (uploadStatus === 1) {
-			ctx.redirect('/upload?message=No file selected') // No file selected
-		} else if (uploadStatus === -1) {
-			ctx.redirect('/upload?message=Selected file does not exist') // File does not exist
-		} else if (uploadStatus === -2) {
-			ctx.redirect('/upload?message=User has already uploaded a file with the same name') // User has uploaded file with the same name
-		} else if (uploadStatus === -3) {
-			ctx.redirect('/upload?message=Database error has occurred, please try again') // Database error encountered
+		const uploadResult = await uploadManager.uploadFile(path, name, ctx.session.username)
+		if (uploadResult[0] === 0) {
+			// Successful upload
+			ctx.redirect(`/shareFile?h=${uploadResult[1]}`)
 		} else {
-			ctx.redirect('/upload?message=Something went wrong') // Generic error
+			// Unsuccessful upload
+			ctx.redirect(`/upload?message=${uploadResult[1]}`)
 		}
 	} catch (err) {
 		await ctx.render('error', { message: err.message })
