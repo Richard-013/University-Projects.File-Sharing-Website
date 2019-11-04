@@ -32,11 +32,17 @@ module.exports = class FileManagement {
 	}
 
 	async generateFileDetails(name) {
-		const hashID = await this.hashFileName(name) // Hashes the file name without the extension
-		const ext = await this.getExtension(name) // Gets the extension
-		const saveName = `${hashID}.${ext}` // Recombines the extension and hashed file name
-		const fileDetails = [saveName, hashID, ext]
-		return fileDetails
+		try {
+			const hashID = await this.hashFileName(name) // Hashes the file name without the extension
+			const ext = await this.getExtension(name) // Gets the extension
+			const saveName = `${hashID}.${ext}` // Recombines the extension and hashed file name
+			const fileDetails = [saveName, hashID, ext]
+			return fileDetails
+		} catch (err) {
+			return 1
+		}
+	}
+
 	}
 
 	async hashFileName(name) {
