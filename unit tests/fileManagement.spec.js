@@ -175,6 +175,68 @@ describe('checkUploadRes()', () => {
 		done()
 	})
 
+	test('handles no hash correctly', async done => {
+		expect.assertions(2)
+		const uploadManager = await new FileManagement()
+
+		const serverMessage = await uploadManager.checkUploadRes(0)
+		expect(serverMessage[0]).toBe(0)
+		expect(serverMessage[1]).toBe('No hashID given')
+
+		done()
+	})
+
+	test('handles empty hash correctly', async done => {
+		expect.assertions(2)
+		const uploadManager = await new FileManagement()
+
+		const serverMessage = await uploadManager.checkUploadRes(0, '')
+		expect(serverMessage[0]).toBe(0)
+		expect(serverMessage[1]).toBe('No hashID given')
+
+		done()
+	})
+
+	test('handles a repeated file name code correctly', async done => {
+		expect.assertions(2)
+		const uploadManager = await new FileManagement()
+
+		const serverMessage = await uploadManager.checkUploadRes(-2, 'a94a')
+		expect(serverMessage[0]).toBe(1)
+		expect(serverMessage[1]).toBe('User has already uploaded a file with the same name')
+
+		done()
+	})
+
+	test('handles a database error code correctly', async done => {
+		expect.assertions(2)
+		const uploadManager = await new FileManagement()
+
+		const serverMessage = await uploadManager.checkUploadRes(-3, 'a94a')
+		expect(serverMessage[0]).toBe(1)
+		expect(serverMessage[1]).toBe('Database error has occurred, please try again')
+
+		done()
+	})
+
+	test('handles no status code being given correctly', async done => {
+		expect.assertions(2)
+		const uploadManager = await new FileManagement()
+
+		const serverMessage = await uploadManager.checkUploadRes()
+		expect(serverMessage[0]).toBe(1)
+		expect(serverMessage[1]).toBe('Something went wrong')
+
+		done()
+	})
+
+	test('handles only being given a hash correctly', async done => {
+		expect.assertions(2)
+		const uploadManager = await new FileManagement()
+
+		const serverMessage = await uploadManager.checkUploadRes('a94a8fe5ccb19ba61c4c0873d391e987982fbbd3')
+		expect(serverMessage[0]).toBe(1)
+		expect(serverMessage[1]).toBe('Something went wrong')
 
 		done()
 	})
