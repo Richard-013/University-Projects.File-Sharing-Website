@@ -129,6 +129,41 @@ describe('uploadFile()', () => {
 		const returnVal = await uploadManager.uploadFile('testing/dummy.txt', 'dummy.txt', 'testing')
 		expect(returnVal).toBe(-2)
 
+describe('generateFileDetails()', () => {
+	test('generates file details correctly', async done => {
+		expect.assertions(3)
+		const uploadManager = await new FileManagement()
+
+		const fileDetails = await uploadManager.generateFileDetails('test.txt')
+		expect(fileDetails[0]).toBe('a94a8fe5ccb19ba61c4c0873d391e987982fbbd3.txt')
+		expect(fileDetails[1]).toBe('a94a8fe5ccb19ba61c4c0873d391e987982fbbd3')
+		expect(fileDetails[2]).toBe('txt')
+
+		done()
+	})
+
+	test('returns correct code if no file name is given', async done => {
+		expect.assertions(1)
+		const uploadManager = await new FileManagement()
+
+		const fileDetails = await uploadManager.generateFileDetails()
+		expect(fileDetails).toBe(1)
+
+		done()
+	})
+
+	test('returns correct code if something goes wrong while prepping the file details', async done => {
+		expect.assertions(1)
+		const uploadManager = await new FileManagement()
+
+		const fileDetails = await uploadManager.generateFileDetails('a')
+		expect(fileDetails).toBe(1)
+
+		done()
+	})
+})
+
+
 		done()
 	})
 })
