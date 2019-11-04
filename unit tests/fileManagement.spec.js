@@ -2,6 +2,7 @@
 
 const fs = require('fs')
 const mock = require('mock-fs')
+const sqlite = require('sqlite-async')
 const FileManagement = require('../modules/fileManagement.js')
 
 describe('uploadFile()', () => {
@@ -16,7 +17,7 @@ describe('uploadFile()', () => {
 	afterEach(mock.restore)
 
 	test('file is uploaded to the server', async done => {
-		expect.assertions(2)
+		expect.assertions(3)
 		const uploadManager = await new FileManagement()
 
 		// Upload
@@ -26,13 +27,14 @@ describe('uploadFile()', () => {
 		const existing = fs.existsSync(`files/uploads/testing/${expectName}.txt`)
 		expect(existing).toBeTruthy()
 		// Checks return value was correct
-		expect(returnVal).toBe(0)
+		expect(returnVal[0]).toBe(0)
+		expect(returnVal[1]).toBe(expectName)
 
 		done() // Finish the test
 	})
 
 	test('directory path is created if it does not exist', async done => {
-		expect.assertions(3)
+		expect.assertions(4)
 		const uploadManager = await new FileManagement()
 
 		// Checks that the folder does not exist
@@ -41,17 +43,19 @@ describe('uploadFile()', () => {
 		}
 
 		expect(fs.existsSync('files/uploads/testing')).toBeFalsy()
+		const expectName = await uploadManager.hashFileName('dummy.txt')
 
 		// Upload file to directory and check directory was created
 		const returnVal = await uploadManager.uploadFile('testing/dummy.txt', 'dummy.txt', 'testing')
 		expect(fs.existsSync('files/uploads/testing')).toBeTruthy() // Checks that the folder was created successfully
 		// Checks return value was correct
-		expect(returnVal).toBe(0)
+		expect(returnVal[0]).toBe(0)
+		expect(returnVal[1]).toBe(expectName)
 		done()
 	})
 
 	test('directory path is not created if it already exists', async done => {
-		expect.assertions(4)
+		expect.assertions(5)
 		const uploadManager = await new FileManagement()
 
 		if (fs.existsSync('files/uploads/testing') === false) {
@@ -63,61 +67,67 @@ describe('uploadFile()', () => {
 
 		// Upload file to directory
 		const returnVal = await uploadManager.uploadFile('testing/dummy.txt', 'dummy.txt', 'testing')
+		const expectName = await uploadManager.hashFileName('dummy.txt')
 
 		// Checks that the folder was not removed
 		expect(fs.existsSync('files/uploads/testing')).toBeTruthy()
 		// Checks that the folder was not created inside the existing directory
 		expect(fs.existsSync('files/uploads/testing/testing')).toBeFalsy()
 		// Checks return value was correct
-		expect(returnVal).toBe(0)
+		expect(returnVal[0]).toBe(0)
+		expect(returnVal[1]).toBe(expectName)
 		done()
 	})
 
 	test('handles no selected file and no stated path correctly', async done => {
-		expect.assertions(1)
+		expect.assertions(2)
 		const uploadManager = await new FileManagement()
 		const returnVal = await uploadManager.uploadFile(undefined, undefined, 'testing')
 		// Tests to see if the correct error is thrown when upload attempts
-		expect(returnVal).toBe(1)
+		expect(returnVal[0]).toBe(1)
+		expect(returnVal[1]).toBe('No file or path specified for upload')
 
 		done() // Finish the test
 	})
 
 	test('handles no selected file correctly', async done => {
-		expect.assertions(1)
+		expect.assertions(2)
 		const uploadManager = await new FileManagement()
 		const returnVal = await uploadManager.uploadFile('testing/dummy.txt', undefined, 'testing')
 		
 		// Tests to see if the correct error is thrown when upload attempts
-		expect(returnVal).toBe(1)
+		expect(returnVal[0]).toBe(1)
+		expect(returnVal[1]).toBe('No file or path specified for upload')
 
 		done() // Finish the test
 	})
 
 	test('handles no stated path correctly', async done => {
-		expect.assertions(1)
+		expect.assertions(2)
 		const uploadManager = await new FileManagement()
 		const returnVal = await uploadManager.uploadFile(undefined, 'dummy.txt', 'testing')
 		
 		// Tests to see if the correct error is thrown when upload attempts
-		expect(returnVal).toBe(1)
+		expect(returnVal[0]).toBe(1)
+		expect(returnVal[1]).toBe('No file or path specified for upload')
 
 		done() // Finish the test
 	})
 
 	test('selected file does not exist', async done => {
-		expect.assertions(1)
+		expect.assertions(2)
 		const uploadManager = await new FileManagement()
 		const returnVal = await uploadManager.uploadFile('testing/alpha.txt', 'alpha.txt', 'testing')
 		
 		// Tests to see if the correct error is thrown when upload attempts
-		expect(returnVal).toBe(-1)
+		expect(returnVal[0]).toBe(1)
+		expect(returnVal[1]).toBe('Selected file does not exist')
 
 		done() // Finish the test
 	})
 
 	test('user has already uploaded the file to the database', async done => {
-		expect.assertions(2)
+		expect.assertions(3)
 		const uploadManager = await new FileManagement()
 		const hashName = await uploadManager.hashFileName('dummy.txt')
 		
@@ -127,7 +137,38 @@ describe('uploadFile()', () => {
 
 		// Upload file which will attempt to add it to the database again
 		const returnVal = await uploadManager.uploadFile('testing/dummy.txt', 'dummy.txt', 'testing')
-		expect(returnVal).toBe(-2)
+		expect(returnVal[0]).toBe(1)
+		expect(returnVal[1]).toBe('User has already uploaded a file with the same name')
+
+		done()
+	})
+
+	test('database error occurs', async done => {
+		expect.assertions(2)
+		const uploadManager = await new FileManagement()
+
+		const sql = 'DROP TABLE IF EXISTS files;'
+		await uploadManager.db.run(sql)
+
+		// Upload attempt should detect a database error and respond accordingly
+		const returnVal = await uploadManager.uploadFile('testing/dummy.txt', 'dummy.txt', 'testing')
+		expect(returnVal[0]).toBe(1)
+		expect(returnVal[1]).toBe('Database error has occurred, please try again')
+
+		done()
+	})
+
+	test('responds correctly to an empty file name', async done => {
+		expect.assertions(2)
+		const uploadManager = await new FileManagement()
+
+		const returnVal = await uploadManager.uploadFile('testing/', '', 'testing')
+		expect(returnVal[0]).toBe(1)
+		expect(returnVal[1]).toBe('An error occurred whilst prepping your file for upload')
+
+		done()
+	})
+})
 
 describe('generateFileDetails()', () => {
 	test('generates file details correctly', async done => {
