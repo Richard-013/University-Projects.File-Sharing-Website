@@ -163,6 +163,18 @@ describe('generateFileDetails()', () => {
 	})
 })
 
+describe('checkUploadRes()', () => {
+	test('handles a successful upload code correctly', async done => {
+		expect.assertions(2)
+		const uploadManager = await new FileManagement()
+		
+		const serverMessage = await uploadManager.checkUploadRes(0, 'a94a8fe5ccb19ba61c4c0873d391e987982fbbd3')
+		expect(serverMessage[0]).toBe(0)
+		expect(serverMessage[1]).toBe('a94a8fe5ccb19ba61c4c0873d391e987982fbbd3')
+
+		done()
+	})
+
 
 		done()
 	})
