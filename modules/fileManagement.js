@@ -43,6 +43,27 @@ module.exports = class FileManagement {
 		}
 	}
 
+	async checkUploadRes(statusCode, hashID) {
+		let message = ''
+		// Uses the status code from addToDB to determine the appropriate message to give the user
+		switch (statusCode) {
+			case 0:
+				if (hashID === undefined || hashID === '') {
+					message = 'No hashID given'
+				} else {
+					message = hashID
+				}
+				return [0, message]
+			case -2:
+				message = 'User has already uploaded a file with the same name'
+				return [1, message]
+			case -3:
+				message = 'Database error has occurred, please try again'
+				return [1, message]
+			default:
+				message = 'Something went wrong'
+				return [1, message]
+		}
 	}
 
 	async hashFileName(name) {
