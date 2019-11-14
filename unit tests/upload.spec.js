@@ -2,7 +2,6 @@
 
 const fs = require('fs')
 const mock = require('mock-fs')
-const sqlite = require('sqlite-async')
 const Upload = require('../modules/upload.js')
 
 describe('uploadFile()', () => {
@@ -94,7 +93,7 @@ describe('uploadFile()', () => {
 		expect.assertions(2)
 		const upload = await new Upload()
 		const returnVal = await upload.uploadFile('testing/dummy.txt', undefined, 'testing')
-		
+
 		// Tests to see if the correct error is thrown when upload attempts
 		expect(returnVal[0]).toBe(1)
 		expect(returnVal[1]).toBe('No file or path specified for upload')
@@ -106,7 +105,7 @@ describe('uploadFile()', () => {
 		expect.assertions(2)
 		const upload = await new Upload()
 		const returnVal = await upload.uploadFile(undefined, 'dummy.txt', 'testing')
-		
+
 		// Tests to see if the correct error is thrown when upload attempts
 		expect(returnVal[0]).toBe(1)
 		expect(returnVal[1]).toBe('No file or path specified for upload')
@@ -118,7 +117,7 @@ describe('uploadFile()', () => {
 		expect.assertions(2)
 		const upload = await new Upload()
 		const returnVal = await upload.uploadFile('testing/alpha.txt', 'alpha.txt', 'testing')
-		
+
 		// Tests to see if the correct error is thrown when upload attempts
 		expect(returnVal[0]).toBe(1)
 		expect(returnVal[1]).toBe('Selected file does not exist')
@@ -130,7 +129,7 @@ describe('uploadFile()', () => {
 		expect.assertions(3)
 		const upload = await new Upload()
 		const hashName = await upload.hashFileName('dummy.txt')
-		
+
 		// Adds file to the database
 		const initialInsert = await upload.addToDB(hashName, 'dummy', 'txt', 'testing')
 		expect(initialInsert).toBe(0)
@@ -208,7 +207,7 @@ describe('checkUploadRes()', () => {
 	test('handles a successful upload code correctly', async done => {
 		expect.assertions(2)
 		const upload = await new Upload()
-		
+
 		const serverMessage = await upload.checkUploadRes(0, 'a94a8fe5ccb19ba61c4c0873d391e987982fbbd3')
 		expect(serverMessage[0]).toBe(0)
 		expect(serverMessage[1]).toBe('a94a8fe5ccb19ba61c4c0873d391e987982fbbd3')

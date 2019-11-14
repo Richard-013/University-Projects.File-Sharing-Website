@@ -1,3 +1,4 @@
+/* eslint-disable no-magic-numbers */
 'use strict'
 const fs = require('fs-extra')
 const crypto = require('crypto')
@@ -9,7 +10,8 @@ module.exports = class Upload {
 		return (async() => {
 			this.db = await sqlite.open(dbName)
 			// Creates a table to store details about uploaded files
-			const sql = 'CREATE TABLE IF NOT EXISTS files (hash_id TEXT PRIMARY KEY, file_name TEXT, extension TEXT, user_upload TEXT, FOREIGN KEY(user_upload) REFERENCES users(user));'
+			const sql = 'CREATE TABLE IF NOT EXISTS files' +
+				'(hash_id TEXT PRIMARY KEY, file_name TEXT, extension TEXT, user_upload TEXT);'
 			await this.db.run(sql)
 			return this
 		})()

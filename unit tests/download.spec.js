@@ -1,8 +1,6 @@
 'use strict'
 
-const fs = require('fs')
-const mock = require('mock-fs')
-const sqlite = require('sqlite-async')
+//const sqlite = require('sqlite-async')
 const Download = require('../modules/download.js')
 
 describe('getFilePath()', () => {
