@@ -21,7 +21,8 @@ const mime = require('mime-types')
 
 /* IMPORT CUSTOM MODULES */
 const User = require('./modules/user')
-const FileManagement = require('./modules/fileManagement.js')
+const Upload = require('./modules/upload.js')
+const Download = require('./modules/download.js')
 
 const app = new Koa()
 const router = new Router()
@@ -124,9 +125,9 @@ router.post('/upload', koaBody, async ctx => {
 		// Prevents users who aren't logged in from uploading files
 		if (ctx.session.authorised !== true) return ctx.redirect('/login?msg=you need to log in')
 		const { path, name } = ctx.request.files.filetoupload // Gets details from file
-		const uploadManager = await new FileManagement(dbName)
+		const upload = await new Upload(dbName)
 		// Attempts to upload file to the server, returns a status code to work with
-		const uploadResult = await uploadManager.uploadFile(path, name, ctx.session.username)
+		const uploadResult = await upload.uploadFile(path, name, ctx.session.username)
 		if (uploadResult[0] === 0) {
 			// Successful upload
 			ctx.redirect(`/shareFile?h=${uploadResult[1]}`)
@@ -152,8 +153,8 @@ router.get('/shareFile', async ctx => {
 router.get('/fileList', async ctx => {
 	try {
 		if (ctx.session.authorised !== true) return ctx.redirect('/login?msg=you need to log in')
-		const downloadManager = await new FileManagement(dbName)
-		const allFiles = await downloadManager.getAllFiles()
+		const download = await new Download(dbName)
+		const allFiles = await download.getAllFiles()
 		console.log(allFiles)
 		const data = { files: allFiles }
 		if (ctx.query.message) data.message = ctx.query.message
@@ -168,9 +169,9 @@ router.get('/file', async ctx => {
 		if (ctx.session.authorised !== true) return ctx.redirect('/login?msg=you need to log in')
 		// Use query to pass in hash-id of the requested file and the username of who uploaded it
 		// Use that information to get the file path and allow the user to download the file
-		const downloadManager = await new FileManagement(dbName)
+		const download = await new Download(dbName)
 		// u is user and h is hash-id
-		const filePath = await downloadManager.getFilePath(ctx.query.u, ctx.query.h)
+		const filePath = await download.getFilePath(ctx.query.u, ctx.query.h)
 		ctx.attachment(filePath)
 		await ctx.render('download')
 	} catch (err) {
@@ -180,6 +181,7 @@ router.get('/file', async ctx => {
 
 router.get('/logout', async ctx => {
 	ctx.session.authorised = null
+	ctx.session.username = null
 	ctx.redirect('/?msg=you are now logged out')
 })
 
