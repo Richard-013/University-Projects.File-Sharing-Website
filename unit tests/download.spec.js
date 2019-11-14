@@ -79,11 +79,15 @@ describe('getAllFiles()', () => {
 		done()
 	})
 
-	/*test('throws error successfully if there is a database issue', async done => {
+	test('throws error successfully if there is a database issue', async done => {
 		expect.assertions(1)
 		const download = await new Download()
-		await expect(download.getAllFiles()).rejects
-			.toEqual(Error('Requested file could not be found'))
+
+		const sql = 'DROP TABLE IF EXISTS files;'
+		await download.db.run(sql)
+
+		const returnVal = await download.getAllFiles()
+		expect(returnVal).toEqual('SQLITE_ERROR: no such table: files')
 		done()
-	})*/
+	})
 })
