@@ -1,6 +1,5 @@
 'use strict'
 
-//const sqlite = require('sqlite-async')
 const Download = require('../modules/download.js')
 
 describe('getFilePath()', () => {
