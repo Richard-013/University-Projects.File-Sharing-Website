@@ -32,11 +32,15 @@ module.exports = class FileManagement {
 		// Gets the file name and user for all available files
 		const sql = 'SELECT * FROM files;'
 		const files = []
-		await this.db.each(sql, [], (err, row) => {
-			if (err) throw err
-			const file = [row.hash_id, row.file_name, row.user_upload, row.extension]
-			files.push(file)
-		})
-		return files
+		try {
+			await this.db.each(sql, [], (_err, row) => {
+				const file = [row.hash_id, row.file_name, row.user_upload, row.extension]
+				files.push(file)
+			})
+
+			return files
+		} catch (error) {
+			return error.message
+		}
 	}
 }
