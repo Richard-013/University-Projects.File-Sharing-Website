@@ -22,7 +22,9 @@ describe('removeFile()', () => {
 		const remove = await new Remove()
 
 		// Mock upload of file to system
-		await fs.writeFile('files/uploads/testing/a94a8fe5ccb19ba61c4c0873d391e987982fbbd3.txt', 'test file')
+		await fs.writeFile('files/uploads/testing/a94a8fe5ccb19ba61c4c0873d391e987982fbbd3.txt', 'test file', err => {
+			if (err) throw err
+		})
 		const sqlInsert = 'INSERT INTO files (hash_id, file_name, extension, user_upload) VALUES(?, ?, ?, ?);'
 		await remove.db.run(sqlInsert, 'a94a8fe5ccb19ba61c4c0873d391e987982fbbd3', 'test.txt', 'txt', 'testing')
 
@@ -59,7 +61,9 @@ describe('removeFileFromServer()', () => {
 	test('checks if file was removed from the server', async done => {
 		expect.assertions(3)
 		const remove = await new Remove()
-		await fs.writeFile('files/uploads/testing/a94a8fe5ccb19ba61c4c0873d391e987982fbbd3.txt', 'test file')
+		await fs.writeFile('files/uploads/testing/a94a8fe5ccb19ba61c4c0873d391e987982fbbd3.txt', 'test file', err => {
+			if (err) throw err
+		})
 
 		// Check the mocked upload worked
 		expect(fs.existsSync('files/uploads/testing/a94a8fe5ccb19ba61c4c0873d391e987982fbbd3.txt')).toBeTruthy()
