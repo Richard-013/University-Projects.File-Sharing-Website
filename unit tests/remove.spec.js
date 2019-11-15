@@ -69,7 +69,8 @@ describe('removeFileFromServer()', () => {
 		expect(fs.existsSync('files/uploads/testing/a94a8fe5ccb19ba61c4c0873d391e987982fbbd3.txt')).toBeTruthy()
 
 		// Remove the file from the server
-		const returnVal = await remove.removeFileFromServer('testing', 'a94a8fe5ccb19ba61c4c0873d391e987982fbbd3', 'txt')
+		const returnVal = await remove.removeFileFromServer(
+			'testing', 'a94a8fe5ccb19ba61c4c0873d391e987982fbbd3', 'txt')
 
 		// Test if removal was a success
 		expect(fs.existsSync('files/uploads/testing/a94a8fe5ccb19ba61c4c0873d391e987982fbbd3.txt')).toBeFalsy()
@@ -95,7 +96,7 @@ describe('removeFileFromDB()', () => {
 		// Check mocked upload worked
 		expect(checkDB.records).not.toBe(0)
 
-		const returnVal = remove.removeFileFromDB('testing', 'a94a8fe5ccb19ba61c4c0873d391e987982fbbd3')
+		const returnVal = await remove.removeFileFromDB('testing', 'a94a8fe5ccb19ba61c4c0873d391e987982fbbd3', 'txt')
 		checkDB = await remove.db.get(sqlSelect, 'testing', 'a94a8fe5ccb19ba61c4c0873d391e987982fbbd3')
 
 		// Test if removal was a success
