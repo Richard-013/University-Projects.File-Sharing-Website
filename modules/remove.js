@@ -17,5 +17,12 @@ module.exports = class Remove {
 
 	async removeFile(user, hashName) {
 		// Remove file from database and server
+
+	async removeFileFromServer(user, hashName, ext) {
+		// Remove file from the server
+	}
+
+	async removeFileFromDB(user, hashName) {
+		// Remove file from the database
 	}
 }
