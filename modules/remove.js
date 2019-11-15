@@ -15,8 +15,25 @@ module.exports = class Remove {
 		})()
 	}
 
-	async removeFile(user, hashName) {
-		// Remove file from database and server
+	async removeFile(user, hashName, ext) {
+		let extension = ext
+		if(ext === undefined && user !== undefined && hashName !== undefined) {
+			// Get extension of file from db if it is not provided
+			const sql = 'SELECT * FROM files WHERE user_upload = ? AND hash_id = ?;'
+			const result = await this.db.get(sql, user, hashName)
+			extension = result[2]
+		}
+		const serverStatus = await this.removeFileFromServer(user, hashName, extension)
+		const dbStatus = await this.removeFileFromDB(user, hashName)
+
+		if(serverStatus !== 0) {
+			return 1
+		} else if (dbStatus !== 0) {
+			return -1
+		} else {
+			return 0
+		}
+	}
 
 	async removeFileFromServer(user, hashName, ext) {
 		// Remove file from the server
