@@ -37,15 +37,14 @@ module.exports = class Remove {
 
 	async removeFileFromServer(user, hashName, ext) {
 		// Remove file from the server
-		const fileName = `${hashName}.${ext}`
 		try {
-			await fs.unlink(`files/uploads/${user}/${fileName}`, err => {
+			await fs.unlink(`files/uploads/${user}/${hashName}.${ext}`, err => {
 				if (err) throw err
 			})
 			return 0
 		} catch (err) {
 			console.log(err.message)
-			return -1
+			return 1
 		}
 	}
 
