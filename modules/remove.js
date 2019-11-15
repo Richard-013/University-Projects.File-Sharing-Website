@@ -48,7 +48,15 @@ module.exports = class Remove {
 		}
 	}
 
-	async removeFileFromDB(user, hashName) {
+	async removeFileFromDB(user, hashName, ext) {
 		// Remove file from the database
+		try {
+			const sql = 'DELETE FROM files WHERE hash_id = ? AND extension = ? AND user_upload = ?'
+			this.db.run(sql, hashName, ext, user)
+			return 0
+		} catch (err) {
+			console.log(err.message)
+			return 1
+		}
 	}
 }
