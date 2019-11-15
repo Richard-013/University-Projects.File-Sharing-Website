@@ -16,6 +16,7 @@ module.exports = class Remove {
 	}
 
 	async removeFile(user, hashName, ext) {
+		// If the extension is not provided, get it from the db
 		let extension = ext
 		if(ext === undefined && user !== undefined && hashName !== undefined) {
 			// Get extension of file from db if it is not provided
@@ -23,8 +24,11 @@ module.exports = class Remove {
 			const result = await this.db.get(sql, user, hashName)
 			extension = result[2]
 		}
-		const serverStatus = await this.removeFileFromServer(user, hashName, extension)
-		const dbStatus = await this.removeFileFromDB(user, hashName)
+
+		// Runs both removal operations in parallel but awaits completion of both before moving on
+		const [serverStatus, dbStatus] = await Promise.all(
+			[this.removeFileFromServer(user, hashName, extension),
+				this.removeFileFromDB(user, hashName, extension)])
 
 		if(serverStatus !== 0) {
 			return 1
