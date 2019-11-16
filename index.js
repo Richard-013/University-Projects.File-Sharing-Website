@@ -21,8 +21,9 @@ const mime = require('mime-types')
 
 /* IMPORT CUSTOM MODULES */
 const User = require('./modules/user')
-const Upload = require('./modules/upload.js')
-const Download = require('./modules/download.js')
+const Upload = require('./modules/upload')
+const Download = require('./modules/download')
+const Remove = require('./modules/remove')
 
 const app = new Koa()
 const router = new Router()
@@ -170,9 +171,15 @@ router.get('/file', async ctx => {
 		// Use query to pass in hash-id of the requested file and the username of who uploaded it
 		// Use that information to get the file path and allow the user to download the file
 		const download = await new Download(dbName)
-		// u is user and h is hash-id
-		const filePath = await download.getFilePath(ctx.query.u, ctx.query.h)
+		const user = ctx.query.u
+		const hash = ctx.query.h
+		const filePath = await download.getFilePath(user, hash)
 		ctx.attachment(filePath)
+		const remover = await new Remove(dbName)
+		const timer = 500000 // Sets timer amount
+		setTimeout(() => {
+			remover.removeFile(user, hash)
+		}, timer) // Delete the file after approx. 5 minutes to allow user time to download it
 		await ctx.render('download')
 	} catch (err) {
 		await ctx.render('error', { message: err.message })
