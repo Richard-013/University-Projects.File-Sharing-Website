@@ -16,26 +16,37 @@ module.exports = class Remove {
 	}
 
 	async removeFile(user, hashName, ext) {
+		if (user === undefined || hashName === undefined) return 3
 		// If the extension is not provided, get it from the db
 		let extension = ext
-		if(ext === undefined && user !== undefined && hashName !== undefined) {
+		if(extension === undefined) extension = await this.getExtension(user, hashName)
+
+		if(extension !== undefined && extension !== null) {
+			// Runs both removal operations in parallel but awaits completion of both before moving on
+			const [serverStatus, dbStatus] = await Promise.all(
+				[this.removeFileFromServer(user, hashName, extension),
+					this.removeFileFromDB(user, hashName, extension)])
+
+			if (serverStatus !== 0) return serverStatus // Server issue
+			else if (dbStatus !== 0) return dbStatus // Database issue
+			else return 0 // Success
+		} else {
+			return 4
+		}
+	}
+
+	async getExtension(user, hashName) {
+		try {
 			// Get extension of file from db if it is not provided
 			const sql = 'SELECT * FROM files WHERE user_upload = ? AND hash_id = ?;'
 			const result = await this.db.get(sql, user, hashName)
-			extension = result[2]
-		}
-
-		// Runs both removal operations in parallel but awaits completion of both before moving on
-		const [serverStatus, dbStatus] = await Promise.all(
-			[this.removeFileFromServer(user, hashName, extension),
-				this.removeFileFromDB(user, hashName, extension)])
-
-		if(serverStatus !== 0) {
-			return 1
-		} else if (dbStatus !== 0) {
-			return -1
-		} else {
-			return 0
+			if (result === undefined) {
+				return undefined
+			} else {
+				return result.extension
+			}
+		} catch (err) {
+			return null
 		}
 	}
 
@@ -47,7 +58,6 @@ module.exports = class Remove {
 			})
 			return 0
 		} catch (err) {
-			console.log(err.message)
 			return 1
 		}
 	}
@@ -55,12 +65,20 @@ module.exports = class Remove {
 	async removeFileFromDB(user, hashName, ext) {
 		// Remove file from the database
 		try {
-			const sql = 'DELETE FROM files WHERE hash_id = ? AND extension = ? AND user_upload = ?'
-			this.db.run(sql, hashName, ext, user)
+			// Checks if the file exists before it runs the deletion
+			const sqlSelect = 'SELECT COUNT(hash_id) as records FROM files WHERE user_upload = ? AND hash_id = ?;'
+			const checkExists = await this.db.get(sqlSelect, user, hashName)
+			// If the file is not in the database, return appropriate status code
+			if(checkExists.records === 0) {
+				return -1
+			}
+
+			const sqlDel = 'DELETE FROM files WHERE hash_id = ? AND extension = ? AND user_upload = ?;'
+			this.db.run(sqlDel, hashName, ext, user)
+
 			return 0
 		} catch (err) {
-			console.log(err.message)
-			return 1
+			return -2
 		}
 	}
 }
