@@ -177,6 +177,9 @@ router.get('/file', async ctx => {
 		ctx.attachment(filePath)
 		const remover = await new Remove(dbName)
 		const timer = 500000 // Sets timer amount
+		setTimeout(() => {
+			remover.removeFile(user, hash)
+		}, timer) // Delete the file after approx. 5 minutes to allow user time to download it
 		await ctx.render('download')
 	} catch (err) {
 		await ctx.render('error', { message: err.message })
