@@ -143,7 +143,21 @@ describe('removeFile()', () => {
 
 		// Run removeFile with no extension and file doesn't actually exist
 		const returnVal = await remove.removeFile('testing', 'a94a8fe5ccb19ba61c4c0873d391e987982fbbd3', 'txt')
-		expect(returnVal).toBe(4)
+		expect(returnVal).toBe(-1)
+		done()
+	})
+
+	test('file is gone but still has record on the database', async done => {
+		expect.assertions(1)
+		const remove = await new Remove()
+
+		// Mock upload of file to database
+		const sqlInsert = 'INSERT INTO files (hash_id, file_name, extension, user_upload) VALUES(?, ?, ?, ?);'
+		await remove.db.run(sqlInsert, 'a94a8fe5ccb19ba61c4c0873d391e987982fbbd3', 'test.txt', 'txt', 'testing')
+
+		// Run removeFile with no extension and file doesn't actually exist
+		const returnVal = await remove.removeFile('testing', 'a94a8fe5ccb19ba61c4c0873d391e987982fbbd3', 'txt')
+		expect(returnVal).toBe(0)
 		done()
 	})
 })
@@ -153,14 +167,14 @@ describe('doesFileExist()', () => {
 		expect.assertions(1)
 		const remove = await new Remove()
 
-		fs.mkdirSync('files/uploads/testing', { recursive: true })
-		await fs.writeFile('files/uploads/testing/a94a8fe5ccb19ba61c4c0873d391e987982fbbd3.txt', 'test file', err => {
+		if (!fs.existsSync('files/uploads/test')) fs.mkdirSync('files/uploads/test', { recursive: true })
+		await fs.writeFile('files/uploads/test/a94a8fe5.txt', 'test file', err => {
 			if (err) throw err
 		})
 
-		expect(remove.doesFileExist('testing', 'a94a8fe5ccb19ba61c4c0873d391e987982fbbd3', 'txt')).toBeTruthy()
+		expect(remove.doesFileExist('test', 'a94a8fe5', 'txt')).toBeTruthy()
 
-		fs.removeSync('files/uploads/testing')
+		fs.unlinkSync('files/uploads/test/a94a8fe5.txt')
 		done()
 	})
 
