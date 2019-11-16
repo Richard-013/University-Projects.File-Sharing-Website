@@ -34,7 +34,7 @@ module.exports = class User {
 		}
 	}
 
-	async uploadPicture(path, name, username) {
+	async uploadAvatar(path, name, username) {
 		if (username === undefined || username.length === 0 ) throw new Error('No Username')
 		if(path === undefined || name === undefined) {
 			// Allows the user to not upload an avatar if they so choose

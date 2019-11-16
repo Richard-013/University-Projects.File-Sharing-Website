@@ -42,7 +42,7 @@ describe('register()', () => {
 
 })
 
-describe('uploadPicture()', () => {
+describe('uploadAvatar()', () => {
 	beforeEach(() => {
 		mock({
 			'public': {
@@ -61,7 +61,7 @@ describe('uploadPicture()', () => {
 		const account = await new Accounts()
 
 		// Upload avatar
-		await account.uploadPicture('example/image.png', 'image.png', 'tester')
+		await account.uploadAvatar('example/image.png', 'image.png', 'tester')
 
 		// Check upload worked
 		const success = fs.existsSync('public/avatars/tester.png')
@@ -75,7 +75,7 @@ describe('uploadPicture()', () => {
 		const account = await new Accounts()
 
 		// Upload no avatar
-		const returnVal = await account.uploadPicture(undefined, 'image.png', 'tester')
+		const returnVal = await account.uploadAvatar(undefined, 'image.png', 'tester')
 
 		expect(returnVal).toBe(0)
 
@@ -87,7 +87,7 @@ describe('uploadPicture()', () => {
 		const account = await new Accounts()
 
 		// Upload no avatar
-		const returnVal = await account.uploadPicture('example/image.png', undefined, 'tester')
+		const returnVal = await account.uploadAvatar('example/image.png', undefined, 'tester')
 
 		expect(returnVal).toBe(0)
 
@@ -99,7 +99,7 @@ describe('uploadPicture()', () => {
 		const account = await new Accounts()
 
 		// Upload no avatar
-		const returnVal = await account.uploadPicture(undefined, undefined, 'tester')
+		const returnVal = await account.uploadAvatar(undefined, undefined, 'tester')
 
 		expect(returnVal).toBe(0)
 
@@ -111,7 +111,7 @@ describe('uploadPicture()', () => {
 		const account = await new Accounts()
 
 		// Upload no avatar
-		await expect(account.uploadPicture('example/image.png', 'image.png'))
+		await expect(account.uploadAvatar('example/image.png', 'image.png'))
 			.rejects.toEqual(Error('No Username'))
 
 		done()
@@ -122,7 +122,7 @@ describe('uploadPicture()', () => {
 		const account = await new Accounts()
 
 		// Upload no avatar
-		await expect(account.uploadPicture('example/image.png', 'image.png', ''))
+		await expect(account.uploadAvatar('example/image.png', 'image.png', ''))
 			.rejects.toEqual(Error('No Username'))
 
 		done()
