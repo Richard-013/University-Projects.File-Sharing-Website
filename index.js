@@ -171,8 +171,9 @@ router.get('/file', async ctx => {
 		// Use query to pass in hash-id of the requested file and the username of who uploaded it
 		// Use that information to get the file path and allow the user to download the file
 		const download = await new Download(dbName)
-		// u is user and h is hash-id
-		const filePath = await download.getFilePath(ctx.query.u, ctx.query.h)
+		const user = ctx.query.u
+		const hash = ctx.query.h
+		const filePath = await download.getFilePath(user, hash)
 		ctx.attachment(filePath)
 		await ctx.render('download')
 	} catch (err) {
