@@ -2,8 +2,7 @@
 'use strict'
 
 const bcrypt = require('bcrypt-promise')
-// const fs = require('fs-extra')
-const mime = require('mime-types')
+const fs = require('fs-extra')
 const sqlite = require('sqlite-async')
 const saltRounds = 10
 
@@ -35,11 +34,15 @@ module.exports = class User {
 		}
 	}
 
-	async uploadPicture(path, mimeType) {
-		const extension = mime.extension(mimeType)
-		console.log(`path: ${path}`)
-		console.log(`extension: ${extension}`)
-		//await fs.copy(path, `public/avatars/${username}.${fileExtension}`)
+	async uploadAvatar(path, name, username) {
+		if (username === undefined || username.length === 0 ) throw new Error('No Username')
+		if(path === undefined || name === undefined) {
+			// Allows the user to not upload an avatar if they so choose
+			return 0
+		}
+		const nameSplit = name.split('.')
+		const ext = nameSplit.pop()
+		await fs.copy(path, `public/avatars/${username}.${ext}`)
 	}
 
 	async login(username, password) {
