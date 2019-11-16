@@ -70,6 +70,63 @@ describe('uploadPicture()', () => {
 		done()
 	})
 
+	test('handles no path correctly', async done => {
+		expect.assertions(1)
+		const account = await new Accounts()
+
+		// Upload no avatar
+		const returnVal = await account.uploadPicture(undefined, 'image.png', 'tester')
+
+		expect(returnVal).toBe(0)
+
+		done()
+	})
+
+	test('handles no file name correctly', async done => {
+		expect.assertions(1)
+		const account = await new Accounts()
+
+		// Upload no avatar
+		const returnVal = await account.uploadPicture('example/image.png', undefined, 'tester')
+
+		expect(returnVal).toBe(0)
+
+		done()
+	})
+
+	test('handles no file name and no path correctly', async done => {
+		expect.assertions(1)
+		const account = await new Accounts()
+
+		// Upload no avatar
+		const returnVal = await account.uploadPicture(undefined, undefined, 'tester')
+
+		expect(returnVal).toBe(0)
+
+		done()
+	})
+
+	test('handles no username correctly', async done => {
+		expect.assertions(1)
+		const account = await new Accounts()
+
+		// Upload no avatar
+		await expect(account.uploadPicture('example/image.png', 'image.png'))
+			.rejects.toEqual(Error('No Username'))
+
+		done()
+	})
+
+	test('handles 0 length username correctly', async done => {
+		expect.assertions(1)
+		const account = await new Accounts()
+
+		// Upload no avatar
+		await expect(account.uploadPicture('example/image.png', 'image.png', ''))
+			.rejects.toEqual(Error('No Username'))
+
+		done()
+	})
 })
 
 describe('login()', () => {
