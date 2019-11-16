@@ -1,8 +1,8 @@
 'use strict'
 
 const Remove = require('../modules/remove.js')
-const fs = require('fs')
 const mock = require('mock-fs')
+const fs = require('fs-extra')
 
 describe('removeFile()', () => {
 	beforeEach(() => {
@@ -134,6 +134,42 @@ describe('removeFile()', () => {
 		const returnVal = await remove.removeFile('testing', 'a94a8fe5ccb19ba61c4c0873d391e987982fbbd3')
 		expect(returnVal).toBe(4)
 
+		done()
+	})
+
+	test('handles non-existant file correctly', async done => {
+		expect.assertions(1)
+		const remove = await new Remove()
+
+		// Run removeFile with no extension and file doesn't actually exist
+		const returnVal = await remove.removeFile('testing', 'a94a8fe5ccb19ba61c4c0873d391e987982fbbd3', 'txt')
+		expect(returnVal).toBe(4)
+		done()
+	})
+})
+
+describe('doesFileExist()', () => {
+	test('file exists so return true', async done => {
+		expect.assertions(1)
+		const remove = await new Remove()
+
+		fs.mkdirSync('files/uploads/testing', { recursive: true })
+		await fs.writeFile('files/uploads/testing/a94a8fe5ccb19ba61c4c0873d391e987982fbbd3.txt', 'test file', err => {
+			if (err) throw err
+		})
+
+		expect(remove.doesFileExist('testing', 'a94a8fe5ccb19ba61c4c0873d391e987982fbbd3', 'txt')).toBeTruthy()
+
+		fs.removeSync('files/uploads/testing')
+		done()
+	})
+
+	test('file does not exist so return false', async done => {
+		expect.assertions(1)
+		const remove = await new Remove()
+		fs.mkdirSync('files/uploads/testing2', { recursive: true })
+		expect(await remove.doesFileExist('testing2', 'a94a8fe', 'txt')).toBeFalsy()
+		fs.removeSync('files/uploads/testing2')
 		done()
 	})
 })
