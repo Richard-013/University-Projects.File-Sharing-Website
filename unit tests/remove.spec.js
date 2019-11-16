@@ -186,6 +186,51 @@ describe('doesFileExist()', () => {
 		fs.removeSync('files/uploads/testing2')
 		done()
 	})
+
+	test('returns false if no username given', async done => {
+		expect.assertions(1)
+		const remove = await new Remove()
+
+		// Runs doesFileExist with no username
+		expect(await remove.doesFileExist(undefined, 'a94a8fe', 'txt')).toBeFalsy()
+		done()
+	})
+
+	test('returns false is no hash ID is given', async done => {
+		expect.assertions(1)
+		const remove = await new Remove()
+
+		// Runs doesFileExist with no hash id
+		expect(await remove.doesFileExist('test', undefined, 'txt')).toBeFalsy()
+		done()
+	})
+
+	test('returns false if no extension is given', async done => {
+		expect.assertions(1)
+		const remove = await new Remove()
+
+		// Runs doesFileExist with no extension
+		expect(await remove.doesFileExist('test', 'a94a8fe', undefined)).toBeFalsy()
+		done()
+	})
+
+	test('returns false if extension is null', async done => {
+		expect.assertions(1)
+		const remove = await new Remove()
+
+		// Runs doesFileExist with null extension
+		expect(await remove.doesFileExist('test', 'a94a8fe', null)).toBeFalsy()
+		done()
+	})
+
+	test('returns false if no arguments given', async done => {
+		expect.assertions(1)
+		const remove = await new Remove()
+
+		// Runs doesFileExist with no arguments passed in
+		expect(await remove.doesFileExist()).toBeFalsy()
+		done()
+	})
 })
 
 describe('getExtension()', () => {
