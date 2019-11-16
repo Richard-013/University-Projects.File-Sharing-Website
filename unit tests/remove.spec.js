@@ -43,6 +43,48 @@ describe('removeFile()', () => {
 
 		done() // Finish the test
 	})
+
+describe('getExtension()', () => {
+
+	test('gets the extension of a given file', async done => {
+		expect.assertions(2)
+		const remove = await new Remove()
+
+		// Mock upload file to database
+		const sqlInsert = 'INSERT INTO files (hash_id, file_name, extension, user_upload) VALUES(?, ?, ?, ?);'
+		await remove.db.run(sqlInsert, 'a94a8fe5ccb19ba61c4c0873d391e987982fbbd3', 'test.txt', 'txt', 'testing')
+
+		// Check the mocked upload worked
+		const sqlSelect = 'SELECT COUNT(hash_id) as records FROM files WHERE user_upload = ? AND hash_id = ?;'
+		const checkDB = await remove.db.get(sqlSelect, 'testing', 'a94a8fe5ccb19ba61c4c0873d391e987982fbbd3')
+		expect(checkDB.records).not.toBe(0)
+
+		const extension = await remove.getExtension('testing', 'a94a8fe5ccb19ba61c4c0873d391e987982fbbd3')
+		expect(extension).toBe('txt')
+		done()
+	})
+
+	test('returns undefined if no matching file or extension exists', async done => {
+		expect.assertions(1)
+		const remove = await new Remove()
+
+		const extension = await remove.getExtension('testing', 'a94a8fe5ccb19ba61c4c0873d391e987982fbbd3')
+		expect(extension).toBe(undefined)
+		done()
+	})
+
+	test('returns null if an error occurs', async done => {
+		expect.assertions(1)
+		const remove = await new Remove()
+
+		// Remove the table to cause db error
+		const sql = 'DROP TABLE IF EXISTS files;'
+		await remove.db.run(sql)
+
+		const extension = await remove.getExtension('testing', 'a94a8fe5ccb19ba61c4c0873d391e987982fbbd3')
+		expect(extension).toBe(null)
+		done()
+	})
 })
 
 describe('removeFileFromServer()', () => {
