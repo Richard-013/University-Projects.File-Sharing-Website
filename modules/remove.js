@@ -1,3 +1,4 @@
+/* eslint-disable no-magic-numbers */
 'use strict'
 
 const sqlite = require('sqlite-async')
@@ -21,15 +22,22 @@ module.exports = class Remove {
 		// If the extension is not provided, get it from the db
 		let ext = extension
 		if(ext === undefined) ext = await this.getExtension(user, hashName)
-		const fileExists = await this.doesFileExist(user, hashName, ext)
-		if (ext !== undefined && extension !== null && fileExists) {
-			// Runs both removal operations in parallel but awaits completion of both before moving on
-			const [serverStatus, dbStatus] = await Promise.all(
-				[this.removeFileFromServer(user, hashName, ext), this.removeFileFromDB(user, hashName, ext)])
+		if (ext !== undefined && ext !== null) {
+			const fileExists = await this.doesFileExist(user, hashName, ext)
+			let serverStatus = undefined
+			let dbStatus = undefined
 
-			if (serverStatus !== 0) return serverStatus // Server issue
-			else if (dbStatus !== 0) return dbStatus // Database issue
-			else return 0 // Success
+			if(fileExists) {
+				// Runs both removal operations in parallel but awaits completion of both before moving on
+				[serverStatus, dbStatus] = await Promise.all(
+					[this.removeFileFromServer(user, hashName, ext), this.removeFileFromDB(user, hashName, ext)])
+
+			} else {
+				dbStatus = await this.removeFileFromDB(user, hashName, ext)
+			}
+			if (dbStatus === 0 && serverStatus === 0) return 0
+			else if (serverStatus === undefined && dbStatus === 0) return 0 // File in db but not on server
+			else return dbStatus // Database issue
 		} else {
 			return 4
 		}
@@ -39,12 +47,8 @@ module.exports = class Remove {
 		if (user === undefined || hashName === undefined || extension === undefined || extension === null) {
 			return false
 		}
-		try {
-			const exists = fs.existsSync(`files/uploads/${user}/${hashName}.${extension}`)
-			return exists
-		} catch (error) {
-			return false
-		}
+		const exists = fs.existsSync(`files/uploads/${user}/${hashName}.${extension}`)
+		return exists
 	}
 
 	async getExtension(user, hashName) {
@@ -64,12 +68,8 @@ module.exports = class Remove {
 
 	async removeFileFromServer(user, hashName, ext) {
 		// Remove file from the server
-		try {
-			fs.unlinkSync(`files/uploads/${user}/${hashName}.${ext}`)
-			return 0
-		} catch (err) {
-			return 1
-		}
+		fs.unlinkSync(`files/uploads/${user}/${hashName}.${ext}`)
+		return 0
 	}
 
 	async removeFileFromDB(user, hashName, ext) {
