@@ -2,7 +2,7 @@
 
 const sqlite = require('sqlite-async')
 
-module.exports = class FileManagement {
+module.exports = class Download {
 	constructor(dbName = ':memory:') {
 		return (async() => {
 			this.db = await sqlite.open(dbName)
