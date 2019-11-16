@@ -21,8 +21,9 @@ const mime = require('mime-types')
 
 /* IMPORT CUSTOM MODULES */
 const User = require('./modules/user')
-const Upload = require('./modules/upload.js')
-const Download = require('./modules/download.js')
+const Upload = require('./modules/upload')
+const Download = require('./modules/download')
+const Remove = require('./modules/remove')
 
 const app = new Koa()
 const router = new Router()
