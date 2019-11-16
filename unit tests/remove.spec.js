@@ -44,6 +44,100 @@ describe('removeFile()', () => {
 		done() // Finish the test
 	})
 
+	test('handles undefined username correctly', async done => {
+		expect.assertions(1)
+		const remove = await new Remove()
+		// Run removeFile with no username
+		const returnVal = await remove.removeFile(undefined, 'a94a8fe5', 'cpp')
+		expect(returnVal).toBe(3)
+
+		done()
+	})
+
+	test('handles undefined hash id correctly', async done => {
+		expect.assertions(1)
+		const remove = await new Remove()
+		// Run removeFile with no hashID
+		const returnVal = await remove.removeFile('testing', undefined, 'cpp')
+		expect(returnVal).toBe(3)
+
+		done()
+	})
+
+	test('handles undefined username and hash id correctly', async done => {
+		expect.assertions(1)
+		const remove = await new Remove()
+		// Run removeFile with no username or hashID
+		const returnVal = await remove.removeFile(undefined, undefined, 'cpp')
+		expect(returnVal).toBe(3)
+
+		done()
+	})
+
+	test('handles no parameters correctly', async done => {
+		expect.assertions(1)
+		const remove = await new Remove()
+		// Run removeFile with no parameters
+		const returnVal = await remove.removeFile()
+		expect(returnVal).toBe(3)
+
+		done()
+	})
+
+	test('handles undefined extension correctly when file exists', async done => {
+		expect.assertions(3)
+		const remove = await new Remove()
+
+		// Mock upload of file to system
+		await fs.writeFile('files/uploads/testing/a94a8fe5ccb19ba61c4c0873d391e987982fbbd3.txt', 'test file', err => {
+			if (err) throw err
+		})
+		const sqlInsert = 'INSERT INTO files (hash_id, file_name, extension, user_upload) VALUES(?, ?, ?, ?);'
+		await remove.db.run(sqlInsert, 'a94a8fe5ccb19ba61c4c0873d391e987982fbbd3', 'test.txt', 'txt', 'testing')
+
+		const sqlSelect = 'SELECT COUNT(hash_id) as records FROM files WHERE user_upload = ? AND hash_id = ?;'
+		const checkDB = await remove.db.get(sqlSelect, 'testing', 'a94a8fe5ccb19ba61c4c0873d391e987982fbbd3')
+
+		// Check the mocked upload worked
+		expect(fs.existsSync('files/uploads/testing/a94a8fe5ccb19ba61c4c0873d391e987982fbbd3.txt')).toBeTruthy()
+		expect(checkDB.records).not.toBe(0)
+
+		// Removes the file from the database and the server, without giving the extension
+		const returnVal = await remove.removeFile('testing', 'a94a8fe5ccb19ba61c4c0873d391e987982fbbd3')
+
+		// Test if removal was a success
+		expect(returnVal).toBe(0)
+
+		done()
+	})
+
+	test('handles undefined extension correctly when file does not exist', async done => {
+		expect.assertions(1)
+		const remove = await new Remove()
+
+		// Run removeFile with no extension and file doesn't actually exist
+		const returnVal = await remove.removeFile('testing', 'a94a8fe5ccb19ba61c4c0873d391e987982fbbd3')
+		expect(returnVal).toBe(4)
+
+		done()
+	})
+
+	test('handles null extension correctly when a db error occurs before extension is retrieved', async done => {
+		expect.assertions(1)
+		const remove = await new Remove()
+
+		// Remove the table to cause db error
+		const sql = 'DROP TABLE IF EXISTS files;'
+		await remove.db.run(sql)
+
+		// Run removeFile with no extension and file doesn't actually exist
+		const returnVal = await remove.removeFile('testing', 'a94a8fe5ccb19ba61c4c0873d391e987982fbbd3')
+		expect(returnVal).toBe(4)
+
+		done()
+	})
+})
+
 describe('getExtension()', () => {
 
 	test('gets the extension of a given file', async done => {
