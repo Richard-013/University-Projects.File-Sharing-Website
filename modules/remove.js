@@ -1,7 +1,7 @@
 'use strict'
 
 const sqlite = require('sqlite-async')
-const fs = require('fs-extra')
+const fs = require('fs')
 
 module.exports = class Remove {
 	constructor(dbName = ':memory:') {
@@ -15,23 +15,35 @@ module.exports = class Remove {
 		})()
 	}
 
-	async removeFile(user, hashName, ext) {
+	// eslint-disable-next-line complexity
+	async removeFile(user, hashName, extension) {
 		if (user === undefined || hashName === undefined) return 3
 		// If the extension is not provided, get it from the db
-		let extension = ext
-		if(extension === undefined) extension = await this.getExtension(user, hashName)
-
-		if(extension !== undefined && extension !== null) {
+		let ext = extension
+		if(ext === undefined) ext = await this.getExtension(user, hashName)
+		const fileExists = await this.doesFileExist(user, hashName, ext)
+		if (ext !== undefined && extension !== null && fileExists) {
 			// Runs both removal operations in parallel but awaits completion of both before moving on
 			const [serverStatus, dbStatus] = await Promise.all(
-				[this.removeFileFromServer(user, hashName, extension),
-					this.removeFileFromDB(user, hashName, extension)])
+				[this.removeFileFromServer(user, hashName, ext), this.removeFileFromDB(user, hashName, ext)])
 
 			if (serverStatus !== 0) return serverStatus // Server issue
 			else if (dbStatus !== 0) return dbStatus // Database issue
 			else return 0 // Success
 		} else {
 			return 4
+		}
+	}
+
+	async doesFileExist(user, hashName, extension) {
+		if (user === undefined || hashName === undefined || extension === undefined || extension === null) {
+			return false
+		}
+		try {
+			const exists = fs.existsSync(`files/uploads/${user}/${hashName}.${extension}`)
+			return exists
+		} catch (error) {
+			return false
 		}
 	}
 
@@ -53,9 +65,7 @@ module.exports = class Remove {
 	async removeFileFromServer(user, hashName, ext) {
 		// Remove file from the server
 		try {
-			await fs.unlink(`files/uploads/${user}/${hashName}.${ext}`, err => {
-				if (err) throw err
-			})
+			fs.unlinkSync(`files/uploads/${user}/${hashName}.${ext}`)
 			return 0
 		} catch (err) {
 			return 1
