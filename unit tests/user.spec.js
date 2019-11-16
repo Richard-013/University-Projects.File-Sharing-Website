@@ -2,6 +2,8 @@
 'use strict'
 
 const Accounts = require('../modules/user.js')
+const fs = require('fs')
+const mock = require('mock-fs')
 
 describe('register()', () => {
 
@@ -41,8 +43,33 @@ describe('register()', () => {
 })
 
 describe('uploadPicture()', () => {
-	// this would have to be done by mocking the file system
-	// perhaps using mock-fs?
+	beforeEach(() => {
+		mock({
+			'public': {
+				'avatars': {}
+			},
+			'example': {
+				'image.png': Buffer.from([8, 6, 7, 5, 3, 0, 9])
+			}
+		})
+	})
+
+	afterEach(mock.restore)
+
+	test('allows user to upload an avatar', async done => {
+		expect.assertions(1)
+		const account = await new Accounts()
+
+		// Upload avatar
+		await account.uploadPicture('example/image.png', 'image.png', 'tester')
+
+		// Check upload worked
+		const success = fs.existsSync('public/avatars/tester.png')
+		expect(success).toBeTruthy()
+
+		done()
+	})
+
 })
 
 describe('login()', () => {
