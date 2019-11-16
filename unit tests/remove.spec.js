@@ -241,4 +241,32 @@ describe('removeFileFromDB()', () => {
 
 		done() // Finish the test
 	})
+
+	test('returns correct error code for file not existing', async done => {
+		expect.assertions(1)
+		const remove = await new Remove()
+
+		// Run removal on item not in database
+		const returnVal = await remove.removeFileFromDB('testing', 'a94a8fe5ccb19ba61c4c0873d391e987982fbbd3', 'txt')
+
+		expect(returnVal).toBe(-1)
+
+		done()
+	})
+
+	test('returns correct error code for database error', async done => {
+		expect.assertions(1)
+		const remove = await new Remove()
+
+		// Remove the table to cause db error
+		const sql = 'DROP TABLE IF EXISTS files;'
+		await remove.db.run(sql)
+
+		// Run removal on item not in database
+		const returnVal = await remove.removeFileFromDB('testing', 'a94a8fe5ccb19ba61c4c0873d391e987982fbbd3', 'txt')
+
+		expect(returnVal).toBe(-2)
+
+		done()
+	})
 })
