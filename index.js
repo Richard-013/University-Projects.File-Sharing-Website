@@ -175,6 +175,8 @@ router.get('/file', async ctx => {
 		const hash = ctx.query.h
 		const filePath = await download.getFilePath(user, hash)
 		ctx.attachment(filePath)
+		const remover = await new Remove(dbName)
+		const timer = 500000 // Sets timer amount
 		await ctx.render('download')
 	} catch (err) {
 		await ctx.render('error', { message: err.message })
