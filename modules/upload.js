@@ -115,8 +115,9 @@ module.exports = class Upload {
 			const data = await this.db.get(sql, username, hashID)
 			if (data.records !== 0) throw new RangeError(`File of the same name already uploaded by ${username}`)
 
-			sql = 'INSERT INTO files (hash_id, file_name, extension, user_upload) VALUES(?, ?, ?, ?)'
-			await this.db.run(sql, hashID, fileName, ext, username)
+			const uploadTime = await this.getUploadTime()
+			sql = 'INSERT INTO files (hash_id, file_name, extension, user_upload, upload_time) VALUES(?, ?, ?, ?, ?)'
+			await this.db.run(sql, hashID, fileName, ext, username, uploadTime)
 			return 0
 		} catch (err) {
 			if (err instanceof RangeError) {
