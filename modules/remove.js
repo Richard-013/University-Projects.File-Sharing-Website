@@ -10,7 +10,7 @@ module.exports = class Remove {
 			this.db = await sqlite.open(dbName)
 			// Creates a table to store details about uploaded files
 			const sql = 'CREATE TABLE IF NOT EXISTS files ' +
-                '(hash_id TEXT PRIMARY KEY, file_name TEXT, extension TEXT, user_upload TEXT);'
+                '(hash_id TEXT PRIMARY KEY, file_name TEXT, extension TEXT, user_upload TEXT, upload_time INTEGER);'
 			await this.db.run(sql)
 			return this
 		})()
@@ -89,6 +89,37 @@ module.exports = class Remove {
 			return 0
 		} catch (err) {
 			return -2
+		}
+	}
+
+	async getExpiredFiles() {
+		const time = Math.floor(Date.now() / 60000) - 4320 // Gets the date of three days ago
+		const sql = `SELECT * FROM files WHERE upload_time <= ${time};`
+		const files = []
+		try {
+			await this.db.each(sql, [], (_err, row) => {
+				const file = [row.hash_id, row.file_name, row.user_upload, row.extension, row.upload_time]
+				files.push(file)
+			})
+			return files
+		} catch (error) {
+			throw new Error('An issue occured when checking for expired files')
+		}
+	}
+
+	async removeExpiredFiles() {
+		try {
+			const expiredFiles = await this.getExpiredFiles()
+			if (expiredFiles === undefined || expiredFiles.length === 0) return 1
+			else {
+				for (const file of expiredFiles) {
+					await this.removeFile(file[2], file[0], file[3])
+				}
+				return 0
+			}
+		} catch (err) {
+			const errorMessage = 'There was an error whilst removing old files'
+			return errorMessage
 		}
 	}
 }

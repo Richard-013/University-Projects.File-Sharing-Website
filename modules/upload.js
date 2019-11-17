@@ -11,7 +11,7 @@ module.exports = class Upload {
 			this.db = await sqlite.open(dbName)
 			// Creates a table to store details about uploaded files
 			const sql = 'CREATE TABLE IF NOT EXISTS files' +
-				'(hash_id TEXT PRIMARY KEY, file_name TEXT, extension TEXT, user_upload TEXT);'
+				'(hash_id TEXT PRIMARY KEY, file_name TEXT, extension TEXT, user_upload TEXT, upload_time INTEGER);'
 			await this.db.run(sql)
 			return this
 		})()
@@ -115,8 +115,9 @@ module.exports = class Upload {
 			const data = await this.db.get(sql, username, hashID)
 			if (data.records !== 0) throw new RangeError(`File of the same name already uploaded by ${username}`)
 
-			sql = 'INSERT INTO files (hash_id, file_name, extension, user_upload) VALUES(?, ?, ?, ?)'
-			await this.db.run(sql, hashID, fileName, ext, username)
+			const uploadTime = await this.getUploadTime()
+			sql = 'INSERT INTO files (hash_id, file_name, extension, user_upload, upload_time) VALUES(?, ?, ?, ?, ?)'
+			await this.db.run(sql, hashID, fileName, ext, username, uploadTime)
 			return 0
 		} catch (err) {
 			if (err instanceof RangeError) {
@@ -125,5 +126,11 @@ module.exports = class Upload {
 				return -3
 			}
 		}
+	}
+
+	async getUploadTime() {
+		const time = Date.now() // Gets time in unix time (ms elapsed since 1st January 1970 00:00:00 UTC)
+		const uploadTime = Math.floor(time / 60000) // Converts time in ms to time in minutes
+		return uploadTime
 	}
 }

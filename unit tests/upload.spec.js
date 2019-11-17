@@ -391,4 +391,48 @@ describe('addToDB()', () => {
 
 		done()
 	})
+
+	test('checks correct time is added to the database', async done => {
+		expect.assertions(3)
+		const upload = await new Upload()
+
+		// Stubs Date.now() calls so they return 1574007598432 every time
+		const originalDateCall = Date.now.bind(global.Date)
+		const stubDate = jest.fn(() => 1574007598432)
+		global.Date.now = stubDate
+
+		const returnVal = await upload.addToDB('123abc', 'dummy', 'txt', 'testing')
+		// Checks return value of the function
+		expect(returnVal).toBe(0)
+		expect(stubDate).toHaveBeenCalled()
+
+		const sql = 'SELECT * FROM files WHERE hash_id = "123abc";'
+		const data = await upload.db.get(sql)
+
+		expect(data.upload_time).toBe(26233459)
+
+		// Restores Date.now() to its original functionality
+		global.Date.now = originalDateCall
+		done()
+	})
+})
+
+describe('getUploadTime()', () => {
+	test('gets the correct time in minutes', async done => {
+		expect.assertions(2)
+		const upload = await new Upload()
+
+		// Stubs Date.now() calls so they return 1574007598432 every time
+		const originalDateCall = Date.now.bind(global.Date)
+		const stubDate = jest.fn(() => 1574007598432)
+		global.Date.now = stubDate
+
+		const time = await upload.getUploadTime()
+		expect(time).toBe(26233459)
+		expect(stubDate).toHaveBeenCalled() // Checks the stub was called
+
+		// Restores Date.now() to its original functionality
+		global.Date.now = originalDateCall
+		done()
+	})
 })
