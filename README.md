@@ -18,12 +18,12 @@ functionality beyond what is provided by the template is my own work.
 
 ### Intermediate
 
-1. Any files should be deleted once they have been downloaded or after 3 days (whichever comes first) \[In Progress for Upcoming Release\]
+1. Any files should be deleted once they have been downloaded or after 3 days (whichever comes first) \[Implemented in Release v0.2\]
 2. All files should download (even if they could display in the web browser) \[Implemented in Release v0.1\]
 
 ### Advanced
 
-1. The person uploading the file can choose the username of the user who can access it \[Will Be Developed In Next Release Cycle (v.03)\]
-2. This username must already exist \[Will Be Developed In Next Release Cycle (v.03)\]
-3. Users need to log in to see a list of the files they can download \[Will Be Developed In Next Release Cycle (v.03)\]
-4. All files in the list should have an appropriate icon reflecting what type of file they are and include information such as the file size and the date and time the file was uploaded as well as how long before it will be deleted \[Will Be Developed In Next Release Cycle (v.03)\]
+1. The person uploading the file can choose the username of the user who can access it \[In Progress for Upcoming Release\]
+2. This username must already exist \[In Progress for Upcoming Release\]
+3. Users need to log in to see a list of the files they can download \[In Progress for Upcoming Release\]
+4. All files in the list should have an appropriate icon reflecting what type of file they are and include information such as the file size and the date and time the file was uploaded as well as how long before it will be deleted \[In Progress for Upcoming Release\]
