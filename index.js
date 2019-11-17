@@ -14,9 +14,9 @@ const staticDir = require('koa-static')
 const bodyParser = require('koa-bodyparser')
 const koaBody = require('koa-body')({multipart: true, uploadDir: '.'})
 const session = require('koa-session')
-const sqlite = require('sqlite-async')
-const fs = require('fs-extra')
-const mime = require('mime-types')
+//const sqlite = require('sqlite-async')
+//const fs = require('fs-extra')
+//const mime = require('mime-types')
 //const jimp = require('jimp')
 
 /* IMPORT CUSTOM MODULES */
@@ -39,6 +39,7 @@ const defaultPort = 8080
 const port = process.env.PORT || defaultPort
 const dbName = 'website.db'
 const domainName = 'http://localhost:8080'
+const expiryCheckInterval = 300000 // Five minutes
 const saltRounds = 10
 
 /**
@@ -50,6 +51,9 @@ const saltRounds = 10
  */
 router.get('/', async ctx => {
 	try {
+		// Sets old file deletion to run every five minutes whilst the app is active
+		const expiryRemover = await new Remove(dbName)
+		setInterval(() => expiryRemover.removeExpiredFiles(), expiryCheckInterval)
 		if(ctx.session.authorised !== true) return ctx.redirect('/login?msg=you need to log in')
 		const data = {}
 		if(ctx.query.msg) data.msg = ctx.query.msg
