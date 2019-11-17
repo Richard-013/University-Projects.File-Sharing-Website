@@ -365,3 +365,37 @@ describe('removeFileFromDB()', () => {
 		done()
 	})
 })
+
+describe('getExpiredFiles()', () => {
+	test('gets expired files from database', async done => {
+		expect.assertions(4)
+		const remove = await new Remove()
+
+		// Stubs Date.now() calls so they return 1574007598432 every time
+		const originalDateCall = Date.now.bind(global.Date)
+		const stubDate = jest.fn(() => 1574007598432)
+		global.Date.now = stubDate
+
+		const sql = 'INSERT INTO files (hash_id, file_name, extension, user_upload, upload_time) VALUES(?, ?, ?, ?, ?);'
+		await remove.db.run(sql, 'a94a8fe', 'test.txt', 'txt', 'testing', 26229139)
+		await remove.db.run(sql, 'b05b9gf', 'main.cpp', 'cpp', 'testing', 26228731)
+
+		const files = await remove.getExpiredFiles()
+		const file1 = files[0]
+		const file2 = files[1]
+
+		// Checks two files were retrieved
+		expect(files.length).toBe(2)
+
+		// Checks two distinct files were retrieved
+		expect(file1[0]).toBe('a94a8fe')
+		expect(file2[0]).toBe('b05b9gf')
+
+		expect(stubDate).toHaveBeenCalled() // Checks the stub was called
+
+		// Restores Date.now() to its original functionality
+		global.Date.now = originalDateCall
+		done()
+	})
+
+})
