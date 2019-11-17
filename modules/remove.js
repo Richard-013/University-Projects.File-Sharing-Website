@@ -91,4 +91,19 @@ module.exports = class Remove {
 			return -2
 		}
 	}
+
+	async getExpiredFiles() {
+		const time = Math.floor(Date.now() / 60000) - 4320 // Gets the date of three days ago
+		const sql = `SELECT * FROM files WHERE upload_time <= ${time};`
+		const files = []
+		try {
+			await this.db.each(sql, [], (_err, row) => {
+				const file = [row.hash_id, row.file_name, row.user_upload, row.extension, row.upload_time]
+				files.push(file)
+			})
+			return files
+		} catch (error) {
+			throw new Error('An issue occured when checking for expired files')
+		}
+	}
 }
