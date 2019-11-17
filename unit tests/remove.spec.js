@@ -163,27 +163,38 @@ describe('removeFile()', () => {
 })
 
 describe('doesFileExist()', () => {
+	beforeEach(() => {
+		mock({
+			'files': {
+				'uploads': {
+					'testing': {},
+					'testing1': {
+						'a94a8fe5.txt': 'test file'
+					},
+					'testing2': {}
+				}
+			}
+		})
+	})
+
+	afterEach(mock.restore)
+
 	test('file exists so return true', async done => {
 		expect.assertions(1)
 		const remove = await new Remove()
 
-		if (!fs.existsSync('files/uploads/test')) fs.mkdirSync('files/uploads/test', { recursive: true })
-		await fs.writeFile('files/uploads/test/a94a8fe5.txt', 'test file', err => {
+		expect(remove.doesFileExist('testing1', 'a94a8fe5', 'txt')).toBeTruthy()
+
+		await fs.remove('files/uploads/testing1', err => {
 			if (err) throw err
 		})
-
-		expect(remove.doesFileExist('test', 'a94a8fe5', 'txt')).toBeTruthy()
-
-		fs.unlinkSync('files/uploads/test/a94a8fe5.txt')
 		done()
 	})
 
 	test('file does not exist so return false', async done => {
 		expect.assertions(1)
 		const remove = await new Remove()
-		fs.mkdirSync('files/uploads/testing2', { recursive: true })
 		expect(await remove.doesFileExist('testing2', 'a94a8fe', 'txt')).toBeFalsy()
-		fs.removeSync('files/uploads/testing2')
 		done()
 	})
 
