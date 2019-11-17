@@ -398,4 +398,62 @@ describe('getExpiredFiles()', () => {
 		done()
 	})
 
+	test('retrieves no files if none have gone beyond 3 days of upload time', async done => {
+		expect.assertions(2)
+		const remove = await new Remove()
+
+		// Stubs Date.now() calls so they return 1574007598432 every time
+		const originalDateCall = Date.now.bind(global.Date)
+		const stubDate = jest.fn(() => 1574007598432)
+		global.Date.now = stubDate
+
+		const sql = 'INSERT INTO files (hash_id, file_name, extension, user_upload, upload_time) VALUES(?, ?, ?, ?, ?);'
+		await remove.db.run(sql, 'a94a8fe', 'test.txt', 'txt', 'testing', 26229300)
+		await remove.db.run(sql, 'b05b9gf', 'main.cpp', 'cpp', 'testing', 26229300)
+
+		const files = await remove.getExpiredFiles()
+
+		// Checks no files were retrieved
+		expect(files.length).toBe(0)
+
+		expect(stubDate).toHaveBeenCalled() // Checks the stub was called
+
+		// Restores Date.now() to its original functionality
+		global.Date.now = originalDateCall
+		done()
+	})
+
+	test('retrieves no files if none are present', async done => {
+		expect.assertions(2)
+		const remove = await new Remove()
+
+		// Stubs Date.now() calls so they return 1574007598432 every time
+		const originalDateCall = Date.now.bind(global.Date)
+		const stubDate = jest.fn(() => 1574007598432)
+		global.Date.now = stubDate
+
+		const files = await remove.getExpiredFiles()
+
+		// Checks no files were retrieved
+		expect(files.length).toBe(0)
+
+		expect(stubDate).toHaveBeenCalled() // Checks the stub was called
+
+		// Restores Date.now() to its original functionality
+		global.Date.now = originalDateCall
+		done()
+	})
+
+	test('throws correct error when something goes wrong', async done => {
+		expect.assertions(1)
+		const remove = await new Remove()
+
+		const sql = 'DROP TABLE IF EXISTS files;'
+		await remove.db.run(sql)
+
+		await expect(remove.getExpiredFiles())
+			.rejects.toEqual(Error('An issue occured when checking for expired files'))
+
+		done()
+	})
 })
