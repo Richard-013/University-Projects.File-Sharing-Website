@@ -126,4 +126,10 @@ module.exports = class Upload {
 			}
 		}
 	}
+
+	async getUploadTime() {
+		const time = Date.now() // Gets time in unix time (ms elapsed since 1st January 1970 00:00:00 UTC)
+		const uploadTime = Math.floor(time / 60000) // Converts time in ms to time in minutes
+		return uploadTime
+	}
 }
