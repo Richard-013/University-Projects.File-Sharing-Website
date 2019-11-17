@@ -108,6 +108,7 @@ module.exports = class Remove {
 	}
 
 	async removeExpiredFiles() {
+		try {
 			const expiredFiles = await this.getExpiredFiles()
 			if (expiredFiles === undefined || expiredFiles.length === 0) return 1
 			else {
@@ -116,5 +117,9 @@ module.exports = class Remove {
 				}
 				return 0
 			}
+		} catch (err) {
+			const errorMessage = 'There was an error whilst removing old files'
+			return errorMessage
+		}
 	}
 }
