@@ -14,14 +14,16 @@ const staticDir = require('koa-static')
 const bodyParser = require('koa-bodyparser')
 const koaBody = require('koa-body')({multipart: true, uploadDir: '.'})
 const session = require('koa-session')
-const sqlite = require('sqlite-async')
-const fs = require('fs-extra')
-const mime = require('mime-types')
+//const sqlite = require('sqlite-async')
+//const fs = require('fs-extra')
+//const mime = require('mime-types')
 //const jimp = require('jimp')
 
 /* IMPORT CUSTOM MODULES */
 const User = require('./modules/user')
-const FileManagement = require('./modules/fileManagement.js')
+const Upload = require('./modules/upload')
+const Download = require('./modules/download')
+const Remove = require('./modules/remove')
 
 const app = new Koa()
 const router = new Router()
@@ -37,6 +39,7 @@ const defaultPort = 8080
 const port = process.env.PORT || defaultPort
 const dbName = 'website.db'
 const domainName = 'http://localhost:8080'
+const expiryCheckInterval = 300000 // Five minutes
 const saltRounds = 10
 
 /**
@@ -48,6 +51,9 @@ const saltRounds = 10
  */
 router.get('/', async ctx => {
 	try {
+		// Sets old file deletion to run every five minutes whilst the app is active
+		const expiryRemover = await new Remove(dbName)
+		setInterval(() => expiryRemover.removeExpiredFiles(), expiryCheckInterval)
 		if(ctx.session.authorised !== true) return ctx.redirect('/login?msg=you need to log in')
 		const data = {}
 		if(ctx.query.msg) data.msg = ctx.query.msg
@@ -73,16 +79,15 @@ router.get('/register', async ctx => await ctx.render('register'))
  */
 router.post('/register', koaBody, async ctx => {
 	try {
-		// extract the data from the request
+		// Extracts data from page
 		const body = ctx.request.body
-		console.log(body)
-		const {path, type} = ctx.request.files.avatar
-		// call the functions in the module
+		const {path, name} = ctx.request.files.avatar
+		// Calls required functions from user module
 		const user = await new User(dbName)
 		await user.register(body.user, body.pass)
-		// await user.uploadPicture(path, type)
-		// redirect to the home page
-		ctx.redirect(`/?msg=new user "${body.name}" added`)
+		await user.uploadAvatar(path, name, body.user)
+		// Redirects user to the login page
+		ctx.redirect('/login?msg=new user added, please log in')
 	} catch(err) {
 		await ctx.render('error', {message: err.message})
 	}
@@ -125,25 +130,17 @@ router.post('/upload', koaBody, async ctx => {
 		// Prevents users who aren't logged in from uploading files
 		if (ctx.session.authorised !== true) return ctx.redirect('/login?msg=you need to log in')
 		const { path, name } = ctx.request.files.filetoupload // Gets details from file
-		const uploadManager = await new FileManagement(dbName)
+		const upload = await new Upload(dbName)
 		// Attempts to upload file to the server, returns a status code to work with
-		const uploadStatus = await uploadManager.uploadFile(path, name, ctx.session.username)
-		if (uploadStatus === 0) {
-			const hash = await uploadManager.hashFileName(name)
-			ctx.redirect(`/shareFile?h=${hash}`) // Successful upload
-		} else if (uploadStatus === 1) {
-			ctx.redirect('/upload?message=No file selected') // No file selected
-		} else if (uploadStatus === -1) {
-			ctx.redirect('/upload?message=Selected file does not exist') // File does not exist
-		} else if (uploadStatus === -2) {
-			ctx.redirect('/upload?message=User has already uploaded a file with the same name') // User has uploaded file with the same name
-		} else if (uploadStatus === -3) {
-			ctx.redirect('/upload?message=Database error has occurred, please try again') // Database error encountered
+		const uploadResult = await upload.uploadFile(path, name, ctx.session.username)
+		if (uploadResult[0] === 0) {
+			// Successful upload
+			ctx.redirect(`/shareFile?h=${uploadResult[1]}`)
 		} else {
-			ctx.redirect('/upload?message=Something went wrong') // Generic error
+			// Unsuccessful upload
+			ctx.redirect(`/upload?message=${uploadResult[1]}`)
 		}
 	} catch (err) {
-		console.log(`error ${err.message}`)
 		await ctx.render('error', { message: err.message })
 	}
 })
@@ -151,12 +148,9 @@ router.post('/upload', koaBody, async ctx => {
 router.get('/shareFile', async ctx => {
 	try {
 		const shareLink = `${domainName}/file?h=${ctx.query.h}&u=${ctx.session.username}`
-		const data = {
-			link: shareLink
-		}
+		const data = { link: shareLink }
 		await ctx.render('share', data)
 	} catch (err) {
-		console.log(`error ${err.message}`)
 		await ctx.render('error', { message: err.message })
 	}
 })
@@ -164,12 +158,10 @@ router.get('/shareFile', async ctx => {
 router.get('/fileList', async ctx => {
 	try {
 		if (ctx.session.authorised !== true) return ctx.redirect('/login?msg=you need to log in')
-		const downloadManager = await new FileManagement(dbName)
-		const allFiles = await downloadManager.getAllFiles()
+		const download = await new Download(dbName)
+		const allFiles = await download.getAllFiles()
 		console.log(allFiles)
-		const data = {
-			files: allFiles,
-		}
+		const data = { files: allFiles }
 		if (ctx.query.message) data.message = ctx.query.message
 		await ctx.render('fileList', data)
 	} catch (err) {
@@ -182,10 +174,16 @@ router.get('/file', async ctx => {
 		if (ctx.session.authorised !== true) return ctx.redirect('/login?msg=you need to log in')
 		// Use query to pass in hash-id of the requested file and the username of who uploaded it
 		// Use that information to get the file path and allow the user to download the file
-		const downloadManager = await new FileManagement(dbName)
-		// u is user and h is hash-id
-		const filePath = await downloadManager.getFilePath(ctx.query.u, ctx.query.h)
+		const download = await new Download(dbName)
+		const user = ctx.query.u
+		const hash = ctx.query.h
+		const filePath = await download.getFilePath(user, hash)
 		ctx.attachment(filePath)
+		const remover = await new Remove(dbName)
+		const timer = 500000 // Sets timer amount
+		setTimeout(() => {
+			remover.removeFile(user, hash)
+		}, timer) // Delete the file after approx. 5 minutes to allow user time to download it
 		await ctx.render('download')
 	} catch (err) {
 		await ctx.render('error', { message: err.message })
@@ -194,6 +192,7 @@ router.get('/file', async ctx => {
 
 router.get('/logout', async ctx => {
 	ctx.session.authorised = null
+	ctx.session.username = null
 	ctx.redirect('/?msg=you are now logged out')
 })
 
