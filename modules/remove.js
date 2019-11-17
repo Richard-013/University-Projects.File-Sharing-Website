@@ -106,4 +106,15 @@ module.exports = class Remove {
 			throw new Error('An issue occured when checking for expired files')
 		}
 	}
+
+	async removeExpiredFiles() {
+			const expiredFiles = await this.getExpiredFiles()
+			if (expiredFiles === undefined || expiredFiles.length === 0) return 1
+			else {
+				for (const file of expiredFiles) {
+					await this.removeFile(file[2], file[0], file[3])
+				}
+				return 0
+			}
+	}
 }
