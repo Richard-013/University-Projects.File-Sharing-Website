@@ -10,7 +10,7 @@ module.exports = class Remove {
 			this.db = await sqlite.open(dbName)
 			// Creates a table to store details about uploaded files
 			const sql = 'CREATE TABLE IF NOT EXISTS files ' +
-                '(hash_id TEXT PRIMARY KEY, file_name TEXT, extension TEXT, user_upload TEXT);'
+                '(hash_id TEXT PRIMARY KEY, file_name TEXT, extension TEXT, user_upload TEXT, upload_time INTEGER);'
 			await this.db.run(sql)
 			return this
 		})()
