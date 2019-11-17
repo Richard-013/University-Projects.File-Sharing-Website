@@ -392,3 +392,23 @@ describe('addToDB()', () => {
 		done()
 	})
 })
+
+describe('getUploadTime()', () => {
+	test('gets the correct time in minutes', async done => {
+		expect.assertions(2)
+		const upload = await new Upload()
+
+		// Stubs Date.now() calls so they return 1574007598432 every time
+		const originalDateCall = Date.now.bind(global.Date)
+		const stubDate = jest.fn(() => 1574007598432)
+		global.Date.now = stubDate
+
+		const time = await upload.getUploadTime()
+		expect(time).toBe(26233459)
+		expect(stubDate).toHaveBeenCalled() // Checks the stub was called
+
+		// Restores Date.now() to its original functionality
+		global.Date.now = originalDateCall
+		done()
+	})
+})
