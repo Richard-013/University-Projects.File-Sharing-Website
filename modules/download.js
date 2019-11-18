@@ -14,18 +14,20 @@ module.exports = class Download {
 		})()
 	}
 
-	async getFilePath(user, hashName) {
-		if (user === undefined || user === '') throw new Error('No username given, file cannot be located')
-		if (hashName === undefined || hashName === '') throw new Error('No file name given, file cannot be located')
-		// Get the file path for the download
-		// Runs sql to find stored file name
-		const sql = 'SELECT * FROM files WHERE user_upload = ? AND hash_id = ?;'
-		const record = await this.db.get(sql, user, hashName)
-		if (record === undefined) throw new Error('Requested file could not be found')
-		const ext = record.extension
-		// Combines the hashed file name and extension with the user's username to generate the file path
-		const filePath = `files/uploads/${user}/${hashName}.${ext}`
-		return filePath
+	async getFilePath(current, source, hash) {
+		if (current === undefined || current === '') throw new Error('User not logged in')
+		if (source === undefined || source === '') throw new Error('No username given, file cannot be located')
+		if (hash === undefined || hash === '') throw new Error('No file name given, file cannot be located')
+		if (await this.verifyUserAccess(hash, source, current) === false) throw new Error('Invalid access permissions')
+		else {
+			// Runs sql to find stored file name
+			const sql = 'SELECT * FROM files WHERE user_upload = ? AND hash_id = ?;'
+			const record = await this.db.get(sql, source, hash)
+			const ext = record.extension
+			// Combines the hashed file name and extension with the user's username to generate the file path
+			const filePath = `files/uploads/${source}/${hash}.${ext}`
+			return filePath
+		}
 	}
 
 	async verifyUserAccess(hashName, sourceUser, currentUser) {
