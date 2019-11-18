@@ -44,19 +44,19 @@ module.exports = class Download {
 		}
 	}
 
-	async getAllFiles() {
+	async getAvailableFiles(currentUser) {
 		// Gets the file name and user for all available files
-		const sql = 'SELECT * FROM files;'
+		const sql = 'SELECT * FROM files WHERE target_user = ?;'
 		const files = []
 		try {
-			await this.db.each(sql, [], (_err, row) => {
-				const file = [row.hash_id, row.file_name, row.user_upload, row.extension]
+			await this.db.each(sql, [currentUser], (_err, row) => {
+				const file = [row.hash_id, row.file_name, row.user_upload, row.extension, row.upload_time]
 				files.push(file)
 			})
 
 			return files
 		} catch (error) {
-			return error.message
+			return -1
 		}
 	}
 }
