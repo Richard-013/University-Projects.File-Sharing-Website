@@ -30,6 +30,14 @@ module.exports = class Download {
 		return filePath
 	}
 
+	async verifyUserAccess(hashName, sourceUser, currentUser) {
+		// Checks that the current user is allowed to download chosen file
+		const sql = 'SELECT * FROM files WHERE user_upload = ? AND hash_id = ?;'
+		const file = await this.db.get(sql, sourceUser, hashName)
+		if (file.target_user === currentUser) return true
+		else return false
+	}
+
 	async getAllFiles() {
 		// Gets the file name and user for all available files
 		const sql = 'SELECT * FROM files;'
