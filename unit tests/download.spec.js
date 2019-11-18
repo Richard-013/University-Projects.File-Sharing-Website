@@ -108,6 +108,21 @@ describe('getAvailableFiles()', () => {
 		done()
 	})
 
+	test('returns correct code if no username is given', async done => {
+		expect.assertions(1)
+		const download = await new Download()
+
+		const returnVal = await download.getAvailableFiles(undefined)
+		expect(returnVal).toBe(1)
+		done()
+	})
+
+	test('returns correct code if username is empty', async done => {
+		expect.assertions(1)
+		const download = await new Download()
+
+		const returnVal = await download.getAvailableFiles('')
+		expect(returnVal).toBe(1)
 		done()
 	})
 })
