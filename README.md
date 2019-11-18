@@ -23,7 +23,7 @@ functionality beyond what is provided by the template is my own work.
 
 ### Advanced
 
-1. The person uploading the file can choose the username of the user who can access it \[In Progress for Upcoming Release\]
-2. This username must already exist \[In Progress for Upcoming Release\]
+1. The person uploading the file can choose the username of the user who can access it \[Implemented, will release in v0.3\]
+2. This username must already exist \[Implemented, will release in v0.3\]
 3. Users need to log in to see a list of the files they can download \[In Progress for Upcoming Release\]
 4. All files in the list should have an appropriate icon reflecting what type of file they are and include information such as the file size and the date and time the file was uploaded as well as how long before it will be deleted \[In Progress for Upcoming Release\]
