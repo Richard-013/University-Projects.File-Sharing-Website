@@ -104,7 +104,7 @@ describe('verifyUserAccess()', () => {
 		done()
 	})
 
-	test('returns true if user is allowed to access the file', async done => {
+	test('returns false if user is not allowed to access the file', async done => {
 		expect.assertions(1)
 		const download = await new Download()
 
@@ -114,6 +114,20 @@ describe('verifyUserAccess()', () => {
 
 		// Checks user if the given user should have access to that file
 		const access = await download.verifyUserAccess('a94a8fe', 'tester', 'badPerson')
+		expect(access).toBeFalsy()
+		done()
+	})
+
+	test('returns false if database cannot be used to verify access', async done => {
+		expect.assertions(1)
+		const download = await new Download()
+
+		// Inserts file into db
+		const sql = 'DROP TABLE IF EXISTS files;'
+		await download.db.run(sql)
+
+		// Checks user if the given user should have access to that file
+		const access = await download.verifyUserAccess('a94a8fe', 'tester', 'testTarget')
 		expect(access).toBeFalsy()
 		done()
 	})
