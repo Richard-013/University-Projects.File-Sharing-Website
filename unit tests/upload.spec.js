@@ -187,6 +187,35 @@ describe('checkValidUser()', () => {
 		done()
 	})
 
+	test('returns false if user does not exist', async done => {
+		expect.assertions(1)
+		const upload = await new Upload()
+
+		// Runs function with no users in db
+		const validUser = await upload.checkValidUser('testUser')
+
+		// Checks output is false
+		expect(validUser).toBeFalsy()
+
+		done()
+	})
+
+	test('returns false if there is a database error', async done => {
+		expect.assertions(1)
+		const upload = await new Upload()
+
+		// Set up database for an error
+		const sql = 'DROP TABLE IF EXISTS users;'
+		await upload.db.run(sql)
+
+		// Runs function with no db
+		const validUser = await upload.checkValidUser('testUser')
+
+		// Checks output is false
+		expect(validUser).toBeFalsy()
+
+		done()
+	})
 })
 
 describe('generateFileDetails()', () => {
