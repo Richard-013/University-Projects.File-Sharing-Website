@@ -175,6 +175,7 @@ router.get('/file', async ctx => {
 		const download = await new Download(dbName)
 		const user = ctx.query.u
 		const hash = ctx.query.h
+		// getFilePath will throw an error if user does not have permission to access the file
 		const filePath = await download.getFilePath(user, hash)
 		ctx.attachment(filePath)
 		const remover = await new Remove(dbName)
