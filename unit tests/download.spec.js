@@ -122,12 +122,52 @@ describe('verifyUserAccess()', () => {
 		expect.assertions(1)
 		const download = await new Download()
 
-		// Inserts file into db
+		// Cause a database error
 		const sql = 'DROP TABLE IF EXISTS files;'
 		await download.db.run(sql)
 
-		// Checks user if the given user should have access to that file
+		// Attempt to verify access rights
 		const access = await download.verifyUserAccess('a94a8fe', 'tester', 'testTarget')
+		expect(access).toBeFalsy()
+		done()
+	})
+
+	test('returns false if hashName is undefined', async done => {
+		expect.assertions(1)
+		const download = await new Download()
+
+		// Call function with incorrect parameter
+		const access = await download.verifyUserAccess(undefined, 'tester', 'testTarget')
+		expect(access).toBeFalsy()
+		done()
+	})
+
+	test('returns false if sourceUser is undefined', async done => {
+		expect.assertions(1)
+		const download = await new Download()
+
+		// Call function with incorrect parameter
+		const access = await download.verifyUserAccess('a94a8fe', undefined, 'testTarget')
+		expect(access).toBeFalsy()
+		done()
+	})
+
+	test('returns false if targetUser is undefined', async done => {
+		expect.assertions(1)
+		const download = await new Download()
+
+		// Call function with incorrect parameter
+		const access = await download.verifyUserAccess('a94a8fe', 'tester', undefined)
+		expect(access).toBeFalsy()
+		done()
+	})
+
+	test('returns false if no arguments are given', async done => {
+		expect.assertions(1)
+		const download = await new Download()
+
+		// Call function with no parameters
+		const access = await download.verifyUserAccess()
 		expect(access).toBeFalsy()
 		done()
 	})
