@@ -131,7 +131,6 @@ router.post('/upload', koaBody, async ctx => {
 		if (ctx.session.authorised !== true) return ctx.redirect('/login?msg=you need to log in')
 		const { path, name } = ctx.request.files.filetoupload // Gets details from file
 		const targetUser = ctx.request.body.targetuser // Gets target user
-		console.log(targetUser)
 		const upload = await new Upload(dbName)
 		// Attempts to upload file to the server, returns a status code to work with
 		const uploadResult = await upload.uploadFile(path, name, ctx.session.username, targetUser)
@@ -173,15 +172,15 @@ router.get('/file', async ctx => {
 		// Use query to pass in hash-id of the requested file and the username of who uploaded it
 		// Use that information to get the file path and allow the user to download the file
 		const download = await new Download(dbName)
-		const user = ctx.query.u
+		const sourceUser = ctx.query.u
 		const hash = ctx.query.h
 		// getFilePath will throw an error if user does not have permission to access the file
-		const filePath = await download.getFilePath(user, hash)
+		const filePath = await download.getFilePath(ctx.session.username, sourceUser, hash)
 		ctx.attachment(filePath)
 		const remover = await new Remove(dbName)
 		const timer = 500000 // Sets timer amount
 		setTimeout(() => {
-			remover.removeFile(user, hash)
+			remover.removeFile(sourceUser, hash)
 		}, timer) // Delete the file after approx. 5 minutes to allow user time to download it
 		await ctx.render('download')
 	} catch (err) {
