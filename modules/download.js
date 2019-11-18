@@ -46,6 +46,7 @@ module.exports = class Download {
 
 	async getAvailableFiles(currentUser) {
 		// Gets the file name and user for all available files
+		if (currentUser === undefined || currentUser === '') return 1
 		const sql = 'SELECT * FROM files WHERE target_user = ?;'
 		const files = []
 		try {
