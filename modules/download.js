@@ -34,7 +34,8 @@ module.exports = class Download {
 			// Checks that the current user is allowed to download chosen file
 			const sql = 'SELECT * FROM files WHERE user_upload = ? AND hash_id = ?;'
 			const file = await this.db.get(sql, sourceUser, hashName)
-			if (file.target_user === currentUser) return true
+			if (file === undefined) return false
+			else if (file.target_user === currentUser) return true
 			else return false
 		} catch (err) {
 			return false
