@@ -10,9 +10,11 @@ module.exports = class Upload {
 		return (async() => {
 			this.db = await sqlite.open(dbName)
 			// Creates a table to store details about uploaded files
-			const sql = 'CREATE TABLE IF NOT EXISTS files' +
-				'(hash_id TEXT PRIMARY KEY, file_name TEXT, extension TEXT, user_upload TEXT, upload_time INTEGER);'
-			await this.db.run(sql)
+			const sqlFiles = 'CREATE TABLE IF NOT EXISTS files' +
+				'(hash_id TEXT PRIMARY KEY, file_name TEXT, extension TEXT, user_upload TEXT, upload_time INTEGER, target_user TEXT);'
+			await this.db.run(sqlFiles)
+			const sqlUsers = 'CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, user TEXT, pass TEXT);'
+			await this.db.run(sqlUsers)
 			return this
 		})()
 	}
@@ -33,6 +35,13 @@ module.exports = class Upload {
 		const dbInsert = await this.addToDB(fileDetails[1], originalName, fileDetails[2], user)
 		const serverMessage = await this.checkUploadRes(dbInsert, fileDetails[1])
 		return serverMessage // Returns message for server to use
+	}
+
+	async checkValidUser(username) {
+			const sql = 'SELECT COUNT(user) as records FROM users WHERE user = ?;'
+			const data = await this.db.get(sql, username)
+			if (data.records <= 0) return false
+			else return true
 	}
 
 	async generateFileDetails(name) {
