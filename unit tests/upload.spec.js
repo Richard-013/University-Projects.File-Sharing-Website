@@ -169,6 +169,26 @@ describe('uploadFile()', () => {
 	})
 })
 
+describe('checkValidUser()', () => {
+	test('returns true if user exists', async done => {
+		expect.assertions(1)
+		const upload = await new Upload()
+
+		// Inserts example user
+		const sql = 'INSERT INTO users(user, pass) VALUES(?, ?);'
+		await upload.db.run(sql, 'testUser', 'unhackablePassword')
+
+		// Runs function
+		const validUser = await upload.checkValidUser('testUser')
+
+		// Checks output is true
+		expect(validUser).toBeTruthy()
+
+		done()
+	})
+
+})
+
 describe('generateFileDetails()', () => {
 	test('generates file details correctly', async done => {
 		expect.assertions(3)
