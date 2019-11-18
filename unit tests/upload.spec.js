@@ -485,6 +485,60 @@ describe('addToDB()', () => {
 		global.Date.now = originalDateCall
 		done()
 	})
+
+	test('handles undefined hashID correctly', async done => {
+		expect.assertions(1)
+		const upload = await new Upload()
+		// Checks correct code is given when function is called with wrong argument
+		const returnVal = await upload.addToDB(undefined, 'dummy', 'txt', 'testing', 'testTarget')
+		expect(returnVal).toBe(-3)
+		done()
+	})
+
+	test('handles undefined file name correctly', async done => {
+		expect.assertions(1)
+		const upload = await new Upload()
+		// Checks correct code is given when function is called with wrong argument
+		const returnVal = await upload.addToDB('abc123', undefined, 'txt', 'testing', 'testTarget')
+		expect(returnVal).toBe(-3)
+		done()
+	})
+
+	test('handles undefined extension correctly', async done => {
+		expect.assertions(1)
+		const upload = await new Upload()
+		// Checks correct code is given when function is called with wrong argument
+		const returnVal = await upload.addToDB('abc123', 'dummy', undefined, 'testing', 'testTarget')
+		expect(returnVal).toBe(-3)
+		done()
+	})
+
+	test('handles undefined source username correctly', async done => {
+		expect.assertions(1)
+		const upload = await new Upload()
+		// Checks correct code is given when function is called with wrong argument
+		const returnVal = await upload.addToDB('abc123', 'dummy', 'txt', undefined, 'testTarget')
+		expect(returnVal).toBe(-3)
+		done()
+	})
+
+	test('handles undefined target username correctly', async done => {
+		expect.assertions(1)
+		const upload = await new Upload()
+		// Checks correct code is given when function is called with wrong argument
+		const returnVal = await upload.addToDB('abc123', 'dummy', 'txt', 'testing', undefined)
+		expect(returnVal).toBe(-3)
+		done()
+	})
+
+	test('handles no arguments eing given correctly correctly', async done => {
+		expect.assertions(1)
+		const upload = await new Upload()
+		// Checks correct code is given when function is called with no arguments
+		const returnVal = await upload.addToDB()
+		expect(returnVal).toBe(-3)
+		done()
+	})
 })
 
 describe('getUploadTime()', () => {
