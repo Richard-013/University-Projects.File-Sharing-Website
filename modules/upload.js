@@ -38,10 +38,14 @@ module.exports = class Upload {
 	}
 
 	async checkValidUser(username) {
+		try {
 			const sql = 'SELECT COUNT(user) as records FROM users WHERE user = ?;'
 			const data = await this.db.get(sql, username)
 			if (data.records <= 0) return false
 			else return true
+		} catch (err) {
+			return false
+		}
 	}
 
 	async generateFileDetails(name) {
