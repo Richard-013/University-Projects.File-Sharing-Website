@@ -118,6 +118,16 @@ describe('verifyUserAccess()', () => {
 		done()
 	})
 
+	test('returns false if the file does not exist', async done => {
+		expect.assertions(1)
+		const download = await new Download()
+
+		// Checks user if the given user should have access to a file
+		const access = await download.verifyUserAccess('a94a8fe', 'tester', 'testTarget')
+		expect(access).toBeFalsy()
+		done()
+	})
+
 	test('returns false if database cannot be used to verify access', async done => {
 		expect.assertions(1)
 		const download = await new Download()
