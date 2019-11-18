@@ -69,19 +69,19 @@ describe('getFilePath()', () => {
 	})
 })
 
-describe('getAllFiles()', () => {
+describe('getAvailableFiles()', () => {
 
 	test('retrieves list of files successfully', async done => {
 		expect.assertions(6)
 		const download = await new Download()
 
 		// Upload files to test with
-		const sql = 'INSERT INTO files (hash_id, file_name, extension, user_upload) VALUES(?, ?, ?, ?)'
-		await download.db.run(sql, 'a94a8fe5ccb19ba61c4c0873d391e987982fbbd3', 'test.txt', 'txt', 'tester')
-		await download.db.run(sql, 'B28B7AF69320201D1CF206EBF28373980ADD1451', 'main.cpp', 'cpp', 'tester')
-		await download.db.run(sql, '6D0D5876E6710EBB4F309B5AF01090CB97381D06', 'print.py', 'py', 'omega')
+		const sql = 'INSERT INTO files (hash_id, file_name, extension, user_upload, target_user) VALUES(?, ?, ?, ?, ?)'
+		await download.db.run(sql, 'a94a8fe5ccb19ba61c4c0873d391e987982fbbd3', 'test.txt', 'txt', 'tester', 'alpha')
+		await download.db.run(sql, 'B28B7AF69320201D1CF206EBF28373980ADD1451', 'main.cpp', 'cpp', 'tester', 'alpha')
+		await download.db.run(sql, '6D0D5876E6710EBB4F309B5AF01090CB97381D06', 'print.py', 'py', 'omega', 'alpha')
 
-		const allFiles = await download.getAllFiles()
+		const allFiles = await download.getAvailableFiles('alpha')
 		// Test type returned
 		expect(Array.isArray(allFiles)).toBeTruthy()
 		// Test length of array returned
@@ -96,15 +96,18 @@ describe('getAllFiles()', () => {
 		done()
 	})
 
-	test('throws error successfully if there is a database issue', async done => {
+	test('returns correct code if there is a database issue', async done => {
 		expect.assertions(1)
 		const download = await new Download()
 
 		const sql = 'DROP TABLE IF EXISTS files;'
 		await download.db.run(sql)
 
-		const returnVal = await download.getAllFiles()
-		expect(returnVal).toEqual('SQLITE_ERROR: no such table: files')
+		const returnVal = await download.getAvailableFiles('alpha')
+		expect(returnVal).toBe(-1)
+		done()
+	})
+
 		done()
 	})
 })
