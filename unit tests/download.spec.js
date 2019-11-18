@@ -8,42 +8,62 @@ describe('getFilePath()', () => {
 		expect.assertions(1)
 		const download = await new Download()
 		// Upload files to test with
-		const sql = 'INSERT INTO files (hash_id, file_name, extension, user_upload) VALUES(?, ?, ?, ?)'
-		await download.db.run(sql, 'a94a8fe5ccb19ba61c4c0873d391e987982fbbd3', 'test.txt', 'txt', 'tester')
+		const sql = 'INSERT INTO files (hash_id, file_name, extension, user_upload, target_user) VALUES(?, ?, ?, ?, ?)'
+		await download.db.run(sql, 'a94a8fe5', 'test.txt', 'txt', 'tester', 'testTarget')
 		// Get path to the file
-		const returnVal = await download.getFilePath('tester', 'a94a8fe5ccb19ba61c4c0873d391e987982fbbd3')
+		const returnVal = await download.getFilePath('testTarget', 'tester', 'a94a8fe5')
 
-		expect(returnVal).toBe('files/uploads/tester/a94a8fe5ccb19ba61c4c0873d391e987982fbbd3.txt')
+		expect(returnVal).toBe('files/uploads/tester/a94a8fe5.txt')
 
 		done() // Finish the test
 	})
 
-	test('throws correct error when there is no username', async done => {
+	test('throws correct error when there is no current username given', async done => {
 		expect.assertions(1)
 		const download = await new Download()
+		// Run function with no current username
+		await expect(download.getFilePath(undefined, 'tester', 'a94a8fe5')).rejects
+			.toEqual(Error('User not logged in'))
 
-		await expect(download.getFilePath(undefined, 'a94a8fe5')).rejects
+		done()
+	})
+
+	test('throws correct error when there is no source username given', async done => {
+		expect.assertions(1)
+		const download = await new Download()
+		// Run function with no source username
+		await expect(download.getFilePath('testTarget', undefined, 'a94a8fe5')).rejects
 			.toEqual(Error('No username given, file cannot be located'))
 
 		done()
 	})
 
-	test('throws correct error when there is no hash name', async done => {
+	test('throws correct error when there is no hash name given', async done => {
 		expect.assertions(1)
 		const download = await new Download()
-
-		await expect(download.getFilePath('tester', undefined)).rejects
+		// Run function with no hash name
+		await expect(download.getFilePath('testTarget', 'tester', undefined)).rejects
 			.toEqual(Error('No file name given, file cannot be located'))
 
 		done()
 	})
 
-	test('throws correct error when the file does not exist', async done => {
+	test('throws correct error when there are no arguments given', async done => {
 		expect.assertions(1)
 		const download = await new Download()
+		// Run function with no arguments
+		await expect(download.getFilePath()).rejects
+			.toEqual(Error('User not logged in'))
 
-		await expect(download.getFilePath('tester', '5p00p5')).rejects
-			.toEqual(Error('Requested file could not be found'))
+		done()
+	})
+
+	test('throws correct error when the user cannot access a file', async done => {
+		expect.assertions(1)
+		const download = await new Download()
+		// Should show this message regardless of whether file exists or not
+		await expect(download.getFilePath('testTarget', 'tester', '5p00p5')).rejects
+			.toEqual(Error('Invalid access permissions'))
 
 		done()
 	})
@@ -85,6 +105,100 @@ describe('getAllFiles()', () => {
 
 		const returnVal = await download.getAllFiles()
 		expect(returnVal).toEqual('SQLITE_ERROR: no such table: files')
+		done()
+	})
+})
+
+describe('verifyUserAccess()', () => {
+	test('returns true if user is allowed to access the file', async done => {
+		expect.assertions(1)
+		const download = await new Download()
+
+		// Inserts file into db
+		const sql = 'INSERT INTO files (hash_id, file_name, extension, user_upload, target_user) VALUES(?, ?, ?, ?, ?)'
+		await download.db.run(sql, 'a94a8fe', 'test.txt', 'txt', 'tester', 'testTarget')
+
+		// Checks user if the given user should have access to that file
+		const access = await download.verifyUserAccess('a94a8fe', 'tester', 'testTarget')
+		expect(access).toBeTruthy()
+		done()
+	})
+
+	test('returns false if user is not allowed to access the file', async done => {
+		expect.assertions(1)
+		const download = await new Download()
+
+		// Inserts file into db
+		const sql = 'INSERT INTO files (hash_id, file_name, extension, user_upload, target_user) VALUES(?, ?, ?, ?, ?)'
+		await download.db.run(sql, 'a94a8fe', 'test.txt', 'txt', 'tester', 'testTarget')
+
+		// Checks user if the given user should have access to that file
+		const access = await download.verifyUserAccess('a94a8fe', 'tester', 'badPerson')
+		expect(access).toBeFalsy()
+		done()
+	})
+
+	test('returns false if the file does not exist', async done => {
+		expect.assertions(1)
+		const download = await new Download()
+
+		// Checks user if the given user should have access to a file
+		const access = await download.verifyUserAccess('a94a8fe', 'tester', 'testTarget')
+		expect(access).toBeFalsy()
+		done()
+	})
+
+	test('returns false if database cannot be used to verify access', async done => {
+		expect.assertions(1)
+		const download = await new Download()
+
+		// Cause a database error
+		const sql = 'DROP TABLE IF EXISTS files;'
+		await download.db.run(sql)
+
+		// Attempt to verify access rights
+		const access = await download.verifyUserAccess('a94a8fe', 'tester', 'testTarget')
+		expect(access).toBeFalsy()
+		done()
+	})
+
+	test('returns false if hashName is undefined', async done => {
+		expect.assertions(1)
+		const download = await new Download()
+
+		// Call function with incorrect parameter
+		const access = await download.verifyUserAccess(undefined, 'tester', 'testTarget')
+		expect(access).toBeFalsy()
+		done()
+	})
+
+	test('returns false if sourceUser is undefined', async done => {
+		expect.assertions(1)
+		const download = await new Download()
+
+		// Call function with incorrect parameter
+		const access = await download.verifyUserAccess('a94a8fe', undefined, 'testTarget')
+		expect(access).toBeFalsy()
+		done()
+	})
+
+	test('returns false if targetUser is undefined', async done => {
+		expect.assertions(1)
+		const download = await new Download()
+
+		// Call function with incorrect parameter
+		const access = await download.verifyUserAccess('a94a8fe', 'tester', undefined)
+		expect(access).toBeFalsy()
+		done()
+	})
+
+	test('returns false if no arguments are given', async done => {
+		expect.assertions(1)
+		const download = await new Download()
+
+		// Call function with no parameters
+		const access = await download.verifyUserAccess()
+		expect(access).toBeFalsy()
 		done()
 	})
 })
