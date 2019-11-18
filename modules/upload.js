@@ -118,20 +118,21 @@ module.exports = class Upload {
 		}
 	}
 
-	async addToDB(hashID, fileName, ext, username) {
+	// eslint-disable-next-line complexity
+	async addToDB(hashID, fileName, ext, sourceUser, targetUser) {
 		// Insert data into the database in the files table
 		try {
-			if (hashID === undefined || fileName === undefined || ext === undefined || username === undefined) {
+			if (hashID === undefined || fileName === undefined || ext === undefined || sourceUser === undefined || targetUser === undefined) {
 				throw new Error('Empty data cannot be added to the database')
 			}
 
 			let sql = 'SELECT COUNT(hash_id) as records FROM files WHERE user_upload = ? AND hash_id = ?;'
-			const data = await this.db.get(sql, username, hashID)
-			if (data.records !== 0) throw new RangeError(`File of the same name already uploaded by ${username}`)
+			const data = await this.db.get(sql, sourceUser, hashID)
+			if (data.records !== 0) throw new RangeError(`File of the same name already uploaded by ${sourceUser}`)
 
 			const uploadTime = await this.getUploadTime()
-			sql = 'INSERT INTO files (hash_id, file_name, extension, user_upload, upload_time) VALUES(?, ?, ?, ?, ?)'
-			await this.db.run(sql, hashID, fileName, ext, username, uploadTime)
+			sql = 'INSERT INTO files (hash_id, file_name, extension, user_upload, upload_time, target_user) VALUES(?, ?, ?, ?, ?, ?)'
+			await this.db.run(sql, hashID, fileName, ext, sourceUser, uploadTime, targetUser)
 			return 0
 		} catch (err) {
 			if (err instanceof RangeError) {
