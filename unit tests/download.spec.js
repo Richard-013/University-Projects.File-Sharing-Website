@@ -88,3 +88,33 @@ describe('getAllFiles()', () => {
 		done()
 	})
 })
+
+describe('verifyUserAccess()', () => {
+	test('returns true if user is allowed to access the file', async done => {
+		expect.assertions(1)
+		const download = await new Download()
+
+		// Inserts file into db
+		const sql = 'INSERT INTO files (hash_id, file_name, extension, user_upload, target_user) VALUES(?, ?, ?, ?, ?)'
+		await download.db.run(sql, 'a94a8fe', 'test.txt', 'txt', 'tester', 'testTarget')
+
+		// Checks user if the given user should have access to that file
+		const access = await download.verifyUserAccess('a94a8fe', 'tester', 'testTarget')
+		expect(access).toBeTruthy()
+		done()
+	})
+
+	test('returns true if user is allowed to access the file', async done => {
+		expect.assertions(1)
+		const download = await new Download()
+
+		// Inserts file into db
+		const sql = 'INSERT INTO files (hash_id, file_name, extension, user_upload, target_user) VALUES(?, ?, ?, ?, ?)'
+		await download.db.run(sql, 'a94a8fe', 'test.txt', 'txt', 'tester', 'testTarget')
+
+		// Checks user if the given user should have access to that file
+		const access = await download.verifyUserAccess('a94a8fe', 'tester', 'badPerson')
+		expect(access).toBeFalsy()
+		done()
+	})
+})
