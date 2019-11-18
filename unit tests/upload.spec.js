@@ -191,6 +191,9 @@ describe('checkValidUser()', () => {
 		expect.assertions(1)
 		const upload = await new Upload()
 
+		const sql = 'INSERT INTO users(user, pass) VALUES(?, ?);'
+		await upload.db.run(sql, 'totallyNotAUser', 'SortOfAPassword')
+
 		// Runs function with no users in db
 		const validUser = await upload.checkValidUser('testUser')
 
@@ -210,6 +213,19 @@ describe('checkValidUser()', () => {
 
 		// Runs function with no db
 		const validUser = await upload.checkValidUser('testUser')
+
+		// Checks output is false
+		expect(validUser).toBeFalsy()
+
+		done()
+	})
+
+	test('returns false if user is undefined', async done => {
+		expect.assertions(1)
+		const upload = await new Upload()
+
+		// Runs function with no users in db
+		const validUser = await upload.checkValidUser(undefined)
 
 		// Checks output is false
 		expect(validUser).toBeFalsy()
