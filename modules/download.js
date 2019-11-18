@@ -29,6 +29,7 @@ module.exports = class Download {
 	}
 
 	async verifyUserAccess(hashName, sourceUser, currentUser) {
+		if (hashName === undefined || sourceUser === undefined || currentUser === undefined) return false
 		try {
 			// Checks that the current user is allowed to download chosen file
 			const sql = 'SELECT * FROM files WHERE user_upload = ? AND hash_id = ?;'
