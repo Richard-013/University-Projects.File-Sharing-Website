@@ -19,20 +19,23 @@ module.exports = class Upload {
 		})()
 	}
 
-	async uploadFile(path, originalName, user) {
+	// eslint-disable-next-line complexity
+	async uploadFile(path, originalName, sourceUser, targetUser) {
 		if (path === undefined || originalName === undefined) return [1, 'No file or path specified for upload']
-		if(fs.existsSync(path) === false) return [1, 'Selected file does not exist']
+		if (sourceUser === undefined || await this.checkValidUser(sourceUser) === false) return [1, 'Invalid user attempted upload']
+		if (targetUser === undefined || await this.checkValidUser(targetUser) === false) return [1, 'Selected user does not exist']
+		if (fs.existsSync(path) === false) return [1, 'Selected file does not exist']
 		// Checks if a directory already exists for the user
-		if (fs.existsSync(`files/uploads/${user}`) !== true) {
-			fs.mkdirSync(`files/uploads/${user}`, { recursive: true }) // Make a directory if it doesn't exist
+		if (fs.existsSync(`files/uploads/${sourceUser}`) !== true) {
+			fs.mkdirSync(`files/uploads/${sourceUser}`, { recursive: true }) // Make a directory if it doesn't exist
 		}
 		// Generates the required file information
 		const fileDetails = await this.generateFileDetails(originalName)
 		if (fileDetails === 1) return [1, 'An error occurred whilst prepping your file for upload']
 		// Copies the file to the server
-		await fs.copy(path, `files/uploads/${user}/${fileDetails[0]}`)
+		await fs.copy(path, `files/uploads/${sourceUser}/${fileDetails[0]}`)
 		// Adds file details to the database
-		const dbInsert = await this.addToDB(fileDetails[1], originalName, fileDetails[2], user)
+		const dbInsert = await this.addToDB(fileDetails[1], originalName, fileDetails[2], sourceUser, targetUser)
 		const serverMessage = await this.checkUploadRes(dbInsert, fileDetails[1])
 		return serverMessage // Returns message for server to use
 	}
