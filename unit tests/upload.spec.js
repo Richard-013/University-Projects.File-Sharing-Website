@@ -427,7 +427,7 @@ describe('addToDB()', () => {
 		// Tests to see if records are successfully added to the database
 		expect.assertions(1)
 		const upload = await new Upload()
-		const returnVal = await upload.addToDB('123abc', 'dummy', 'txt', 'testing')
+		const returnVal = await upload.addToDB('123abc', 'dummy', 'txt', 'testing', 'testTarget')
 		// Checks return value of the function
 		expect(returnVal).toBe(0)
 		done()
@@ -438,10 +438,10 @@ describe('addToDB()', () => {
 		expect.assertions(2)
 		const upload = await new Upload()
 		// Uploads the file for the first time
-		const returnVal1 = await upload.addToDB('123abc', 'dummy', 'txt', 'testing')
+		const returnVal1 = await upload.addToDB('123abc', 'dummy', 'txt', 'testing', 'testTarget')
 		expect(returnVal1).toBe(0)
 
-		const returnVal2 = await upload.addToDB('123abc', 'dummy', 'txt', 'testing')
+		const returnVal2 = await upload.addToDB('123abc', 'dummy', 'txt', 'testing', 'testTarget')
 		expect(returnVal2).toBe(-2)
 		done()
 	})
@@ -450,8 +450,13 @@ describe('addToDB()', () => {
 		// Tests to see if records are successfully added to the database
 		expect.assertions(1)
 		const upload = await new Upload()
-		// Uploads the file for the first time
-		const returnVal = await upload.addToDB()
+
+		// Break database
+		const sql = 'DROP TABLE IF EXISTS files;'
+		await upload.db.run(sql)
+
+		// Attempt upload
+		const returnVal = await upload.addToDB('123abc', 'dummy', 'txt', 'testing', 'testTarget')
 		expect(returnVal).toBe(-3)
 
 		done()
@@ -466,7 +471,7 @@ describe('addToDB()', () => {
 		const stubDate = jest.fn(() => 1574007598432)
 		global.Date.now = stubDate
 
-		const returnVal = await upload.addToDB('123abc', 'dummy', 'txt', 'testing')
+		const returnVal = await upload.addToDB('123abc', 'dummy', 'txt', 'testing', 'testTarget')
 		// Checks return value of the function
 		expect(returnVal).toBe(0)
 		expect(stubDate).toHaveBeenCalled()
