@@ -436,6 +436,23 @@ describe('determineFileCat()', () => {
 		done()
 	})
 
+	test('returns correct file category for unrecognised file', async done => {
+		expect.assertions(1)
+		const download = await new Download()
+		const returnVal = await download.determineFileCat('toot')
+
+		expect(returnVal).toBe('generic')
+		done()
+	})
+
+	test('returns correct file category for no extension', async done => {
+		expect.assertions(1)
+		const download = await new Download()
+		const returnVal = await download.determineFileCat()
+
+		expect(returnVal).toBe('generic')
+		done()
+	})
 })
 
 describe('checkCommonTypes()', () => {
@@ -502,6 +519,23 @@ describe('checkCommonTypes()', () => {
 		done()
 	})
 
+	test('returns correct file category for unrecognised extension', async done => {
+		expect.assertions(1)
+		const download = await new Download()
+		const returnVal = await download.checkCommonTypes('doom')
+
+		expect(returnVal).toBe('generic')
+		done()
+	})
+
+	test('returns correct file category for no extension', async done => {
+		expect.assertions(1)
+		const download = await new Download()
+		const returnVal = await download.checkCommonTypes()
+
+		expect(returnVal).toBe('generic')
+		done()
+	})
 })
 
 describe('checkUncommonTypes()', () => {
@@ -568,4 +602,21 @@ describe('checkUncommonTypes()', () => {
 		done()
 	})
 
+	test('returns correct file category for unrecognised file', async done => {
+		expect.assertions(1)
+		const download = await new Download()
+		const returnVal = await download.checkUncommonTypes('flimflam')
+
+		expect(returnVal).toBe('generic')
+		done()
+	})
+
+	test('returns correct file category for no extension', async done => {
+		expect.assertions(1)
+		const download = await new Download()
+		const returnVal = await download.checkUncommonTypes()
+
+		expect(returnVal).toBe('generic')
+		done()
+	})
 })
