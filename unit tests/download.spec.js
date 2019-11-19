@@ -69,19 +69,19 @@ describe('getFilePath()', () => {
 	})
 })
 
-describe('getAllFiles()', () => {
+describe('getAvailableFiles()', () => {
 
 	test('retrieves list of files successfully', async done => {
 		expect.assertions(6)
 		const download = await new Download()
 
 		// Upload files to test with
-		const sql = 'INSERT INTO files (hash_id, file_name, extension, user_upload) VALUES(?, ?, ?, ?)'
-		await download.db.run(sql, 'a94a8fe5ccb19ba61c4c0873d391e987982fbbd3', 'test.txt', 'txt', 'tester')
-		await download.db.run(sql, 'B28B7AF69320201D1CF206EBF28373980ADD1451', 'main.cpp', 'cpp', 'tester')
-		await download.db.run(sql, '6D0D5876E6710EBB4F309B5AF01090CB97381D06', 'print.py', 'py', 'omega')
+		const sql = 'INSERT INTO files (hash_id, file_name, extension, user_upload, target_user) VALUES(?, ?, ?, ?, ?)'
+		await download.db.run(sql, 'a94a8fe5ccb19ba61c4c0873d391e987982fbbd3', 'test.txt', 'txt', 'tester', 'alpha')
+		await download.db.run(sql, 'B28B7AF69320201D1CF206EBF28373980ADD1451', 'main.cpp', 'cpp', 'tester', 'alpha')
+		await download.db.run(sql, '6D0D5876E6710EBB4F309B5AF01090CB97381D06', 'print.py', 'py', 'omega', 'alpha')
 
-		const allFiles = await download.getAllFiles()
+		const allFiles = await download.getAvailableFiles('alpha')
 		// Test type returned
 		expect(Array.isArray(allFiles)).toBeTruthy()
 		// Test length of array returned
@@ -96,15 +96,33 @@ describe('getAllFiles()', () => {
 		done()
 	})
 
-	test('throws error successfully if there is a database issue', async done => {
+	test('returns correct code if there is a database issue', async done => {
 		expect.assertions(1)
 		const download = await new Download()
 
 		const sql = 'DROP TABLE IF EXISTS files;'
 		await download.db.run(sql)
 
-		const returnVal = await download.getAllFiles()
-		expect(returnVal).toEqual('SQLITE_ERROR: no such table: files')
+		const returnVal = await download.getAvailableFiles('alpha')
+		expect(returnVal).toBe(-1)
+		done()
+	})
+
+	test('returns correct code if no username is given', async done => {
+		expect.assertions(1)
+		const download = await new Download()
+
+		const returnVal = await download.getAvailableFiles(undefined)
+		expect(returnVal).toBe(1)
+		done()
+	})
+
+	test('returns correct code if username is empty', async done => {
+		expect.assertions(1)
+		const download = await new Download()
+
+		const returnVal = await download.getAvailableFiles('')
+		expect(returnVal).toBe(1)
 		done()
 	})
 })
@@ -199,6 +217,94 @@ describe('verifyUserAccess()', () => {
 		// Call function with no parameters
 		const access = await download.verifyUserAccess()
 		expect(access).toBeFalsy()
+		done()
+	})
+})
+
+describe('generateFileList()', () => {
+	test('generates single file list correctly', async done => {
+		expect.assertions(8)
+		const download = await new Download()
+
+		const originalDateCall = Date.now.bind(global.Date)
+		const stubDate = jest.fn(() => 1574171633958)
+		global.Date.now = stubDate
+
+		const expectDate = await new Date(26236193 * 60000)
+		const date = await expectDate.toLocaleString()
+
+		const sql = 'INSERT INTO files (hash_id, file_name, extension, user_upload, upload_time, target_user) VALUES(?, ?, ?, ?, ?, ?)'
+		await download.db.run(sql, 'a94a8fe', 'test.txt', 'txt', 'tester', 26236193, 'testTarget')
+
+		let files = await download.generateFileList('testTarget')
+		expect(files.length).toBe(1)
+		files = files[0]
+		expect(files.fileName).toBe('test.txt')
+		expect(files.uploader).toBe('tester')
+		expect(files.fileType).toBe('txt')
+		expect(files.timeTillDelete).toBe(71)
+		expect(files.dateUploaded).toBe(date)
+		expect(files.url).toBe('http://localhost:8080/file?h=a94a8fe&u=tester')
+
+		expect(stubDate).toHaveBeenCalled()
+		// Restores Date.now() to its original functionality
+		global.Date.now = originalDateCall
+
+		done()
+	})
+
+	test('generates multi-file list correctly', async done => {
+		expect.assertions(8)
+		const download = await new Download()
+
+		const originalDateCall = Date.now.bind(global.Date)
+		const stubDate = jest.fn(() => 1574171633958)
+		global.Date.now = stubDate
+
+		const expectDate = await new Date(26236193 * 60000)
+		const date = await expectDate.toLocaleString()
+
+		const sql = 'INSERT INTO files (hash_id, file_name, extension, user_upload, upload_time, target_user) VALUES(?, ?, ?, ?, ?, ?)'
+		await download.db.run(sql, 'a94a8fe', 'test.txt', 'txt', 'tester', 26236193, 'testTarget')
+		await download.db.run(sql, 'b5453qe', 'main.cpp', 'cpp', 'tester', 26236193, 'testTarget')
+
+		let files = await download.generateFileList('testTarget')
+		expect(files.length).toBe(2)
+		files = files[1]
+		expect(files.fileName).toBe('main.cpp')
+		expect(files.uploader).toBe('tester')
+		expect(files.fileType).toBe('cpp')
+		expect(files.timeTillDelete).toBe(71)
+		expect(files.dateUploaded).toBe(date)
+		expect(files.url).toBe('http://localhost:8080/file?h=b5453qe&u=tester')
+
+		expect(stubDate).toHaveBeenCalled()
+		// Restores Date.now() to its original functionality
+		global.Date.now = originalDateCall
+
+		done()
+	})
+
+	test('handles no current user correctly', async done => {
+		expect.assertions(1)
+		const download = await new Download()
+
+		await expect(download.generateFileList()).rejects
+			.toEqual(Error('User not logged in'))
+
+		done()
+	})
+
+	test('handles database error correctly', async done => {
+		expect.assertions(1)
+		const download = await new Download()
+
+		const sql = 'DROP TABLE IF EXISTS files;'
+		await download.db.run(sql)
+
+		await expect(download.generateFileList('test')).rejects
+			.toEqual(Error('Database error'))
+
 		done()
 	})
 })

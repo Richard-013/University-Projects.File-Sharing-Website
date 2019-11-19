@@ -156,7 +156,7 @@ router.get('/fileList', async ctx => {
 	try {
 		if (ctx.session.authorised !== true) return ctx.redirect('/login?msg=you need to log in')
 		const download = await new Download(dbName)
-		const allFiles = await download.getAllFiles()
+		const allFiles = await download.generateFileList(ctx.session.username)
 		console.log(allFiles)
 		const data = { files: allFiles }
 		if (ctx.query.message) data.message = ctx.query.message
