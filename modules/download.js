@@ -132,6 +132,7 @@ module.exports = class Download {
 					fileName: file[1],
 					uploader: file[2],
 					fileType: file[3],
+					fileCat: await this.determineFileCat(file[3]),
 					// Converts stored time into hours until deletion
 					timeTillDelete: await Math.floor(Math.floor(file[4] - (Date.now() - 259200000) / 60000) / 60),
 					dateUploaded: await uploadDate.toLocaleString(), // Converts stored time into the upload date
