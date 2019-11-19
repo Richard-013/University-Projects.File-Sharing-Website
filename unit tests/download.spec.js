@@ -343,4 +343,58 @@ describe('checkUncommonTypes()', () => {
 		done()
 	})
 
+	test('returns correct file category for code', async done => {
+		expect.assertions(1)
+		const download = await new Download()
+		const returnVal = await download.checkUncommonTypes('asl')
+
+		expect(returnVal).toBe('code')
+		done()
+	})
+
+	test('returns correct file category for executable', async done => {
+		expect.assertions(1)
+		const download = await new Download()
+		const returnVal = await download.checkUncommonTypes('exe')
+
+		expect(returnVal).toBe('exec')
+		done()
+	})
+
+	test('returns correct file category for database', async done => {
+		expect.assertions(1)
+		const download = await new Download()
+		const returnVal = await download.checkUncommonTypes('db')
+
+		expect(returnVal).toBe('db')
+		done()
+	})
+
+	test('returns correct file category for web', async done => {
+		expect.assertions(1)
+		const download = await new Download()
+		const returnVal = await download.checkUncommonTypes('htm')
+
+		expect(returnVal).toBe('web')
+		done()
+	})
+
+	test('returns correct file category for disk image', async done => {
+		expect.assertions(1)
+		const download = await new Download()
+		const returnVal = await download.checkUncommonTypes('toast')
+
+		expect(returnVal).toBe('iso')
+		done()
+	})
+
+	test('returns correct file category for system file', async done => {
+		expect.assertions(1)
+		const download = await new Download()
+		const returnVal = await download.checkUncommonTypes('dll')
+
+		expect(returnVal).toBe('sys')
+		done()
+	})
+
 })
