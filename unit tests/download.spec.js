@@ -308,3 +308,39 @@ describe('generateFileList()', () => {
 		done()
 	})
 })
+
+describe('determineFileCat()', () => {
+	test('returns correct file category for audio', async done => {
+		expect.assertions(1)
+		const download = await new Download()
+		const returnVal = await download.determineFileCat('mp3')
+
+		expect(returnVal).toBe('audio')
+		done()
+	})
+
+})
+
+describe('checkCommonTypes()', () => {
+	test('returns correct file category for audio file', async done => {
+		expect.assertions(1)
+		const download = await new Download()
+		const returnVal = await download.checkCommonTypes('aif')
+
+		expect(returnVal).toBe('audio')
+		done()
+	})
+
+})
+
+describe('checkUncommonTypes()', () => {
+	test('returns correct file category for fonts', async done => {
+		expect.assertions(1)
+		const download = await new Download()
+		const returnVal = await download.checkUncommonTypes('ttf')
+
+		expect(returnVal).toBe('fonts')
+		done()
+	})
+
+})
