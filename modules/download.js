@@ -3,8 +3,9 @@
 const sqlite = require('sqlite-async')
 
 module.exports = class Download {
-	constructor(dbName = ':memory:') {
+	constructor(dbName = ':memory:', siteURL = 'http://localhost:8080') {
 		return (async() => {
+			this.siteURL = siteURL
 			this.db = await sqlite.open(dbName)
 			// Creates a table to store details about uploaded files
 			const sqlFiles = 'CREATE TABLE IF NOT EXISTS files' +
@@ -59,5 +60,24 @@ module.exports = class Download {
 		} catch (error) {
 			return -1
 		}
+	}
+
+	async generateFileList(currentUser) {
+		const availableFiles = await this.getAvailableFiles(currentUser)
+			const fileList = []
+			for (const file of availableFiles) {
+				const uploadDate = await new Date(file[4] * 60000)
+				const fileInfo = {
+					fileName: file[1],
+					uploader: file[2],
+					fileType: file[3],
+					// Converts stored time into hours until deletion
+					timeTillDelete: await Math.floor((Math.floor(file[4] - (Date.now() - 259200000) / 60000)) / 60),
+					dateUploaded: await uploadDate.toLocaleString(), // Converts stored time into the upload date
+					url: `${this.siteURL}/file?h=${file[0]}&u=${file[2]}` // Generates share url
+				}
+				fileList.push(fileInfo)
+			}
+			return fileList
 	}
 }
