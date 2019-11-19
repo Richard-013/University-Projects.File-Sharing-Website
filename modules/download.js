@@ -71,6 +71,25 @@ module.exports = class Download {
 		// Checks if file is an audio file
 		const audio = ['aif', 'cda', 'mid', 'midi', 'mp3', 'mpa', 'ogg', 'wav', 'wma', 'wpl']
 		if (audio.includes(extension)) return 'audio'
+		// Checks if file is an image file
+		const image = ['ai', 'bmp', 'gif', 'ico', 'jpeg', 'jpg', 'png', 'ps', 'psd', 'svg', 'tif', 'tiff']
+		if (image.includes(extension)) return 'image'
+		// Checks if file is a video file
+		const video = ['3g2', '3gp', 'avi', 'flv', 'h264', 'm4v', 'mkv', 'mov', 'mp4', 'mpg', 'mpeg', 'rm', 'swf', 'vob', 'wmv']
+		if (video.includes(extension)) return 'video'
+		// Checks if file is a compressed file
+		const zip = ['7z', 'arj', 'deb', 'pkg', 'rar', 'rpm', 'targ.gz', 'gz', 'z', 'zip']
+		if (zip.includes(extension)) return 'zip'
+		// Checks if file is a written document file
+		const write = ['doc', 'docx', 'pdf', 'rtf', 'tex', 'txt', 'wks', 'wps', 'wpd']
+		if (write.includes(extension)) return 'write'
+		// Checks if file is a presentation file
+		const present = ['key', 'odp', 'pps', 'ppt', 'pptx']
+		if (present.includes(extension)) return 'present'
+		// Checks if file is a spreadsheet file
+		const sheet = ['ods', 'xlr', 'xls', 'xlsx']
+		if (sheet.includes(extension)) return 'sheet'
+		// Check for more uncommon file types
 		return await this.checkUncommonTypes(extension)
 	}
 
