@@ -253,4 +253,27 @@ describe('generateFileList()', () => {
 		done()
 	})
 
+
+	test('handles no current user correctly', async done => {
+		expect.assertions(1)
+		const download = await new Download()
+
+		await expect(download.generateFileList()).rejects
+			.toEqual(Error('User not logged in'))
+
+		done()
+	})
+
+	test('handles database error correctly', async done => {
+		expect.assertions(1)
+		const download = await new Download()
+
+		const sql = 'DROP TABLE IF EXISTS files;'
+		await download.db.run(sql)
+
+		await expect(download.generateFileList('test')).rejects
+			.toEqual(Error('Database error'))
+
+		done()
+	})
 })
