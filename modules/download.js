@@ -62,6 +62,24 @@ module.exports = class Download {
 		}
 	}
 
+	async determineFileCat(extension) {
+		// Determines file type category for use with icons on file list
+		return this.checkCommonTypes(extension)
+	}
+
+	async checkCommonTypes(extension) {
+		// Checks if file is an audio file
+		const audio = ['aif', 'cda', 'mid', 'midi', 'mp3', 'mpa', 'ogg', 'wav', 'wma', 'wpl']
+		if (audio.includes(extension)) return 'audio'
+		return await this.checkUncommonTypes(extension)
+	}
+
+	async checkUncommonTypes(extension) {
+		// Checks if file is a font file
+		const fonts = ['fnt', 'fon', 'otf', 'ttf']
+		if (fonts.includes(extension)) return 'fonts'
+	}
+
 	async generateFileList(currentUser) {
 		const availableFiles = await this.getAvailableFiles(currentUser)
 		if (availableFiles === -1) throw new Error('Database error')
