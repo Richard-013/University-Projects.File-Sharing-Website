@@ -253,6 +253,37 @@ describe('generateFileList()', () => {
 		done()
 	})
 
+	test('generates multi-file list correctly', async done => {
+		expect.assertions(8)
+		const download = await new Download()
+
+		const originalDateCall = Date.now.bind(global.Date)
+		const stubDate = jest.fn(() => 1574171633958)
+		global.Date.now = stubDate
+
+		const expectDate = await new Date(26236193 * 60000)
+		const date = await expectDate.toLocaleString()
+
+		const sql = 'INSERT INTO files (hash_id, file_name, extension, user_upload, upload_time, target_user) VALUES(?, ?, ?, ?, ?, ?)'
+		await download.db.run(sql, 'a94a8fe', 'test.txt', 'txt', 'tester', 26236193, 'testTarget')
+		await download.db.run(sql, 'b5453qe', 'main.cpp', 'cpp', 'tester', 26236193, 'testTarget')
+
+		let files = await download.generateFileList('testTarget')
+		expect(files.length).toBe(2)
+		files = files[1]
+		expect(files.fileName).toBe('main.cpp')
+		expect(files.uploader).toBe('tester')
+		expect(files.fileType).toBe('cpp')
+		expect(files.timeTillDelete).toBe(71)
+		expect(files.dateUploaded).toBe(date)
+		expect(files.url).toBe('http://localhost:8080/file?h=b5453qe&u=tester')
+
+		expect(stubDate).toHaveBeenCalled()
+		// Restores Date.now() to its original functionality
+		global.Date.now = originalDateCall
+
+		done()
+	})
 
 	test('handles no current user correctly', async done => {
 		expect.assertions(1)
