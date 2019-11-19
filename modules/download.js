@@ -48,9 +48,9 @@ module.exports = class Download {
 	async getAvailableFiles(currentUser) {
 		// Gets the file name and user for all available files
 		if (currentUser === undefined || currentUser === '') return 1
-		const sql = 'SELECT * FROM files WHERE target_user = ?;'
 		const files = []
 		try {
+			const sql = 'SELECT * FROM files WHERE target_user = ?;'
 			await this.db.each(sql, [currentUser], (_err, row) => {
 				const file = [row.hash_id, row.file_name, row.user_upload, row.extension, row.upload_time]
 				files.push(file)
@@ -64,6 +64,9 @@ module.exports = class Download {
 
 	async generateFileList(currentUser) {
 		const availableFiles = await this.getAvailableFiles(currentUser)
+		if (availableFiles === -1) throw new Error('Database error')
+		if (availableFiles === 1) throw new Error('User not logged in')
+		else {
 			const fileList = []
 			for (const file of availableFiles) {
 				const uploadDate = await new Date(file[4] * 60000)
@@ -79,5 +82,6 @@ module.exports = class Download {
 				fileList.push(fileInfo)
 			}
 			return fileList
+		}
 	}
 }
