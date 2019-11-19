@@ -64,6 +64,7 @@ module.exports = class Download {
 
 	async determineFileCat(extension) {
 		// Determines file type category for use with icons on file list
+		if(extension === undefined) return 'generic'
 		return this.checkCommonTypes(extension)
 	}
 
@@ -115,6 +116,8 @@ module.exports = class Download {
 		// Checks if file is a system file
 		const sys = ['bak', 'cab', 'cfg', 'cpl', 'cur', 'dll', 'dmp', 'drv', 'icns', 'ico', 'ini', 'lnk', 'msi', 'sys', 'tmp']
 		if (sys.includes(extension)) return 'sys'
+		// If none of the above, return genric file category
+		return 'generic'
 	}
 
 	async generateFileList(currentUser) {
