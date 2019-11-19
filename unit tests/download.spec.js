@@ -331,6 +331,60 @@ describe('checkCommonTypes()', () => {
 		done()
 	})
 
+	test('returns correct file category for image', async done => {
+		expect.assertions(1)
+		const download = await new Download()
+		const returnVal = await download.checkCommonTypes('png')
+
+		expect(returnVal).toBe('image')
+		done()
+	})
+
+	test('returns correct file category for video', async done => {
+		expect.assertions(1)
+		const download = await new Download()
+		const returnVal = await download.checkCommonTypes('mpeg')
+
+		expect(returnVal).toBe('video')
+		done()
+	})
+
+	test('returns correct file category for compressed folder', async done => {
+		expect.assertions(1)
+		const download = await new Download()
+		const returnVal = await download.checkCommonTypes('rar')
+
+		expect(returnVal).toBe('zip')
+		done()
+	})
+
+	test('returns correct file category for write', async done => {
+		expect.assertions(1)
+		const download = await new Download()
+		const returnVal = await download.checkCommonTypes('docx')
+
+		expect(returnVal).toBe('write')
+		done()
+	})
+
+	test('returns correct file category for presentation', async done => {
+		expect.assertions(1)
+		const download = await new Download()
+		const returnVal = await download.checkCommonTypes('ppt')
+
+		expect(returnVal).toBe('present')
+		done()
+	})
+
+	test('returns correct file category for spreadsheet', async done => {
+		expect.assertions(1)
+		const download = await new Download()
+		const returnVal = await download.checkCommonTypes('xlsx')
+
+		expect(returnVal).toBe('sheet')
+		done()
+	})
+
 })
 
 describe('checkUncommonTypes()', () => {
