@@ -78,6 +78,24 @@ module.exports = class Download {
 		// Checks if file is a font file
 		const fonts = ['fnt', 'fon', 'otf', 'ttf']
 		if (fonts.includes(extension)) return 'fonts'
+		// Checks if file is a programming file
+		const code = ['asl', 'c', 'class', 'cpp', 'cs', 'h', 'java', 'js', 'py', 'sh', 'swift', 'vb']
+		if (code.includes(extension)) return 'code'
+		// Checks if file is an executable file
+		const exec = ['apk', 'bat', 'bin', 'cgi', 'pl', 'com', 'exe', 'gadget', 'jar', 'wsf']
+		if (exec.includes(extension)) return 'exec'
+		// Checks if file is a database file
+		const db = ['csv', 'dat', 'db', 'dbf', 'json', 'log', 'mdb', 'sav', 'sql', 'tar', 'xml']
+		if (db.includes(extension)) return 'db'
+		// Checks if file is a web file
+		const web = ['asp', 'aspx', 'cer', 'cfm', 'css', 'htm', 'html', 'jsp', 'part', 'php', 'rss', 'xhtml']
+		if (web.includes(extension)) return 'web'
+		// Checks if file is a disk image file
+		const iso = ['bin', 'dmg', 'iso', 'toast', 'vcd']
+		if (iso.includes(extension)) return 'iso'
+		// Checks if file is a system file
+		const sys = ['bak', 'cab', 'cfg', 'cpl', 'cur', 'dll', 'dmp', 'drv', 'icns', 'ico', 'ini', 'lnk', 'msi', 'sys', 'tmp']
+		if (sys.includes(extension)) return 'sys'
 	}
 
 	async generateFileList(currentUser) {
