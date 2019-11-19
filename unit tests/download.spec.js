@@ -223,7 +223,7 @@ describe('verifyUserAccess()', () => {
 
 describe('generateFileList()', () => {
 	test('generates single file list correctly', async done => {
-		expect.assertions(8)
+		expect.assertions(9)
 		const download = await new Download()
 
 		const originalDateCall = Date.now.bind(global.Date)
@@ -242,6 +242,7 @@ describe('generateFileList()', () => {
 		expect(files.fileName).toBe('test.txt')
 		expect(files.uploader).toBe('tester')
 		expect(files.fileType).toBe('txt')
+		expect(files.fileCat).toBe('write')
 		expect(files.timeTillDelete).toBe(71)
 		expect(files.dateUploaded).toBe(date)
 		expect(files.url).toBe('http://localhost:8080/file?h=a94a8fe&u=tester')
@@ -254,7 +255,7 @@ describe('generateFileList()', () => {
 	})
 
 	test('generates multi-file list correctly', async done => {
-		expect.assertions(8)
+		expect.assertions(9)
 		const download = await new Download()
 
 		const originalDateCall = Date.now.bind(global.Date)
@@ -274,6 +275,7 @@ describe('generateFileList()', () => {
 		expect(files.fileName).toBe('main.cpp')
 		expect(files.uploader).toBe('tester')
 		expect(files.fileType).toBe('cpp')
+		expect(files.fileCat).toBe('code')
 		expect(files.timeTillDelete).toBe(71)
 		expect(files.dateUploaded).toBe(date)
 		expect(files.url).toBe('http://localhost:8080/file?h=b5453qe&u=tester')
@@ -305,6 +307,318 @@ describe('generateFileList()', () => {
 		await expect(download.generateFileList('test')).rejects
 			.toEqual(Error('Database error'))
 
+		done()
+	})
+})
+
+describe('determineFileCat()', () => {
+	test('returns correct file category for audio', async done => {
+		expect.assertions(1)
+		const download = await new Download()
+		const returnVal = await download.determineFileCat('mp3')
+
+		expect(returnVal).toBe('audio')
+		done()
+	})
+
+	test('returns correct file category for image', async done => {
+		expect.assertions(1)
+		const download = await new Download()
+		const returnVal = await download.determineFileCat('png')
+
+		expect(returnVal).toBe('image')
+		done()
+	})
+
+	test('returns correct file category for video', async done => {
+		expect.assertions(1)
+		const download = await new Download()
+		const returnVal = await download.determineFileCat('mpeg')
+
+		expect(returnVal).toBe('video')
+		done()
+	})
+
+	test('returns correct file category for compressed folder', async done => {
+		expect.assertions(1)
+		const download = await new Download()
+		const returnVal = await download.determineFileCat('rar')
+
+		expect(returnVal).toBe('zip')
+		done()
+	})
+
+	test('returns correct file category for write', async done => {
+		expect.assertions(1)
+		const download = await new Download()
+		const returnVal = await download.determineFileCat('docx')
+
+		expect(returnVal).toBe('write')
+		done()
+	})
+
+	test('returns correct file category for presentation', async done => {
+		expect.assertions(1)
+		const download = await new Download()
+		const returnVal = await download.determineFileCat('ppt')
+
+		expect(returnVal).toBe('present')
+		done()
+	})
+
+	test('returns correct file category for spreadsheet', async done => {
+		expect.assertions(1)
+		const download = await new Download()
+		const returnVal = await download.determineFileCat('xlsx')
+
+		expect(returnVal).toBe('sheet')
+		done()
+	})
+
+	test('returns correct file category for fonts', async done => {
+		expect.assertions(1)
+		const download = await new Download()
+		const returnVal = await download.determineFileCat('fon')
+
+		expect(returnVal).toBe('fonts')
+		done()
+	})
+
+	test('returns correct file category for code', async done => {
+		expect.assertions(1)
+		const download = await new Download()
+		const returnVal = await download.determineFileCat('asl')
+
+		expect(returnVal).toBe('code')
+		done()
+	})
+
+	test('returns correct file category for executable', async done => {
+		expect.assertions(1)
+		const download = await new Download()
+		const returnVal = await download.determineFileCat('exe')
+
+		expect(returnVal).toBe('exec')
+		done()
+	})
+
+	test('returns correct file category for database', async done => {
+		expect.assertions(1)
+		const download = await new Download()
+		const returnVal = await download.determineFileCat('db')
+
+		expect(returnVal).toBe('db')
+		done()
+	})
+
+	test('returns correct file category for web', async done => {
+		expect.assertions(1)
+		const download = await new Download()
+		const returnVal = await download.determineFileCat('htm')
+
+		expect(returnVal).toBe('web')
+		done()
+	})
+
+	test('returns correct file category for disk image', async done => {
+		expect.assertions(1)
+		const download = await new Download()
+		const returnVal = await download.determineFileCat('toast')
+
+		expect(returnVal).toBe('iso')
+		done()
+	})
+
+	test('returns correct file category for system file', async done => {
+		expect.assertions(1)
+		const download = await new Download()
+		const returnVal = await download.determineFileCat('tmp')
+
+		expect(returnVal).toBe('sys')
+		done()
+	})
+
+	test('returns correct file category for unrecognised file', async done => {
+		expect.assertions(1)
+		const download = await new Download()
+		const returnVal = await download.determineFileCat('toot')
+
+		expect(returnVal).toBe('generic')
+		done()
+	})
+
+	test('returns correct file category for no extension', async done => {
+		expect.assertions(1)
+		const download = await new Download()
+		const returnVal = await download.determineFileCat()
+
+		expect(returnVal).toBe('generic')
+		done()
+	})
+})
+
+describe('checkCommonTypes()', () => {
+	test('returns correct file category for audio file', async done => {
+		expect.assertions(1)
+		const download = await new Download()
+		const returnVal = await download.checkCommonTypes('aif')
+
+		expect(returnVal).toBe('audio')
+		done()
+	})
+
+	test('returns correct file category for image', async done => {
+		expect.assertions(1)
+		const download = await new Download()
+		const returnVal = await download.checkCommonTypes('png')
+
+		expect(returnVal).toBe('image')
+		done()
+	})
+
+	test('returns correct file category for video', async done => {
+		expect.assertions(1)
+		const download = await new Download()
+		const returnVal = await download.checkCommonTypes('mpeg')
+
+		expect(returnVal).toBe('video')
+		done()
+	})
+
+	test('returns correct file category for compressed folder', async done => {
+		expect.assertions(1)
+		const download = await new Download()
+		const returnVal = await download.checkCommonTypes('rar')
+
+		expect(returnVal).toBe('zip')
+		done()
+	})
+
+	test('returns correct file category for write', async done => {
+		expect.assertions(1)
+		const download = await new Download()
+		const returnVal = await download.checkCommonTypes('docx')
+
+		expect(returnVal).toBe('write')
+		done()
+	})
+
+	test('returns correct file category for presentation', async done => {
+		expect.assertions(1)
+		const download = await new Download()
+		const returnVal = await download.checkCommonTypes('ppt')
+
+		expect(returnVal).toBe('present')
+		done()
+	})
+
+	test('returns correct file category for spreadsheet', async done => {
+		expect.assertions(1)
+		const download = await new Download()
+		const returnVal = await download.checkCommonTypes('xlsx')
+
+		expect(returnVal).toBe('sheet')
+		done()
+	})
+
+	test('returns correct file category for unrecognised extension', async done => {
+		expect.assertions(1)
+		const download = await new Download()
+		const returnVal = await download.checkCommonTypes('doom')
+
+		expect(returnVal).toBe('generic')
+		done()
+	})
+
+	test('returns correct file category for no extension', async done => {
+		expect.assertions(1)
+		const download = await new Download()
+		const returnVal = await download.checkCommonTypes()
+
+		expect(returnVal).toBe('generic')
+		done()
+	})
+})
+
+describe('checkUncommonTypes()', () => {
+	test('returns correct file category for fonts', async done => {
+		expect.assertions(1)
+		const download = await new Download()
+		const returnVal = await download.checkUncommonTypes('ttf')
+
+		expect(returnVal).toBe('fonts')
+		done()
+	})
+
+	test('returns correct file category for code', async done => {
+		expect.assertions(1)
+		const download = await new Download()
+		const returnVal = await download.checkUncommonTypes('asl')
+
+		expect(returnVal).toBe('code')
+		done()
+	})
+
+	test('returns correct file category for executable', async done => {
+		expect.assertions(1)
+		const download = await new Download()
+		const returnVal = await download.checkUncommonTypes('exe')
+
+		expect(returnVal).toBe('exec')
+		done()
+	})
+
+	test('returns correct file category for database', async done => {
+		expect.assertions(1)
+		const download = await new Download()
+		const returnVal = await download.checkUncommonTypes('db')
+
+		expect(returnVal).toBe('db')
+		done()
+	})
+
+	test('returns correct file category for web', async done => {
+		expect.assertions(1)
+		const download = await new Download()
+		const returnVal = await download.checkUncommonTypes('htm')
+
+		expect(returnVal).toBe('web')
+		done()
+	})
+
+	test('returns correct file category for disk image', async done => {
+		expect.assertions(1)
+		const download = await new Download()
+		const returnVal = await download.checkUncommonTypes('toast')
+
+		expect(returnVal).toBe('iso')
+		done()
+	})
+
+	test('returns correct file category for system file', async done => {
+		expect.assertions(1)
+		const download = await new Download()
+		const returnVal = await download.checkUncommonTypes('dll')
+
+		expect(returnVal).toBe('sys')
+		done()
+	})
+
+	test('returns correct file category for unrecognised file', async done => {
+		expect.assertions(1)
+		const download = await new Download()
+		const returnVal = await download.checkUncommonTypes('flimflam')
+
+		expect(returnVal).toBe('generic')
+		done()
+	})
+
+	test('returns correct file category for no extension', async done => {
+		expect.assertions(1)
+		const download = await new Download()
+		const returnVal = await download.checkUncommonTypes()
+
+		expect(returnVal).toBe('generic')
 		done()
 	})
 })
