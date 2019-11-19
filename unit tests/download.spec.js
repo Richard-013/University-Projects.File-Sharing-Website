@@ -223,7 +223,7 @@ describe('verifyUserAccess()', () => {
 
 describe('generateFileList()', () => {
 	test('generates single file list correctly', async done => {
-		expect.assertions(8)
+		expect.assertions(9)
 		const download = await new Download()
 
 		const originalDateCall = Date.now.bind(global.Date)
@@ -242,6 +242,7 @@ describe('generateFileList()', () => {
 		expect(files.fileName).toBe('test.txt')
 		expect(files.uploader).toBe('tester')
 		expect(files.fileType).toBe('txt')
+		expect(files.fileCat).toBe('write')
 		expect(files.timeTillDelete).toBe(71)
 		expect(files.dateUploaded).toBe(date)
 		expect(files.url).toBe('http://localhost:8080/file?h=a94a8fe&u=tester')
@@ -254,7 +255,7 @@ describe('generateFileList()', () => {
 	})
 
 	test('generates multi-file list correctly', async done => {
-		expect.assertions(8)
+		expect.assertions(9)
 		const download = await new Download()
 
 		const originalDateCall = Date.now.bind(global.Date)
@@ -274,6 +275,7 @@ describe('generateFileList()', () => {
 		expect(files.fileName).toBe('main.cpp')
 		expect(files.uploader).toBe('tester')
 		expect(files.fileType).toBe('cpp')
+		expect(files.fileCat).toBe('code')
 		expect(files.timeTillDelete).toBe(71)
 		expect(files.dateUploaded).toBe(date)
 		expect(files.url).toBe('http://localhost:8080/file?h=b5453qe&u=tester')
