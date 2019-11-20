@@ -728,7 +728,7 @@ describe('getFileSize()', () => {
 		done()
 	})
 
-	test('responds correctly to an error being thrown', async done => {
+	test('responds correctly to an error being thrown by fs.stat', async done => {
 		expect.assertions(2)
 		const download = await new Download()
 		sinon.stub(fs, 'stat')
@@ -741,6 +741,42 @@ describe('getFileSize()', () => {
 		expect(returnVal[1]).toBe('')
 
 		fs.stat.restore()
+		done()
+	})
+
+	test('handles undefined hashName correctly', async done => {
+		expect.assertions(1)
+		const download = await new Download()
+
+		await expect(download.getFileSize(undefined, 'testing', 'txt')).rejects
+			.toEqual(Error('Undefined parameters not accepted'))
+		done()
+	})
+
+	test('handles undefined username correctly', async done => {
+		expect.assertions(1)
+		const download = await new Download()
+
+		await expect(download.getFileSize('hk47ad.db', undefined, 'txt')).rejects
+			.toEqual(Error('Undefined parameters not accepted'))
+		done()
+	})
+
+	test('handles undefined extension correctly', async done => {
+		expect.assertions(1)
+		const download = await new Download()
+
+		await expect(download.getFileSize('123abc', 'testing', undefined)).rejects
+			.toEqual(Error('Undefined parameters not accepted'))
+		done()
+	})
+
+	test('handles no parameters correctly', async done => {
+		expect.assertions(1)
+		const download = await new Download()
+
+		await expect(download.getFileSize()).rejects
+			.toEqual(Error('Undefined parameters not accepted'))
 		done()
 	})
 })
