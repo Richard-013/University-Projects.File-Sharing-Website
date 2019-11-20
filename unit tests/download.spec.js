@@ -632,7 +632,7 @@ describe('getFileSize()', () => {
 			'files': {
 				'uploads': {
 					'testing': {
-						'a94af.txt': 'a',
+						'a94af.txt': 'ab',
 						'c56uwu.png': Buffer.from([8, 6, 7, 5, 3, 0, 9])
 					}
 				}
@@ -643,29 +643,27 @@ describe('getFileSize()', () => {
 	afterEach(mock.restore)
 
 	test('returns correct file size in bytes', async done => {
-		expect.assertions(2)
+		expect.assertions(1)
 		const download = await new Download()
 
 		const returnVal = await download.getFileSize('a94af', 'testing', 'txt')
-		expect(returnVal[0]).toBe(1)
-		expect(returnVal[1]).toBe('Bytes')
+		expect(returnVal).toBe('2 Bytes')
 
 		done()
 	})
 
 	test('returns correct file size in bytes of image file', async done => {
-		expect.assertions(2)
+		expect.assertions(1)
 		const download = await new Download()
 
 		const returnVal = await download.getFileSize('c56uwu', 'testing', 'png')
-		expect(returnVal[0]).toBe(7)
-		expect(returnVal[1]).toBe('Bytes')
+		expect(returnVal).toBe('7 Bytes')
 
 		done()
 	})
 
 	test('returns the correct size in kilobytes', async done => {
-		expect.assertions(2)
+		expect.assertions(1)
 		const download = await new Download()
 		sinon.stub(fs, 'stat')
 			.withArgs('files/uploads/testing/k1l0b1t.cpp')
@@ -673,15 +671,14 @@ describe('getFileSize()', () => {
 
 		const returnVal = await download.getFileSize('k1l0b1t', 'testing', 'cpp')
 
-		expect(returnVal[0]).toBe(4)
-		expect(returnVal[1]).toBe('KB')
+		expect(returnVal).toBe('4 KB')
 
 		fs.stat.restore()
 		done()
 	})
 
 	test('returns the correct size in kilobytes with decimal place', async done => {
-		expect.assertions(2)
+		expect.assertions(1)
 		const download = await new Download()
 		sinon.stub(fs, 'stat')
 			.withArgs('files/uploads/testing/tr1gr3.bat')
@@ -689,15 +686,14 @@ describe('getFileSize()', () => {
 
 		const returnVal = await download.getFileSize('tr1gr3', 'testing', 'bat')
 
-		expect(returnVal[0]).toBe(3.8)
-		expect(returnVal[1]).toBe('KB')
+		expect(returnVal).toBe('3.8 KB')
 
 		fs.stat.restore()
 		done()
 	})
 
 	test('returns the correct size in megabytes', async done => {
-		expect.assertions(2)
+		expect.assertions(1)
 		const download = await new Download()
 		sinon.stub(fs, 'stat')
 			.withArgs('files/uploads/testing/grmn34.tff')
@@ -705,15 +701,14 @@ describe('getFileSize()', () => {
 
 		const returnVal = await download.getFileSize('grmn34', 'testing', 'tff')
 
-		expect(returnVal[0]).toBe(7)
-		expect(returnVal[1]).toBe('MB')
+		expect(returnVal).toBe('7 MB')
 
 		fs.stat.restore()
 		done()
 	})
 
 	test('returns the correct size in megabytes with decimal place', async done => {
-		expect.assertions(2)
+		expect.assertions(1)
 		const download = await new Download()
 		sinon.stub(fs, 'stat')
 			.withArgs('files/uploads/testing/hk47ad.db')
@@ -721,15 +716,14 @@ describe('getFileSize()', () => {
 
 		const returnVal = await download.getFileSize('hk47ad', 'testing', 'db')
 
-		expect(returnVal[0]).toBe(14.5)
-		expect(returnVal[1]).toBe('MB')
+		expect(returnVal).toBe('14.5 MB')
 
 		fs.stat.restore()
 		done()
 	})
 
 	test('responds correctly to an error being thrown by fs.stat', async done => {
-		expect.assertions(2)
+		expect.assertions(1)
 		const download = await new Download()
 		sinon.stub(fs, 'stat')
 			.withArgs('files/uploads/tester/1.dll')
@@ -737,8 +731,7 @@ describe('getFileSize()', () => {
 
 		const returnVal = await download.getFileSize('1', 'tester', 'dll')
 
-		expect(returnVal[0]).toBe('N/A')
-		expect(returnVal[1]).toBe('')
+		expect(returnVal).toBe('N/A')
 
 		fs.stat.restore()
 		done()
