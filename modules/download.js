@@ -1,3 +1,4 @@
+/* eslint-disable no-magic-numbers */
 'use strict'
 
 const sqlite = require('sqlite-async')
@@ -122,22 +123,19 @@ module.exports = class Download {
 	}
 
 	async getFileSize(hashName, username, ext) {
-		// Finds the file on the server
 		const filepath = `files/uploads/${username}/${hashName}.${ext}`
 		try {
 			const stats = await fs.stat(filepath)
 			const sizeBytes = stats['size']
 			if (sizeBytes < 1024) return [sizeBytes, 'Bytes']
-			else {
-				const sizeKB = Math.round(sizeBytes / 1024 * 10) / 10 // Converts rounded size to one decimal place
-				if (sizeKB < 1024) return [sizeKB, 'KB']
-				else {
-					const sizeMB = Math.round(sizeKB / 1024 * 10) / 10 // Converts rounded size to one decimal place
-					return [sizeMB, 'MB']
-				}
+			else if (sizeBytes >= 1024) {
+				const sizeKB = Math.round(sizeBytes / 1024 * 10) / 10 // Size rounded to 1dp
+				if (sizeKB < 1024) {
+					return [sizeKB, 'KB']
+				} else return [Math.round(sizeKB / 1024 * 10) / 10, 'MB'] // Size rounded to 1dp
 			}
 		} catch (err) {
-			throw err
+			return ['N/A', '']
 		}
 	}
 
