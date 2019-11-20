@@ -2,6 +2,8 @@
 
 const Download = require('../modules/download.js')
 const mock = require('mock-fs')
+const fs = require('fs-extra')
+const sinon = require('sinon')
 
 describe('getFilePath()', () => {
 
@@ -659,6 +661,38 @@ describe('getFileSize()', () => {
 		expect(returnVal[0]).toBe(7)
 		expect(returnVal[1]).toBe('Bytes')
 
+		done()
+	})
+
+	test('returns the correct size in kilobytes', async done => {
+		expect.assertions(2)
+		const download = await new Download()
+		sinon.stub(fs, 'stat')
+			.withArgs('files/uploads/testing/k1l0b1t.cpp')
+			.returns({size: 4096})
+
+		const returnVal = await download.getFileSize('k1l0b1t', 'testing', 'cpp')
+
+		expect(returnVal[0]).toBe(4)
+		expect(returnVal[1]).toBe('KB')
+
+		fs.stat.restore()
+		done()
+	})
+
+	test('returns the correct size in kilobytes with decimal place', async done => {
+		expect.assertions(2)
+		const download = await new Download()
+		sinon.stub(fs, 'stat')
+			.withArgs('files/uploads/testing/tr1gr3.bat')
+			.returns({ size: 3840 })
+
+		const returnVal = await download.getFileSize('tr1gr3', 'testing', 'bat')
+
+		expect(returnVal[0]).toBe(3.8)
+		expect(returnVal[1]).toBe('KB')
+
+		fs.stat.restore()
 		done()
 	})
 
