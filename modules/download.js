@@ -1,6 +1,7 @@
 'use strict'
 
 const sqlite = require('sqlite-async')
+const fs = require('fs-extra')
 
 module.exports = class Download {
 	constructor(dbName = ':memory:', siteURL = 'http://localhost:8080') {
@@ -118,6 +119,22 @@ module.exports = class Download {
 		if (sys.includes(extension)) return 'sys'
 		// If none of the above, return genric file category
 		return 'generic'
+	}
+
+	async getFileSize(hashName, username, ext) {
+		// Finds the file on the server
+		const filepath = `files/uploads/${username}/${hashName}.${ext}`
+		const stats = await fs.stat(filepath)
+		const sizeBytes = stats['size']
+		if (sizeBytes < 1024) return [sizeBytes, 'Bytes']
+		else {
+			const sizeKB = Math.round(sizeBytes / 1024)
+			if (sizeKB < 1024) return [sizeKB, 'KB']
+			else {
+				const sizeMB = Math.round(sizeKB / 1024)
+				return [sizeMB, 'MB']
+			}
+		}
 	}
 
 	async generateFileList(currentUser) {
