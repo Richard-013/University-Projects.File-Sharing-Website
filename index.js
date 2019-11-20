@@ -5,8 +5,7 @@
 
 'use strict'
 
-/* MODULE IMPORTS */
-const bcrypt = require('bcrypt-promise')
+// Module Imports
 const Koa = require('koa')
 const Router = require('koa-router')
 const views = require('koa-views')
@@ -14,12 +13,8 @@ const staticDir = require('koa-static')
 const bodyParser = require('koa-bodyparser')
 const koaBody = require('koa-body')({multipart: true, uploadDir: '.'})
 const session = require('koa-session')
-//const sqlite = require('sqlite-async')
-//const fs = require('fs-extra')
-//const mime = require('mime-types')
-//const jimp = require('jimp')
 
-/* IMPORT CUSTOM MODULES */
+// Custom Modules
 const User = require('./modules/user')
 const Upload = require('./modules/upload')
 const Download = require('./modules/download')
@@ -28,7 +23,7 @@ const Remove = require('./modules/remove')
 const app = new Koa()
 const router = new Router()
 
-/* CONFIGURING THE MIDDLEWARE */
+// Middleware Config
 app.keys = ['darkSecret']
 app.use(staticDir('public'))
 app.use(bodyParser())
@@ -39,8 +34,7 @@ const defaultPort = 8080
 const port = process.env.PORT || defaultPort
 const dbName = 'website.db'
 const domainName = 'http://localhost:8080'
-const expiryCheckInterval = 300000 // Five minutes
-const saltRounds = 10
+const expiryCheckInterval = 300000 // Three minutes
 
 /**
  * The secure home page.
