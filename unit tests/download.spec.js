@@ -630,7 +630,8 @@ describe('getFileSize()', () => {
 			'files': {
 				'uploads': {
 					'testing': {
-						'a94af.txt': 'a'
+						'a94af.txt': 'a',
+						'c56uwu.png': Buffer.from([8, 6, 7, 5, 3, 0, 9])
 					}
 				}
 			}
@@ -649,4 +650,16 @@ describe('getFileSize()', () => {
 
 		done()
 	})
+
+	test('returns correct file size in bytes of image file', async done => {
+		expect.assertions(2)
+		const download = await new Download()
+
+		const returnVal = await download.getFileSize('c56uwu', 'testing', 'png')
+		expect(returnVal[0]).toBe(7)
+		expect(returnVal[1]).toBe('Bytes')
+
+		done()
+	})
+
 })
