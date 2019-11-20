@@ -124,16 +124,20 @@ module.exports = class Download {
 	async getFileSize(hashName, username, ext) {
 		// Finds the file on the server
 		const filepath = `files/uploads/${username}/${hashName}.${ext}`
-		const stats = await fs.stat(filepath)
-		const sizeBytes = stats['size']
-		if (sizeBytes < 1024) return [sizeBytes, 'Bytes']
-		else {
-			const sizeKB = Math.round(sizeBytes / 1024)
-			if (sizeKB < 1024) return [sizeKB, 'KB']
+		try {
+			const stats = await fs.stat(filepath)
+			const sizeBytes = stats['size']
+			if (sizeBytes < 1024) return [sizeBytes, 'Bytes']
 			else {
-				const sizeMB = Math.round(sizeKB / 1024)
-				return [sizeMB, 'MB']
+				const sizeKB = Math.round(sizeBytes / 1024 * 10) / 10 // Converts rounded size to one decimal place
+				if (sizeKB < 1024) return [sizeKB, 'KB']
+				else {
+					const sizeMB = Math.round(sizeKB / 1024 * 10) / 10 // Converts rounded size to one decimal place
+					return [sizeMB, 'MB']
+				}
 			}
+		} catch (err) {
+			throw err
 		}
 	}
 
