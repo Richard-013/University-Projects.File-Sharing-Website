@@ -727,4 +727,20 @@ describe('getFileSize()', () => {
 		fs.stat.restore()
 		done()
 	})
+
+	test('responds correctly to an error being thrown', async done => {
+		expect.assertions(2)
+		const download = await new Download()
+		sinon.stub(fs, 'stat')
+			.withArgs('files/uploads/tester/1.dll')
+			.throws(new Error('ENOENT, no such file or directory \'files/uploads/tester/1.dll\''))
+
+		const returnVal = await download.getFileSize('1', 'tester', 'dll')
+
+		expect(returnVal[0]).toBe('N/A')
+		expect(returnVal[1]).toBe('')
+
+		fs.stat.restore()
+		done()
+	})
 })
