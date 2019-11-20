@@ -81,6 +81,12 @@ router.post('/register', koaBody, async ctx => {
 	}
 })
 
+/**
+ * The login page that all users can see.
+ *
+ * @name Login Page
+ * @route {GET} /login
+ */
 router.get('/login', async ctx => {
 	const data = {}
 	if(ctx.query.msg) data.msg = ctx.query.msg
@@ -88,6 +94,12 @@ router.get('/login', async ctx => {
 	await ctx.render('login', data)
 })
 
+/**
+ * The script to handle users logging in.
+ *
+ * @name Login Script
+ * @route {POST} /login
+ */
 router.post('/login', async ctx => {
 	try {
 		const body = ctx.request.body
@@ -101,6 +113,13 @@ router.post('/login', async ctx => {
 	}
 })
 
+/**
+ * A secure page where a user can upload a file.
+ *
+ * @name Upload Page
+ * @route {GET} /upload
+ * @authentication This route requires cookie-based authentication.
+ */
 router.get('/upload', async ctx => {
 	try {
 		if (ctx.session.authorised !== true) return ctx.redirect('/login?msg=you need to log in')
@@ -112,6 +131,13 @@ router.get('/upload', async ctx => {
 	}
 })
 
+/**
+ * The script that handles uploading a user's file to the server.
+ *
+ * @name Upload Script
+ * @route {POST} /upload
+ * @authentication This route requires cookie-based authentication.
+ */
 router.post('/upload', koaBody, async ctx => {
 	try {
 		if (ctx.session.authorised !== true) return ctx.redirect('/login?msg=you need to log in')
@@ -127,6 +153,13 @@ router.post('/upload', koaBody, async ctx => {
 	}
 })
 
+/**
+ * A secure page where a user can get the information they need to share their file.
+ *
+ * @name File Sharing Page
+ * @route {GET} /shareFile
+ * @authentication This route requires cookie-based authentication.
+ */
 router.get('/shareFile', async ctx => {
 	try {
 		const shareLink = `${domainName}/file?h=${ctx.query.h}&u=${ctx.session.username}`
@@ -136,6 +169,13 @@ router.get('/shareFile', async ctx => {
 	}
 })
 
+/**
+ * A secure page where a user can view information about the files available to them and download them.
+ *
+ * @name File List Page
+ * @route {GET} /fileList
+ * @authentication This route requires cookie-based authentication.
+ */
 router.get('/fileList', async ctx => {
 	try {
 		if (ctx.session.authorised !== true) return ctx.redirect('/login?msg=you need to log in')
@@ -149,6 +189,13 @@ router.get('/fileList', async ctx => {
 	}
 })
 
+/**
+ * A secure page where a user downloads their chosen file.
+ *
+ * @name File Download Page
+ * @route {GET} /file
+ * @authentication This route requires cookie-based authentication.
+ */
 router.get('/file', async ctx => {
 	try {
 		if (ctx.session.authorised !== true) return ctx.redirect('/login?msg=you need to log in')
@@ -167,6 +214,12 @@ router.get('/file', async ctx => {
 	}
 })
 
+/**
+ * User is logged out and redirected to the home page.
+ *
+ * @name Log Out Page
+ * @route {GET} /logout
+ */
 router.get('/logout', async ctx => {
 	ctx.session.authorised = null
 	ctx.session.username = null
