@@ -131,7 +131,7 @@ module.exports = class Download {
 			const stats = await fs.stat(filepath)
 			const sizeBytes = stats['size']
 			if (sizeBytes < 1024) return `${sizeBytes.toString()} Bytes`
-			else if (sizeBytes >= 1024) {
+			else {
 				const sizeKB = Math.round(sizeBytes / 1024 * 10) / 10 // Size rounded to 1dp
 				if (sizeKB < 1024) {
 					return `${sizeKB.toString()} KB`
