@@ -1,6 +1,8 @@
+/* eslint-disable no-magic-numbers */
 'use strict'
 
 const sqlite = require('sqlite-async')
+const fs = require('fs-extra')
 
 module.exports = class Download {
 	constructor(dbName = ':memory:', siteURL = 'http://localhost:8080') {
@@ -120,6 +122,29 @@ module.exports = class Download {
 		return 'generic'
 	}
 
+	async getFileSize(hashName, username, ext) {
+		if (hashName === undefined || username === undefined || ext === undefined) {
+			throw new Error('Undefined parameters not accepted')
+		}
+		const filepath = `files/uploads/${username}/${hashName}.${ext}`
+		try {
+			const stats = await fs.stat(filepath)
+			const sizeBytes = stats['size']
+			if (sizeBytes < 1024) return `${sizeBytes.toString()} Bytes`
+			else {
+				const sizeKB = Math.round(sizeBytes / 1024 * 10) / 10 // Size rounded to 1dp
+				if (sizeKB < 1024) {
+					return `${sizeKB.toString()} KB`
+				} else {
+					const sizeMB = Math.round(sizeKB / 1024 * 10) / 10 // Size rounded to 1dp
+					return `${sizeMB.toString()} MB`
+				}
+			}
+		} catch (err) {
+			return 'N/A'
+		}
+	}
+
 	async generateFileList(currentUser) {
 		const availableFiles = await this.getAvailableFiles(currentUser)
 		if (availableFiles === -1) throw new Error('Database error')
@@ -132,8 +157,9 @@ module.exports = class Download {
 					fileName: file[1],
 					uploader: file[2],
 					fileType: file[3],
+					fileSize: await this.getFileSize(file[0], file[2], file[3]),
 					fileCat: await this.determineFileCat(file[3]),
-					// Converts stored time into hours until deletion
+					// Converts time into hours till deletion
 					timeTillDelete: await Math.floor(Math.floor(file[4] - (Date.now() - 259200000) / 60000) / 60),
 					dateUploaded: await uploadDate.toLocaleString(), // Converts stored time into the upload date
 					url: `${this.siteURL}/file?h=${file[0]}&u=${file[2]}` // Generates share url

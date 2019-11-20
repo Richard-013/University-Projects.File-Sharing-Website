@@ -1,6 +1,9 @@
 'use strict'
 
 const Download = require('../modules/download.js')
+const mock = require('mock-fs')
+const fs = require('fs-extra')
+const sinon = require('sinon')
 
 describe('getFilePath()', () => {
 
@@ -223,12 +226,16 @@ describe('verifyUserAccess()', () => {
 
 describe('generateFileList()', () => {
 	test('generates single file list correctly', async done => {
-		expect.assertions(9)
+		expect.assertions(10)
 		const download = await new Download()
 
 		const originalDateCall = Date.now.bind(global.Date)
 		const stubDate = jest.fn(() => 1574171633958)
 		global.Date.now = stubDate
+
+		sinon.stub(fs, 'stat')
+			.withArgs('files/uploads/tester/a94a8fe.txt')
+			.returns({ size: 4096 })
 
 		const expectDate = await new Date(26236193 * 60000)
 		const date = await expectDate.toLocaleString()
@@ -242,6 +249,7 @@ describe('generateFileList()', () => {
 		expect(files.fileName).toBe('test.txt')
 		expect(files.uploader).toBe('tester')
 		expect(files.fileType).toBe('txt')
+		expect(files.fileSize).toBe('4 KB')
 		expect(files.fileCat).toBe('write')
 		expect(files.timeTillDelete).toBe(71)
 		expect(files.dateUploaded).toBe(date)
@@ -250,17 +258,22 @@ describe('generateFileList()', () => {
 		expect(stubDate).toHaveBeenCalled()
 		// Restores Date.now() to its original functionality
 		global.Date.now = originalDateCall
+		fs.stat.restore()
 
 		done()
 	})
 
 	test('generates multi-file list correctly', async done => {
-		expect.assertions(9)
+		expect.assertions(10)
 		const download = await new Download()
 
 		const originalDateCall = Date.now.bind(global.Date)
 		const stubDate = jest.fn(() => 1574171633958)
 		global.Date.now = stubDate
+
+		sinon.stub(fs, 'stat')
+			.withArgs('files/uploads/tester/b5453qe.cpp')
+			.returns({ size: 7340032 })
 
 		const expectDate = await new Date(26236193 * 60000)
 		const date = await expectDate.toLocaleString()
@@ -275,6 +288,7 @@ describe('generateFileList()', () => {
 		expect(files.fileName).toBe('main.cpp')
 		expect(files.uploader).toBe('tester')
 		expect(files.fileType).toBe('cpp')
+		expect(files.fileSize).toBe('7 MB')
 		expect(files.fileCat).toBe('code')
 		expect(files.timeTillDelete).toBe(71)
 		expect(files.dateUploaded).toBe(date)
@@ -283,6 +297,7 @@ describe('generateFileList()', () => {
 		expect(stubDate).toHaveBeenCalled()
 		// Restores Date.now() to its original functionality
 		global.Date.now = originalDateCall
+		fs.stat.restore()
 
 		done()
 	})
@@ -619,6 +634,154 @@ describe('checkUncommonTypes()', () => {
 		const returnVal = await download.checkUncommonTypes()
 
 		expect(returnVal).toBe('generic')
+		done()
+	})
+})
+
+describe('getFileSize()', () => {
+	beforeEach(() => {
+		mock({
+			'files': {
+				'uploads': {
+					'testing': {
+						'a94af.txt': 'ab',
+						'c56uwu.png': Buffer.from([8, 6, 7, 5, 3, 0, 9])
+					}
+				}
+			}
+		})
+	})
+
+	afterEach(mock.restore)
+
+	test('returns correct file size in bytes', async done => {
+		expect.assertions(1)
+		const download = await new Download()
+
+		const returnVal = await download.getFileSize('a94af', 'testing', 'txt')
+		expect(returnVal).toBe('2 Bytes')
+
+		done()
+	})
+
+	test('returns correct file size in bytes of image file', async done => {
+		expect.assertions(1)
+		const download = await new Download()
+
+		const returnVal = await download.getFileSize('c56uwu', 'testing', 'png')
+		expect(returnVal).toBe('7 Bytes')
+
+		done()
+	})
+
+	test('returns the correct size in kilobytes', async done => {
+		expect.assertions(1)
+		const download = await new Download()
+		sinon.stub(fs, 'stat')
+			.withArgs('files/uploads/testing/k1l0b1t.cpp')
+			.returns({size: 4096})
+
+		const returnVal = await download.getFileSize('k1l0b1t', 'testing', 'cpp')
+
+		expect(returnVal).toBe('4 KB')
+
+		fs.stat.restore()
+		done()
+	})
+
+	test('returns the correct size in kilobytes with decimal place', async done => {
+		expect.assertions(1)
+		const download = await new Download()
+		sinon.stub(fs, 'stat')
+			.withArgs('files/uploads/testing/tr1gr3.bat')
+			.returns({ size: 3840 })
+
+		const returnVal = await download.getFileSize('tr1gr3', 'testing', 'bat')
+
+		expect(returnVal).toBe('3.8 KB')
+
+		fs.stat.restore()
+		done()
+	})
+
+	test('returns the correct size in megabytes', async done => {
+		expect.assertions(1)
+		const download = await new Download()
+		sinon.stub(fs, 'stat')
+			.withArgs('files/uploads/testing/grmn34.tff')
+			.returns({ size: 7340032 })
+
+		const returnVal = await download.getFileSize('grmn34', 'testing', 'tff')
+
+		expect(returnVal).toBe('7 MB')
+
+		fs.stat.restore()
+		done()
+	})
+
+	test('returns the correct size in megabytes with decimal place', async done => {
+		expect.assertions(1)
+		const download = await new Download()
+		sinon.stub(fs, 'stat')
+			.withArgs('files/uploads/testing/hk47ad.db')
+			.returns({ size: 15204352 })
+
+		const returnVal = await download.getFileSize('hk47ad', 'testing', 'db')
+
+		expect(returnVal).toBe('14.5 MB')
+
+		fs.stat.restore()
+		done()
+	})
+
+	test('responds correctly to an error being thrown by fs.stat', async done => {
+		expect.assertions(1)
+		const download = await new Download()
+		sinon.stub(fs, 'stat')
+			.withArgs('files/uploads/tester/1.dll')
+			.throws(new Error('ENOENT, no such file or directory \'files/uploads/tester/1.dll\''))
+
+		const returnVal = await download.getFileSize('1', 'tester', 'dll')
+
+		expect(returnVal).toBe('N/A')
+
+		fs.stat.restore()
+		done()
+	})
+
+	test('handles undefined hashName correctly', async done => {
+		expect.assertions(1)
+		const download = await new Download()
+
+		await expect(download.getFileSize(undefined, 'testing', 'txt')).rejects
+			.toEqual(Error('Undefined parameters not accepted'))
+		done()
+	})
+
+	test('handles undefined username correctly', async done => {
+		expect.assertions(1)
+		const download = await new Download()
+
+		await expect(download.getFileSize('hk47ad.db', undefined, 'txt')).rejects
+			.toEqual(Error('Undefined parameters not accepted'))
+		done()
+	})
+
+	test('handles undefined extension correctly', async done => {
+		expect.assertions(1)
+		const download = await new Download()
+
+		await expect(download.getFileSize('123abc', 'testing', undefined)).rejects
+			.toEqual(Error('Undefined parameters not accepted'))
+		done()
+	})
+
+	test('handles no parameters correctly', async done => {
+		expect.assertions(1)
+		const download = await new Download()
+
+		await expect(download.getFileSize()).rejects
+			.toEqual(Error('Undefined parameters not accepted'))
 		done()
 	})
 })
