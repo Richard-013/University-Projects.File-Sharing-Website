@@ -157,8 +157,9 @@ module.exports = class Download {
 					fileName: file[1],
 					uploader: file[2],
 					fileType: file[3],
+					fileSize: await this.getFileSize(file[0], file[2], file[3]),
 					fileCat: await this.determineFileCat(file[3]),
-					// Converts stored time into hours until deletion
+					// Converts time into hours till deletion
 					timeTillDelete: await Math.floor(Math.floor(file[4] - (Date.now() - 259200000) / 60000) / 60),
 					dateUploaded: await uploadDate.toLocaleString(), // Converts stored time into the upload date
 					url: `${this.siteURL}/file?h=${file[0]}&u=${file[2]}` // Generates share url
