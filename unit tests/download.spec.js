@@ -226,12 +226,16 @@ describe('verifyUserAccess()', () => {
 
 describe('generateFileList()', () => {
 	test('generates single file list correctly', async done => {
-		expect.assertions(9)
+		expect.assertions(10)
 		const download = await new Download()
 
 		const originalDateCall = Date.now.bind(global.Date)
 		const stubDate = jest.fn(() => 1574171633958)
 		global.Date.now = stubDate
+
+		sinon.stub(fs, 'stat')
+			.withArgs('files/uploads/tester/a94a8fe.txt')
+			.returns({ size: 4096 })
 
 		const expectDate = await new Date(26236193 * 60000)
 		const date = await expectDate.toLocaleString()
@@ -245,6 +249,7 @@ describe('generateFileList()', () => {
 		expect(files.fileName).toBe('test.txt')
 		expect(files.uploader).toBe('tester')
 		expect(files.fileType).toBe('txt')
+		expect(files.fileSize).toBe('4 KB')
 		expect(files.fileCat).toBe('write')
 		expect(files.timeTillDelete).toBe(71)
 		expect(files.dateUploaded).toBe(date)
@@ -253,17 +258,22 @@ describe('generateFileList()', () => {
 		expect(stubDate).toHaveBeenCalled()
 		// Restores Date.now() to its original functionality
 		global.Date.now = originalDateCall
+		fs.stat.restore()
 
 		done()
 	})
 
 	test('generates multi-file list correctly', async done => {
-		expect.assertions(9)
+		expect.assertions(10)
 		const download = await new Download()
 
 		const originalDateCall = Date.now.bind(global.Date)
 		const stubDate = jest.fn(() => 1574171633958)
 		global.Date.now = stubDate
+
+		sinon.stub(fs, 'stat')
+			.withArgs('files/uploads/tester/b5453qe.cpp')
+			.returns({ size: 7340032 })
 
 		const expectDate = await new Date(26236193 * 60000)
 		const date = await expectDate.toLocaleString()
@@ -278,6 +288,7 @@ describe('generateFileList()', () => {
 		expect(files.fileName).toBe('main.cpp')
 		expect(files.uploader).toBe('tester')
 		expect(files.fileType).toBe('cpp')
+		expect(files.fileSize).toBe('7 MB')
 		expect(files.fileCat).toBe('code')
 		expect(files.timeTillDelete).toBe(71)
 		expect(files.dateUploaded).toBe(date)
@@ -286,6 +297,7 @@ describe('generateFileList()', () => {
 		expect(stubDate).toHaveBeenCalled()
 		// Restores Date.now() to its original functionality
 		global.Date.now = originalDateCall
+		fs.stat.restore()
 
 		done()
 	})
