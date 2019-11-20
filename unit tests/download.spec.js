@@ -696,4 +696,35 @@ describe('getFileSize()', () => {
 		done()
 	})
 
+	test('returns the correct size in megabytes', async done => {
+		expect.assertions(2)
+		const download = await new Download()
+		sinon.stub(fs, 'stat')
+			.withArgs('files/uploads/testing/grmn34.tff')
+			.returns({ size: 7340032 })
+
+		const returnVal = await download.getFileSize('grmn34', 'testing', 'tff')
+
+		expect(returnVal[0]).toBe(7)
+		expect(returnVal[1]).toBe('MB')
+
+		fs.stat.restore()
+		done()
+	})
+
+	test('returns the correct size in megabytes with decimal place', async done => {
+		expect.assertions(2)
+		const download = await new Download()
+		sinon.stub(fs, 'stat')
+			.withArgs('files/uploads/testing/hk47ad.db')
+			.returns({ size: 15204352 })
+
+		const returnVal = await download.getFileSize('hk47ad', 'testing', 'db')
+
+		expect(returnVal[0]).toBe(14.5)
+		expect(returnVal[1]).toBe('MB')
+
+		fs.stat.restore()
+		done()
+	})
 })
