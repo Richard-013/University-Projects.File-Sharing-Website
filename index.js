@@ -1,8 +1,6 @@
 #!/usr/bin/env node
-/* eslint-disable complexity */
 
-//Routes File
-
+// Routes File
 'use strict'
 
 // Module Imports
@@ -45,8 +43,7 @@ const expiryCheckInterval = 300000 // Three minutes
  */
 router.get('/', async ctx => {
 	try {
-		// Sets old file deletion to run every five minutes whilst the app is active
-		const expiryRemover = await new Remove(dbName)
+		const expiryRemover = await new Remove(dbName) // Removes old files every five minutes whilst active
 		setInterval(() => expiryRemover.removeExpiredFiles(), expiryCheckInterval)
 		if(ctx.session.authorised !== true) return ctx.redirect('/login?msg=you need to log in')
 		const data = {}
@@ -73,15 +70,12 @@ router.get('/register', async ctx => await ctx.render('register'))
  */
 router.post('/register', koaBody, async ctx => {
 	try {
-		// Extracts data from page
-		const body = ctx.request.body
+		const body = ctx.request.body // Extracts data from page
 		const {path, name} = ctx.request.files.avatar
-		// Calls required functions from user module
 		const user = await new User(dbName)
-		await user.register(body.user, body.pass)
-		await user.uploadAvatar(path, name, body.user)
-		// Redirects user to the login page
-		ctx.redirect('/login?msg=new user added, please log in')
+		await user.register(body.user, body.pass) // Registers the user
+		await user.uploadAvatar(path, name, body.user) // Uploads their avatar
+		ctx.redirect('/login?msg=new user added, please log in') // Redirects user to the login page
 	} catch(err) {
 		await ctx.render('error', {message: err.message})
 	}
@@ -118,17 +112,14 @@ router.get('/upload', async ctx => {
 	}
 })
 
-// eslint-disable-next-line max-lines-per-function
 router.post('/upload', koaBody, async ctx => {
 	try {
-		// Prevents users who aren't logged in from uploading files
 		if (ctx.session.authorised !== true) return ctx.redirect('/login?msg=you need to log in')
 		const { path, name } = ctx.request.files.filetoupload // Gets details from file
-		const targetUser = ctx.request.body.targetuser // Gets target user
+		const targetUser = ctx.request.body.targetuser // Gets target user (user to share file with)
 		const upload = await new Upload(dbName)
 		// Attempts to upload file to the server, returns a status code to work with
 		const uploadResult = await upload.uploadFile(path, name, ctx.session.username, targetUser)
-
 		if (uploadResult[0] === 0) ctx.redirect(`/shareFile?h=${uploadResult[1]}`) // Successful upload
 		else ctx.redirect(`/upload?message=${uploadResult[1]}`) // Unsuccessful upload
 	} catch (err) {
@@ -139,8 +130,7 @@ router.post('/upload', koaBody, async ctx => {
 router.get('/shareFile', async ctx => {
 	try {
 		const shareLink = `${domainName}/file?h=${ctx.query.h}&u=${ctx.session.username}`
-		const data = { link: shareLink }
-		await ctx.render('share', data)
+		await ctx.render('share', { link: shareLink })
 	} catch (err) {
 		await ctx.render('error', { message: err.message })
 	}
@@ -151,7 +141,6 @@ router.get('/fileList', async ctx => {
 		if (ctx.session.authorised !== true) return ctx.redirect('/login?msg=you need to log in')
 		const download = await new Download(dbName)
 		const allFiles = await download.generateFileList(ctx.session.username)
-		console.log(allFiles)
 		const data = { files: allFiles }
 		if (ctx.query.message) data.message = ctx.query.message
 		await ctx.render('fileList', data)
@@ -163,14 +152,10 @@ router.get('/fileList', async ctx => {
 router.get('/file', async ctx => {
 	try {
 		if (ctx.session.authorised !== true) return ctx.redirect('/login?msg=you need to log in')
-		// Use query to pass in hash-id of the requested file and the username of who uploaded it
-		// Use that information to get the file path and allow the user to download the file
 		const download = await new Download(dbName)
-		const sourceUser = ctx.query.u
-		const hash = ctx.query.h
-		// getFilePath will throw an error if user does not have permission to access the file
-		const filePath = await download.getFilePath(ctx.session.username, sourceUser, hash)
-		ctx.attachment(filePath)
+		const [sourceUser, hash] = [ctx.query.u, ctx.query.h]
+		const filePath = await download.getFilePath(ctx.session.username, sourceUser, hash) // Throws if cannot access
+		ctx.attachment(filePath) // Lets the user donwload the file
 		const remover = await new Remove(dbName)
 		const timer = 500000 // Sets timer amount
 		setTimeout(() => {
@@ -188,5 +173,6 @@ router.get('/logout', async ctx => {
 	ctx.redirect('/?msg=you are now logged out')
 })
 
+// Starts the server when the file is executed
 app.use(router.routes())
 module.exports = app.listen(port, async() => console.log(`listening on port ${port}`))
