@@ -19,8 +19,14 @@ describe('uploadFile()', () => {
 		expect.assertions(3)
 		const upload = await new Upload()
 
+		// Adds users to database
+		let sql = 'INSERT INTO users(user, pass) VALUES(?, ?);'
+		await upload.db.run(sql, 'testing', 'unhackable')
+		sql = 'INSERT INTO users(user, pass) VALUES(?, ?);'
+		await upload.db.run(sql, 'testTarget', 'beefyPassword2')
+
 		// Upload
-		const returnVal = await upload.uploadFile('testing/dummy.txt', 'dummy.txt', 'testing')
+		const returnVal = await upload.uploadFile('testing/dummy.txt', 'dummy.txt', 'testing', 'testTarget')
 		const expectName = await upload.hashFileName('dummy.txt')
 		// Check upload success
 		const existing = fs.existsSync(`files/uploads/testing/${expectName}.txt`)
@@ -36,6 +42,12 @@ describe('uploadFile()', () => {
 		expect.assertions(4)
 		const upload = await new Upload()
 
+		// Adds users to database
+		let sql = 'INSERT INTO users(user, pass) VALUES(?, ?);'
+		await upload.db.run(sql, 'testing', 'unhackable')
+		sql = 'INSERT INTO users(user, pass) VALUES(?, ?);'
+		await upload.db.run(sql, 'testTarget', 'beefyPassword2')
+
 		// Checks that the folder does not exist
 		if (fs.existsSync('files/uploads/testing')) {
 			fs.rmdirSync('files/uploads/testing', { recursive: true })
@@ -45,7 +57,7 @@ describe('uploadFile()', () => {
 		const expectName = await upload.hashFileName('dummy.txt')
 
 		// Upload file to directory and check directory was created
-		const returnVal = await upload.uploadFile('testing/dummy.txt', 'dummy.txt', 'testing')
+		const returnVal = await upload.uploadFile('testing/dummy.txt', 'dummy.txt', 'testing', 'testTarget')
 		expect(fs.existsSync('files/uploads/testing')).toBeTruthy() // Checks that the folder was created successfully
 		// Checks return value was correct
 		expect(returnVal[0]).toBe(0)
@@ -57,6 +69,12 @@ describe('uploadFile()', () => {
 		expect.assertions(5)
 		const upload = await new Upload()
 
+		// Adds users to database
+		let sql = 'INSERT INTO users(user, pass) VALUES(?, ?);'
+		await upload.db.run(sql, 'testing', 'unhackable')
+		sql = 'INSERT INTO users(user, pass) VALUES(?, ?);'
+		await upload.db.run(sql, 'testTarget', 'beefyPassword2')
+
 		if (fs.existsSync('files/uploads/testing') === false) {
 			// Creates the folder
 			fs.mkdirSync('files/uploads/testing', { recursive: true })
@@ -65,7 +83,7 @@ describe('uploadFile()', () => {
 		expect(fs.existsSync('files/uploads/testing')).toBeTruthy()
 
 		// Upload file to directory
-		const returnVal = await upload.uploadFile('testing/dummy.txt', 'dummy.txt', 'testing')
+		const returnVal = await upload.uploadFile('testing/dummy.txt', 'dummy.txt', 'testing', 'testTarget')
 		const expectName = await upload.hashFileName('dummy.txt')
 
 		// Checks that the folder was not removed
@@ -81,7 +99,7 @@ describe('uploadFile()', () => {
 	test('handles no selected file and no stated path correctly', async done => {
 		expect.assertions(2)
 		const upload = await new Upload()
-		const returnVal = await upload.uploadFile(undefined, undefined, 'testing')
+		const returnVal = await upload.uploadFile(undefined, undefined, 'testing', 'testTarget')
 		// Tests to see if the correct error is thrown when upload attempts
 		expect(returnVal[0]).toBe(1)
 		expect(returnVal[1]).toBe('No file or path specified for upload')
@@ -92,7 +110,7 @@ describe('uploadFile()', () => {
 	test('handles no selected file correctly', async done => {
 		expect.assertions(2)
 		const upload = await new Upload()
-		const returnVal = await upload.uploadFile('testing/dummy.txt', undefined, 'testing')
+		const returnVal = await upload.uploadFile('testing/dummy.txt', undefined, 'testing', 'testTarget')
 
 		// Tests to see if the correct error is thrown when upload attempts
 		expect(returnVal[0]).toBe(1)
@@ -104,7 +122,7 @@ describe('uploadFile()', () => {
 	test('handles no stated path correctly', async done => {
 		expect.assertions(2)
 		const upload = await new Upload()
-		const returnVal = await upload.uploadFile(undefined, 'dummy.txt', 'testing')
+		const returnVal = await upload.uploadFile(undefined, 'dummy.txt', 'testing', 'testTarget')
 
 		// Tests to see if the correct error is thrown when upload attempts
 		expect(returnVal[0]).toBe(1)
@@ -116,7 +134,14 @@ describe('uploadFile()', () => {
 	test('selected file does not exist', async done => {
 		expect.assertions(2)
 		const upload = await new Upload()
-		const returnVal = await upload.uploadFile('testing/alpha.txt', 'alpha.txt', 'testing')
+
+		// Adds users to database
+		let sql = 'INSERT INTO users(user, pass) VALUES(?, ?);'
+		await upload.db.run(sql, 'testing', 'unhackable')
+		sql = 'INSERT INTO users(user, pass) VALUES(?, ?);'
+		await upload.db.run(sql, 'testTarget', 'beefyPassword2')
+
+		const returnVal = await upload.uploadFile('testing/alpha.txt', 'alpha.txt', 'testing', 'testTarget')
 
 		// Tests to see if the correct error is thrown when upload attempts
 		expect(returnVal[0]).toBe(1)
@@ -130,12 +155,18 @@ describe('uploadFile()', () => {
 		const upload = await new Upload()
 		const hashName = await upload.hashFileName('dummy.txt')
 
+		// Adds users to database
+		let sql = 'INSERT INTO users(user, pass) VALUES(?, ?);'
+		await upload.db.run(sql, 'testing', 'unhackable')
+		sql = 'INSERT INTO users(user, pass) VALUES(?, ?);'
+		await upload.db.run(sql, 'testTarget', 'beefyPassword2')
+
 		// Adds file to the database
-		const initialInsert = await upload.addToDB(hashName, 'dummy', 'txt', 'testing')
+		const initialInsert = await upload.addToDB(hashName, 'dummy', 'txt', 'testing', 'testTarget')
 		expect(initialInsert).toBe(0)
 
 		// Upload file which will attempt to add it to the database again
-		const returnVal = await upload.uploadFile('testing/dummy.txt', 'dummy.txt', 'testing')
+		const returnVal = await upload.uploadFile('testing/dummy.txt', 'dummy.txt', 'testing', 'testTarget')
 		expect(returnVal[0]).toBe(1)
 		expect(returnVal[1]).toBe('User has already uploaded a file with the same name')
 
@@ -146,11 +177,18 @@ describe('uploadFile()', () => {
 		expect.assertions(2)
 		const upload = await new Upload()
 
-		const sql = 'DROP TABLE IF EXISTS files;'
+		// Adds users to database
+		let sql = 'INSERT INTO users(user, pass) VALUES(?, ?);'
+		await upload.db.run(sql, 'testing', 'unhackable')
+		sql = 'INSERT INTO users(user, pass) VALUES(?, ?);'
+		await upload.db.run(sql, 'testTarget', 'beefyPassword2')
+
+		// Drops file table to cause db error
+		sql = 'DROP TABLE IF EXISTS files;'
 		await upload.db.run(sql)
 
 		// Upload attempt should detect a database error and respond accordingly
-		const returnVal = await upload.uploadFile('testing/dummy.txt', 'dummy.txt', 'testing')
+		const returnVal = await upload.uploadFile('testing/dummy.txt', 'dummy.txt', 'testing', 'testTarget')
 		expect(returnVal[0]).toBe(1)
 		expect(returnVal[1]).toBe('Database error has occurred, please try again')
 
@@ -161,9 +199,168 @@ describe('uploadFile()', () => {
 		expect.assertions(2)
 		const upload = await new Upload()
 
-		const returnVal = await upload.uploadFile('testing/', '', 'testing')
+		// Adds users to database
+		let sql = 'INSERT INTO users(user, pass) VALUES(?, ?);'
+		await upload.db.run(sql, 'testing', 'unhackable')
+		sql = 'INSERT INTO users(user, pass) VALUES(?, ?);'
+		await upload.db.run(sql, 'testTarget', 'beefyPassword2')
+
+		const returnVal = await upload.uploadFile('testing/', '', 'testing', 'testTarget')
 		expect(returnVal[0]).toBe(1)
 		expect(returnVal[1]).toBe('An error occurred whilst prepping your file for upload')
+
+		done()
+	})
+
+	test('responds correctly to an undefined source username', async done => {
+		expect.assertions(2)
+		const upload = await new Upload()
+
+		// Adds target user to database
+		const sql = 'INSERT INTO users(user, pass) VALUES(?, ?);'
+		await upload.db.run(sql, 'testTarget', 'beefyPassword2')
+
+		// Runs with undefined source username but valid target username
+		const returnVal = await upload.uploadFile('testing/test.txt', 'test.txt', undefined, 'testTarget')
+		expect(returnVal[0]).toBe(1)
+		expect(returnVal[1]).toBe('Invalid user attempted upload')
+
+		done()
+	})
+
+	test('responds correctly to a non-existant source username', async done => {
+		expect.assertions(2)
+		const upload = await new Upload()
+
+		// Adds target user to database
+		const sql = 'INSERT INTO users(user, pass) VALUES(?, ?);'
+		await upload.db.run(sql, 'testTarget', 'beefyPassword2')
+
+		// Runs with invalid source username but valid target username
+		const returnVal = await upload.uploadFile('testing/test.txt', 'test.txt', 'blarg', 'testTarget')
+		expect(returnVal[0]).toBe(1)
+		expect(returnVal[1]).toBe('Invalid user attempted upload')
+
+		done()
+	})
+
+	test('responds correctly to an undefined target username', async done => {
+		expect.assertions(2)
+		const upload = await new Upload()
+
+		// Adds source user to database
+		const sql = 'INSERT INTO users(user, pass) VALUES(?, ?);'
+		await upload.db.run(sql, 'testing', 'beefyPassword')
+
+		// Runs with valid source username but undefined target username
+		const returnVal = await upload.uploadFile('testing/test.txt', 'test.txt', 'testing', undefined)
+		expect(returnVal[0]).toBe(1)
+		expect(returnVal[1]).toBe('Selected user does not exist')
+
+		done()
+	})
+
+	test('responds correctly to a non-existant target username', async done => {
+		expect.assertions(2)
+		const upload = await new Upload()
+
+		// Adds source user to database
+		const sql = 'INSERT INTO users(user, pass) VALUES(?, ?);'
+		await upload.db.run(sql, 'testing', 'beefyPassword')
+
+		// Runs with valid source username but invalid target username
+		const returnVal = await upload.uploadFile('testing/test.txt', 'test.txt', 'testing', 'blorg')
+		expect(returnVal[0]).toBe(1)
+		expect(returnVal[1]).toBe('Selected user does not exist')
+
+		done()
+	})
+
+	test('responds correctly to an undefined source and target username', async done => {
+		expect.assertions(2)
+		const upload = await new Upload()
+
+		// Run uploadFile with no usernames
+		const returnVal = await upload.uploadFile('testing/test.txt', 'test.txt', undefined, undefined)
+		expect(returnVal[0]).toBe(1)
+		expect(returnVal[1]).toBe('Invalid user attempted upload')
+
+		done()
+	})
+
+	test('responds correctly to a non-existant source and target username', async done => {
+		expect.assertions(2)
+		const upload = await new Upload()
+
+		// Run uploadFile with non-existant usernames
+		const returnVal = await upload.uploadFile('testing/test.txt', 'test.txt', 'blarg', 'blorg')
+		expect(returnVal[0]).toBe(1)
+		expect(returnVal[1]).toBe('Invalid user attempted upload')
+
+		done()
+	})
+})
+
+describe('checkValidUser()', () => {
+	test('returns true if user exists', async done => {
+		expect.assertions(1)
+		const upload = await new Upload()
+
+		// Inserts example user
+		const sql = 'INSERT INTO users(user, pass) VALUES(?, ?);'
+		await upload.db.run(sql, 'testUser', 'unhackablePassword')
+
+		// Runs function
+		const validUser = await upload.checkValidUser('testUser')
+
+		// Checks output is true
+		expect(validUser).toBeTruthy()
+
+		done()
+	})
+
+	test('returns false if user does not exist', async done => {
+		expect.assertions(1)
+		const upload = await new Upload()
+
+		const sql = 'INSERT INTO users(user, pass) VALUES(?, ?);'
+		await upload.db.run(sql, 'totallyNotAUser', 'SortOfAPassword')
+
+		// Runs function with no users in db
+		const validUser = await upload.checkValidUser('testUser')
+
+		// Checks output is false
+		expect(validUser).toBeFalsy()
+
+		done()
+	})
+
+	test('returns false if there is a database error', async done => {
+		expect.assertions(1)
+		const upload = await new Upload()
+
+		// Set up database for an error
+		const sql = 'DROP TABLE IF EXISTS users;'
+		await upload.db.run(sql)
+
+		// Runs function with no db
+		const validUser = await upload.checkValidUser('testUser')
+
+		// Checks output is false
+		expect(validUser).toBeFalsy()
+
+		done()
+	})
+
+	test('returns false if user is undefined', async done => {
+		expect.assertions(1)
+		const upload = await new Upload()
+
+		// Runs function with no users in db
+		const validUser = await upload.checkValidUser(undefined)
+
+		// Checks output is false
+		expect(validUser).toBeFalsy()
 
 		done()
 	})
@@ -362,7 +559,7 @@ describe('addToDB()', () => {
 		// Tests to see if records are successfully added to the database
 		expect.assertions(1)
 		const upload = await new Upload()
-		const returnVal = await upload.addToDB('123abc', 'dummy', 'txt', 'testing')
+		const returnVal = await upload.addToDB('123abc', 'dummy', 'txt', 'testing', 'testTarget')
 		// Checks return value of the function
 		expect(returnVal).toBe(0)
 		done()
@@ -373,10 +570,10 @@ describe('addToDB()', () => {
 		expect.assertions(2)
 		const upload = await new Upload()
 		// Uploads the file for the first time
-		const returnVal1 = await upload.addToDB('123abc', 'dummy', 'txt', 'testing')
+		const returnVal1 = await upload.addToDB('123abc', 'dummy', 'txt', 'testing', 'testTarget')
 		expect(returnVal1).toBe(0)
 
-		const returnVal2 = await upload.addToDB('123abc', 'dummy', 'txt', 'testing')
+		const returnVal2 = await upload.addToDB('123abc', 'dummy', 'txt', 'testing', 'testTarget')
 		expect(returnVal2).toBe(-2)
 		done()
 	})
@@ -385,8 +582,13 @@ describe('addToDB()', () => {
 		// Tests to see if records are successfully added to the database
 		expect.assertions(1)
 		const upload = await new Upload()
-		// Uploads the file for the first time
-		const returnVal = await upload.addToDB()
+
+		// Break database
+		const sql = 'DROP TABLE IF EXISTS files;'
+		await upload.db.run(sql)
+
+		// Attempt upload
+		const returnVal = await upload.addToDB('123abc', 'dummy', 'txt', 'testing', 'testTarget')
 		expect(returnVal).toBe(-3)
 
 		done()
@@ -401,7 +603,7 @@ describe('addToDB()', () => {
 		const stubDate = jest.fn(() => 1574007598432)
 		global.Date.now = stubDate
 
-		const returnVal = await upload.addToDB('123abc', 'dummy', 'txt', 'testing')
+		const returnVal = await upload.addToDB('123abc', 'dummy', 'txt', 'testing', 'testTarget')
 		// Checks return value of the function
 		expect(returnVal).toBe(0)
 		expect(stubDate).toHaveBeenCalled()
@@ -413,6 +615,60 @@ describe('addToDB()', () => {
 
 		// Restores Date.now() to its original functionality
 		global.Date.now = originalDateCall
+		done()
+	})
+
+	test('handles undefined hashID correctly', async done => {
+		expect.assertions(1)
+		const upload = await new Upload()
+		// Checks correct code is given when function is called with wrong argument
+		const returnVal = await upload.addToDB(undefined, 'dummy', 'txt', 'testing', 'testTarget')
+		expect(returnVal).toBe(-3)
+		done()
+	})
+
+	test('handles undefined file name correctly', async done => {
+		expect.assertions(1)
+		const upload = await new Upload()
+		// Checks correct code is given when function is called with wrong argument
+		const returnVal = await upload.addToDB('abc123', undefined, 'txt', 'testing', 'testTarget')
+		expect(returnVal).toBe(-3)
+		done()
+	})
+
+	test('handles undefined extension correctly', async done => {
+		expect.assertions(1)
+		const upload = await new Upload()
+		// Checks correct code is given when function is called with wrong argument
+		const returnVal = await upload.addToDB('abc123', 'dummy', undefined, 'testing', 'testTarget')
+		expect(returnVal).toBe(-3)
+		done()
+	})
+
+	test('handles undefined source username correctly', async done => {
+		expect.assertions(1)
+		const upload = await new Upload()
+		// Checks correct code is given when function is called with wrong argument
+		const returnVal = await upload.addToDB('abc123', 'dummy', 'txt', undefined, 'testTarget')
+		expect(returnVal).toBe(-3)
+		done()
+	})
+
+	test('handles undefined target username correctly', async done => {
+		expect.assertions(1)
+		const upload = await new Upload()
+		// Checks correct code is given when function is called with wrong argument
+		const returnVal = await upload.addToDB('abc123', 'dummy', 'txt', 'testing', undefined)
+		expect(returnVal).toBe(-3)
+		done()
+	})
+
+	test('handles no arguments eing given correctly correctly', async done => {
+		expect.assertions(1)
+		const upload = await new Upload()
+		// Checks correct code is given when function is called with no arguments
+		const returnVal = await upload.addToDB()
+		expect(returnVal).toBe(-3)
 		done()
 	})
 })
