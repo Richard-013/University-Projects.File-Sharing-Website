@@ -1,6 +1,7 @@
 'use strict'
 
 const Download = require('../modules/download.js')
+const mock = require('mock-fs')
 
 describe('getFilePath()', () => {
 
@@ -619,6 +620,33 @@ describe('checkUncommonTypes()', () => {
 		const returnVal = await download.checkUncommonTypes()
 
 		expect(returnVal).toBe('generic')
+		done()
+	})
+})
+
+describe('getFileSize()', () => {
+	beforeEach(() => {
+		mock({
+			'files': {
+				'uploads': {
+					'testing': {
+						'a94af.txt': 'a'
+					}
+				}
+			}
+		})
+	})
+
+	afterEach(mock.restore)
+
+	test('returns correct file size in bytes', async done => {
+		expect.assertions(2)
+		const download = await new Download()
+
+		const returnVal = await download.getFileSize('a94af', 'testing', 'txt')
+		expect(returnVal[0]).toBe(1)
+		expect(returnVal[1]).toBe('Bytes')
+
 		done()
 	})
 })
