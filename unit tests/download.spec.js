@@ -240,7 +240,8 @@ describe('generateFileList()', () => {
 		const expectDate = await new Date(26236193 * 60000)
 		const date = await expectDate.toLocaleString()
 
-		const sql = 'INSERT INTO files (hash_id, file_name, extension, user_upload, upload_time, target_user) VALUES(?, ?, ?, ?, ?, ?)'
+		const sql = 'INSERT INTO files (hash_id, file_name, extension, user_upload, upload_time, target_user)' +
+			'VALUES(?, ?, ?, ?, ?, ?)'
 		await download.db.run(sql, 'a94a8fe', 'test.txt', 'txt', 'tester', 26236193, 'testTarget')
 
 		let files = await download.generateFileList('testTarget')
@@ -278,7 +279,8 @@ describe('generateFileList()', () => {
 		const expectDate = await new Date(26236193 * 60000)
 		const date = await expectDate.toLocaleString()
 
-		const sql = 'INSERT INTO files (hash_id, file_name, extension, user_upload, upload_time, target_user) VALUES(?, ?, ?, ?, ?, ?)'
+		const sql = 'INSERT INTO files (hash_id, file_name, extension, user_upload, upload_time, target_user)' +
+			'VALUES(?, ?, ?, ?, ?, ?)'
 		await download.db.run(sql, 'a94a8fe', 'test.txt', 'txt', 'tester', 26236193, 'testTarget')
 		await download.db.run(sql, 'b5453qe', 'main.cpp', 'cpp', 'tester', 26236193, 'testTarget')
 
