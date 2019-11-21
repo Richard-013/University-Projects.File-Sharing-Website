@@ -1,11 +1,21 @@
 /* eslint-disable no-magic-numbers */
 'use strict'
+
+// Imports
 const fs = require('fs-extra')
 const crypto = require('crypto')
 const sqlite = require('sqlite-async')
 
-module.exports = class Upload {
+/**
+ * Upload Module.
+ * @module upload
+ */
 
+module.exports = class Upload {
+	/**
+	* Upload Module constructor that sets up required database and tables.
+	* @class upload
+	*/
 	constructor(dbName = ':memory:') {
 		return (async() => {
 			this.db = await sqlite.open(dbName)
@@ -21,6 +31,15 @@ module.exports = class Upload {
 		})()
 	}
 
+	/**
+	* Uploads a file to the server and the database.
+	* @async
+	* @param   {string} path - Path to the file being uploaded.
+	* @param   {string} originalName - Original name of the file.
+	* @param   {string} sourceUser - Username of the user uploading the file.
+	* @param   {string} targetUser - Username of the user the file is being shared with.
+	* @returns {array} [{int} statusCode, {string} message] - Returns an array with a status code and message to reflect the outcome of the upload
+	*/
 	async uploadFile(path, originalName, sourceUser, targetUser) {
 		// Tests arguments are valid before proceeding
 		if (path === undefined || originalName === undefined) return [1, 'No file or path specified for upload']
@@ -44,6 +63,12 @@ module.exports = class Upload {
 		return serverMessage // Returns message for server to use
 	}
 
+	/**
+	* Checks if a username belongs to a valid user.
+	* @async
+	* @param   {string} username - Username of account being checked.
+	* @returns {boolean} - Returns true if user is valid, false in any other case
+	*/
 	async checkValidUser(username) {
 		try {
 			if(username === undefined) return false // Only runs function when a username is given
@@ -56,6 +81,12 @@ module.exports = class Upload {
 		}
 	}
 
+	/**
+	* Creates a new file name, a hashed ID and a extension for the file being uploaded
+	* @async
+	* @param   {string} name - Name of the file taken straight from the upload form.
+	* @returns {array} ][{string} saveName, {string} hashID, {string} ext] - saveName: name file is saved under, hashID: unique id for file, ext: file extension (type)
+	*/
 	async generateFileDetails(name) {
 		try {
 			const hashID = await this.hashFileName(name) // Hashes the file name without the extension
@@ -68,6 +99,13 @@ module.exports = class Upload {
 		}
 	}
 
+	/**
+	* Takes a status code and the hash ID of the chosen file and returns an appropriate message
+	* @async
+	* @param   {integer} statusCode - Status of the upload operations
+	* @param   {string} name - Name of the file taken straight from the upload form.
+	* @returns {array} ][{integer} result, {string} message] - result: code to mark success or fail of upload, message: returns relevant message based on the statusCode
+	*/
 	async checkUploadRes(statusCode, hashID) {
 		let message = ''
 		switch (statusCode) {
@@ -90,6 +128,14 @@ module.exports = class Upload {
 		}
 	}
 
+	/**
+	* Hashes the name of the file using sha1 standards.
+	* @async
+	* @param   {string} name - Name of the file straight from the upload form.
+	* @returns {string} hashName - Returns a hashed version of the file name (minus the extension), name is hashed using sha1 standard
+	* @throws  {EmptyFileName} No file name passed (fileName).
+	* @throws  {NoExtension} File name is invalid: No extension found (fileName).
+	*/
 	async hashFileName(name) {
 		if (!name) {
 			throw new Error('No file name passed (fileName)') // Throws an error if there is no file name
@@ -106,6 +152,14 @@ module.exports = class Upload {
 		}
 	}
 
+	/**
+	* Separates the extension from the filename.
+	* @async
+	* @param   {string} name - Name of the file straight from the upload form.
+	* @returns {string} ext - Returns the extension of the file as a string
+	* @throws  {EmptyFileName} No file name passed (getExtension).
+	* @throws  {NoExtension} File name is invalid: No extension found (getExtension).
+	*/
 	async getExtension(name) {
 		if (!name) {
 			throw new Error('No file name passed (getExtension)') // If no name is given throw an error
@@ -119,6 +173,16 @@ module.exports = class Upload {
 		}
 	}
 
+	/**
+	* Adds the details of the file and its upload to the database
+	* @async
+	* @param   {string} hashID - Hashed name of the file.
+	* @param   {string} fileName - Name of the file straight from the upload form.
+	* @param   {string} ext - Separated extension of the file as a string.
+	* @param   {string} sourceUser - Username of the user who uploaded the file.
+	* @param   {string} targetUser - Username of the user who the file is being shared with.
+	* @returns {integer} - Returns a status code based on the outcome: 0 for success, -2 file is already uploaded, -3 any other error
+	*/
 	async addToDB(hashID, fileName, ext, sourceUser, targetUser) {
 		try {
 			const argChecks = [hashID, fileName, ext, sourceUser, targetUser]
@@ -144,6 +208,11 @@ module.exports = class Upload {
 		}
 	}
 
+	/**
+	* Adds the details of the file and its upload to the database
+	* @async
+	* @returns {integer} uploadTime - Retuns unix time in minutes (not ms as is the default)
+	*/
 	async getUploadTime() {
 		const time = Date.now() // Gets time in unix time (ms elapsed since 1st January 1970 00:00:00 UTC)
 		const uploadTime = Math.floor(time / 60000) // Converts time in ms to time in minutes
