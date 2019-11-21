@@ -10,7 +10,6 @@ const sqlite = require('sqlite-async')
  * Upload Module.
  * @module upload
  */
-
 module.exports = class Upload {
 	/**
 	* Upload Module constructor that sets up required database and tables.
