@@ -477,6 +477,17 @@ describe('checkUploadRes()', () => {
 
 		done()
 	})
+
+	test('handles status code being passed a string', async done => {
+		expect.assertions(2)
+		const upload = await new Upload()
+
+		const serverMessage = await upload.checkUploadRes('Status: Bad', 'a94a8fe5ccb19ba61c4c0873d391e987982fbbd3')
+		expect(serverMessage[0]).toBe(1)
+		expect(serverMessage[1]).toBe('Something went wrong')
+
+		done()
+	})
 })
 
 describe('hashFileName()', () => {
