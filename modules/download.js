@@ -125,7 +125,7 @@ module.exports = class Download {
 
 	async getFileSize(hashName, username, ext) {
 		if (hashName === undefined || username === undefined || ext === undefined) {
-			throw new Error('Undefined parameters not accepted')
+			throw new Error('Undefined arguments not accepted')
 		}
 		const filepath = `files/uploads/${username}/${hashName}.${ext}`
 		try {
