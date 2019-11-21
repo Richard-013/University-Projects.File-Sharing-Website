@@ -46,8 +46,8 @@ module.exports = class Remove {
 		if (user === undefined || hashName === undefined || extension === undefined) {
 			return false
 		}
-		const exists = fs.existsSync(`files/uploads/${user}/${hashName}.${extension}`)
-		return exists
+		// Uses synchronous function as it determines whether or not to perform file operations, so it needs to block
+		return fs.existsSync(`files/uploads/${user}/${hashName}.${extension}`)
 	}
 
 	async getExtension(user, hashName) {
