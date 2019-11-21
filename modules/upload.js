@@ -30,11 +30,11 @@ module.exports = class Upload {
 		if (validPath[0] === 1) return validPath
 
 		// Checks if a directory already exists for the user
-		if (fs.existsSync(`files/uploads/${sourceUser}`) !== true) {
-			fs.mkdirSync(`files/uploads/${sourceUser}`, { recursive: true }) // Make a directory if it doesn't exist
-		}
-		// Generates the required file information
-		const fileDetails = await this.generateFileDetails(originalName)
+		await Promise.all([fs.stat('files'), fs.stat('files/uploads'), fs.stat(`files/uploads/${sourceUser}`)])
+			.catch(() => {
+				fs.mkdir(`files/uploads/${sourceUser}`, { recursive: true }) // Make relevant directories if they don't exist
+			})
+
 		if (fileDetails === 1) return [1, 'An error occurred whilst prepping your file for upload']
 		// Copies the file to the server
 		await fs.copy(path, `files/uploads/${sourceUser}/${fileDetails[0]}`)
