@@ -35,11 +35,11 @@ module.exports = class Upload {
 				fs.mkdir(`files/uploads/${sourceUser}`, { recursive: true }) // Make relevant directories if they don't exist
 			})
 
+		const fileDetails = await this.generateFileDetails(originalName) // Generates the required file information
 		if (fileDetails === 1) return [1, 'An error occurred whilst prepping your file for upload']
-		// Copies the file to the server
-		await fs.copy(path, `files/uploads/${sourceUser}/${fileDetails[0]}`)
-		// Adds file details to the database
-		const dbInsert = await this.addToDB(fileDetails[1], originalName, fileDetails[2], sourceUser, targetUser)
+
+		await fs.copy(path, `files/uploads/${sourceUser}/${fileDetails[0]}`) // Copies the file to the server
+		const dbInsert = await this.addToDB(fileDetails[1], originalName, fileDetails[2], sourceUser, targetUser) // Adds file details to the database
 		const serverMessage = await this.checkUploadRes(dbInsert, fileDetails[1])
 		return serverMessage // Returns message for server to use
 	}
