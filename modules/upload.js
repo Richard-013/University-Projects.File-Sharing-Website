@@ -9,12 +9,14 @@ module.exports = class Upload {
 	constructor(dbName = ':memory:') {
 		return (async() => {
 			this.db = await sqlite.open(dbName)
-			// Creates a table to store details about uploaded files
 			const sqlFiles = 'CREATE TABLE IF NOT EXISTS files' +
-				'(hash_id TEXT PRIMARY KEY, file_name TEXT, extension TEXT, user_upload TEXT, upload_time INTEGER, target_user TEXT);'
-			await this.db.run(sqlFiles)
-			const sqlUsers = 'CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, user TEXT, pass TEXT);'
-			await this.db.run(sqlUsers)
+				'(hash_id TEXT PRIMARY KEY, file_name TEXT, extension TEXT,' +
+				'user_upload TEXT, upload_time INTEGER, target_user TEXT);'
+			await this.db.run(sqlFiles) // Creates a table to store details about uploaded files if it doesn't exist
+
+			const sqlUsers = 'CREATE TABLE IF NOT EXISTS users' +
+				'(id INTEGER PRIMARY KEY AUTOINCREMENT, user TEXT, pass TEXT);'
+			await this.db.run(sqlUsers) // Creates a table to store user details if it doesn't exist
 			return this
 		})()
 	}
