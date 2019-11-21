@@ -5,7 +5,15 @@
 const sqlite = require('sqlite-async')
 const fs = require('fs-extra')
 
+/**
+ * Download Module.
+ * @module download
+ */
 module.exports = class Download {
+	/**
+	* Download Module constructor that sets up required database and tables.
+	* @class download
+	*/
 	constructor(dbName = ':memory:', siteURL = 'http://localhost:8080') {
 		return (async() => {
 			this.siteURL = siteURL
@@ -19,6 +27,18 @@ module.exports = class Download {
 		})()
 	}
 
+	/**
+	* Gets the filepath to the desired file on the server for a user so they can download it.
+	* @async
+	* @param   {string} current - Username of the currently logged in user.
+	* @param   {string} source - Username of the user who uploaded the file.
+	* @param   {string} hash - Hash ID of the file.
+	* @returns {string} filePath - Path to file on the server
+	* @throws  {EmptyCurrentUsername} User not logged in.
+	* @throws  {EmptySourceUsername} No username given, file cannot be located.
+	* @throws  {EmptyHashID} No file name given, file cannot be located.
+	* @throws  {InvalidAccess} Invalid access permissions.
+	*/
 	async getFilePath(current, source, hash) {
 		if (current === undefined || current === '') throw new Error('User not logged in')
 		if (source === undefined || source === '') throw new Error('No username given, file cannot be located')
@@ -34,6 +54,14 @@ module.exports = class Download {
 		}
 	}
 
+	/**
+	* Verifys that a user has access to the selected file
+	* @async
+	* @param   {string} hashName - Hash ID of the file.
+	* @param   {string} sourceUser - Username of the user who uploaded the file.
+	* @param   {string} currentUser - Username of the currently logged in user.
+	* @returns {boolean} true if the user has access, false if they do not or if the file does not exist
+	*/
 	async verifyUserAccess(hashName, sourceUser, currentUser) {
 		if (hashName === undefined || sourceUser === undefined || currentUser === undefined) return false
 		try {
@@ -47,6 +75,14 @@ module.exports = class Download {
 		}
 	}
 
+	/**
+	* Get all files available to the current user
+	* Each subarray returned is formatted: [hashID, fileName, sourceUser, fileExtension, timeOfUpload]
+	* @async
+	* @param   {string} currentUser - Username of the currently logged in user.
+	* @returns {array} returns an array of arrays, each sub-array containing of file information
+	* @returns {integer} returns a status code if something goes wrong
+	*/
 	async getAvailableFiles(currentUser) {
 		// Gets the file name and user for all available files
 		if (currentUser === undefined || currentUser === '') return 1 // Returns status code
@@ -64,11 +100,23 @@ module.exports = class Download {
 		}
 	}
 
+	/**
+	* Determines the category/type of file, this is used to assign files an icon when displayed in the list
+	* @async
+	* @param   {string} extension - File extension such as 'txt' or 'docx' (Do not include the .)
+	* @returns {string} returns the file category as a string such as 'generic' or 'audio'
+	*/
 	async determineFileCat(extension) {
 		if(extension === undefined) return 'generic'
 		return this.checkCommonTypes(extension) // Determines file type category
 	}
 
+	/**
+	* Compares the extension to lists of common extension types to determine category
+	* @async
+	* @param   {string} extension - File extension such as 'txt' or 'docx' (Do not include the .)
+	* @returns {string} returns the file category as a string
+	*/
 	async checkCommonTypes(extension) {
 		// Checks if file is an audio file
 		const audio = ['aif', 'cda', 'mid', 'midi', 'mp3', 'mpa', 'ogg', 'wav', 'wma', 'wpl']
@@ -95,6 +143,13 @@ module.exports = class Download {
 		return await this.checkUncommonTypes(extension)
 	}
 
+	/**
+	* Compares the extension to lists of uncommon extension types if category was not determined by common types
+	* @async
+	* @param   {string} extension - File extension such as 'txt' or 'docx' (Do not include the .)
+	* @returns {string} returns the file category as a string such as 'web' or 'fonts'
+	* @returns {string} returns the file category as a 'generic' if it cannot be identified
+	*/
 	async checkUncommonTypes(extension) {
 		// Checks if file is a font file
 		const fonts = ['fnt', 'fon', 'otf', 'ttf']
@@ -121,6 +176,18 @@ module.exports = class Download {
 		return 'generic'
 	}
 
+	/**
+	* Determines the size of a file on the server
+	* @async
+	* @param   {string} hashName - Hash ID of the file
+	* @param   {string} username - Username of the user who uploaded the file
+	* @param   {string} ext - File extension such as 'txt' or 'docx' (Do not include the .)
+	* @returns {string} if size is under 1024 bytes, file size is returned in a string such as '24 Bytes'
+	* @returns {string} if size is under 1024 kilobytes, file size is returned in a string such as '560 KB'
+	* @returns {string} if size is over 1024 kilobytes, file size is returned in a string such as '78 MB'
+	* @returns {string} if size cannot be determined returns 'N/A'
+	* @throws  {EmptyArgument} Undefined arguments not accepted.
+	*/
 	async getFileSize(hashName, username, ext) {
 		if (hashName === undefined || username === undefined || ext === undefined) {
 			throw new Error('Undefined arguments not accepted')
@@ -144,6 +211,15 @@ module.exports = class Download {
 		}
 	}
 
+	/**
+	* Generates an array of objects which contain information about each available file
+	* File info objects contain the following fields: fileName, uploader, fileType, fileSize, fileCat, timeTillDelete, dateUploaded, url
+	* @async
+	* @param   {string} currentUser - Username of the user currently logged in.
+	* @returns {array} returns an array of objects that give information on each file
+	* @throws  {DatabaseError} Database error.
+	* @throws  {NotLoggedIn} User not logged in.
+	*/
 	async generateFileList(currentUser) {
 		const availableFiles = await this.getAvailableFiles(currentUser)
 		if (availableFiles === -1) throw new Error('Database error')
