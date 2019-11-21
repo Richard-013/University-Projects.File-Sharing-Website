@@ -122,7 +122,7 @@ describe('removeFile()', () => {
 		done()
 	})
 
-	test('handles null extension correctly when a db error occurs before extension is retrieved', async done => {
+	test('handles extension correctly when a db error occurs before extension is retrieved', async done => {
 		expect.assertions(1)
 		const remove = await new Remove()
 
@@ -273,7 +273,7 @@ describe('getExtension()', () => {
 		done()
 	})
 
-	test('returns null if an error occurs', async done => {
+	test('returns undefined if an error occurs', async done => {
 		expect.assertions(1)
 		const remove = await new Remove()
 
@@ -282,7 +282,7 @@ describe('getExtension()', () => {
 		await remove.db.run(sql)
 
 		const extension = await remove.getExtension('testing', 'a94a8fe5ccb19ba61c4c0873d391e987982fbbd3')
-		expect(extension).toBe(null)
+		expect(extension).toBe(undefined)
 		done()
 	})
 })
