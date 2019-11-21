@@ -1,10 +1,19 @@
 /* eslint-disable no-magic-numbers */
 'use strict'
 
+// Module Imports
 const sqlite = require('sqlite-async')
 const fs = require('fs')
 
+/**
+ * Remove Module.
+ * @module remove
+ */
 module.exports = class Remove {
+	/**
+	* Remove Module constructor that sets up required database and table.
+	* @class remove
+	*/
 	constructor(dbName = ':memory:') {
 		return (async() => {
 			this.db = await sqlite.open(dbName)
@@ -17,6 +26,14 @@ module.exports = class Remove {
 		})()
 	}
 
+	/**
+	* Removes a file from the server and the database.
+	* @async
+	* @param   {string} user - Username of the user who uploaded the file.
+	* @param   {string} hashName - Hash ID of the file.
+	* @param   {string} extension - File extension as a string (Can be left empty and extension will be found).
+	* @returns {integer} returns a status code based on outcome of function.
+	*/
 	async removeFile(user, hashName, extension) {
 		if (user === undefined || hashName === undefined) return 3
 		// If the extension is not provided, get it from the db
@@ -42,6 +59,14 @@ module.exports = class Remove {
 		}
 	}
 
+	/**
+	* Checks if a file exists or not, is a blocking function as it decides whether to perform server-side deletions.
+	* @async
+	* @param   {string} user - Username of the user who uploaded the file.
+	* @param   {string} hashName - Hash ID of the file.
+	* @param   {string} extension - File extension as a string (Can be left empty and extension will be found).
+	* @returns {boolean} returns true if the file exists on the server, false if not.
+	*/
 	async doesFileExist(user, hashName, extension) {
 		if (user === undefined || hashName === undefined || extension === undefined) {
 			return false
@@ -50,6 +75,14 @@ module.exports = class Remove {
 		return fs.existsSync(`files/uploads/${user}/${hashName}.${extension}`)
 	}
 
+	/**
+	* Gets the extension of a file from the database.
+	* @async
+	* @param   {string} user - Username of the user who uploaded the file.
+	* @param   {string} hashName - Hash ID of the file.
+	* @returns {string} returns the extension in string format.
+	* @returns {undefined} returns undefined if extension cannot be found.
+	*/
 	async getExtension(user, hashName) {
 		try {
 			// Get extension of file from db if it is not provided
@@ -65,12 +98,27 @@ module.exports = class Remove {
 		}
 	}
 
+	/**
+	* Removes a file from the server.
+	* @async
+	* @param   {string} user - Username of the user who uploaded the file.
+	* @param   {string} hashName - Hash ID of the file.
+	* @param   {string} ext - Extension of the file.
+	* @returns {integer} returns 0 on success.
+	*/
 	async removeFileFromServer(user, hashName, ext) {
-		// Remove file from the server
-		fs.unlinkSync(`files/uploads/${user}/${hashName}.${ext}`)
+		await fs.unlinkSync(`files/uploads/${user}/${hashName}.${ext}`)
 		return 0
 	}
 
+	/**
+	* Removes a file from the database.
+	* @async
+	* @param   {string} user - Username of the user who uploaded the file.
+	* @param   {string} hashName - Hash ID of the file.
+	* @param   {string} ext - Extension of the file.
+	* @returns {integer} returns 0 on success, -1 if it doesn't exist, -2 if an error occurs.
+	*/
 	async removeFileFromDB(user, hashName, ext) {
 		try {
 			// Checks if the file exists before it runs the deletion
@@ -87,6 +135,13 @@ module.exports = class Remove {
 		}
 	}
 
+	/**
+	* Creates a list of all files that have existed for at least three days.
+	* Each subarray returned is formatted: [hashID, fileName, sourceUser, fileExtension, timeOfUpload]
+	* @async
+	* @returns {array} returns an array of arrays, where each subarray contains information about the file.
+	* @throws  {DatabaseIssue} An issue occured when checking for expired files.
+	*/
 	async getExpiredFiles() {
 		const time = Math.floor(Date.now() / 60000) - 4320 // Gets the date of three days ago
 		const sql = `SELECT * FROM files WHERE upload_time <= ${time};`
@@ -102,6 +157,12 @@ module.exports = class Remove {
 		}
 	}
 
+	/**
+	* Removes old files from the server and the database.
+	* @async
+	* @returns {integer} returns 0 on success, 1 if there are no expired files.
+	* @throws  {DeleteIssue} There was an error whilst removing old files.
+	*/
 	async removeExpiredFiles() {
 		try {
 			const expiredFiles = await this.getExpiredFiles()
