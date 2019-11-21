@@ -43,7 +43,7 @@ module.exports = class Remove {
 	}
 
 	async doesFileExist(user, hashName, extension) {
-		if (user === undefined || hashName === undefined || extension === undefined || extension === null) {
+		if (user === undefined || hashName === undefined || extension === undefined) {
 			return false
 		}
 		const exists = fs.existsSync(`files/uploads/${user}/${hashName}.${extension}`)
@@ -61,7 +61,7 @@ module.exports = class Remove {
 				return result.extension
 			}
 		} catch (err) {
-			return null
+			return undefined
 		}
 	}
 
