@@ -17,13 +17,12 @@ module.exports = class Remove {
 		})()
 	}
 
-	// eslint-disable-next-line complexity
 	async removeFile(user, hashName, extension) {
 		if (user === undefined || hashName === undefined) return 3
 		// If the extension is not provided, get it from the db
 		let ext = extension
 		if(ext === undefined) ext = await this.getExtension(user, hashName)
-		if (ext !== undefined && ext !== null) {
+		if (ext !== undefined) {
 			const fileExists = await this.doesFileExist(user, hashName, ext)
 			let serverStatus = undefined
 			let dbStatus = undefined
@@ -37,7 +36,6 @@ module.exports = class Remove {
 				dbStatus = await this.removeFileFromDB(user, hashName, ext)
 			}
 			if (dbStatus === 0 && serverStatus === 0) return 0
-			else if (serverStatus === undefined && dbStatus === 0) return 0 // File in db but not on server
 			else return dbStatus // Database issue
 		} else {
 			return 4
