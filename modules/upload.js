@@ -46,10 +46,10 @@ module.exports = class Upload {
 
 	async checkValidUser(username) {
 		try {
-			if(username === undefined) return false
+			if(username === undefined) return false // Only runs function when a username is given
 			const sql = 'SELECT COUNT(user) as records FROM users WHERE user = ?;'
-			const data = await this.db.get(sql, username)
-			if (data.records > 0) return true
+			const data = await this.db.get(sql, username) // Checks for the username existing in the users table
+			if (data.records > 0) return true // Returns true if a matching username is found in the table
 			return false
 		} catch (err) {
 			return false
