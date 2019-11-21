@@ -28,9 +28,16 @@ describe('uploadFile()', () => {
 		// Upload
 		const returnVal = await upload.uploadFile('testing/dummy.txt', 'dummy.txt', 'testing', 'testTarget')
 		const expectName = await upload.hashFileName('dummy.txt')
+
 		// Check upload success
-		const existing = fs.existsSync(`files/uploads/testing/${expectName}.txt`)
+		let existing = false
+		await fs.stat(`files/uploads/testing/${expectName}.txt`, (err) => {
+			if (err) throw err
+		})
+		existing = true // If stat executes successfully existing will be true, else an error is thrown before this line is executed
+
 		expect(existing).toBeTruthy()
+
 		// Checks return value was correct
 		expect(returnVal[0]).toBe(0)
 		expect(returnVal[1]).toBe(expectName)
@@ -39,7 +46,7 @@ describe('uploadFile()', () => {
 	})
 
 	test('directory path is created if it does not exist', async done => {
-		expect.assertions(4)
+		expect.assertions(3)
 		const upload = await new Upload()
 
 		// Adds users to database
@@ -48,17 +55,19 @@ describe('uploadFile()', () => {
 		sql = 'INSERT INTO users(user, pass) VALUES(?, ?);'
 		await upload.db.run(sql, 'testTarget', 'beefyPassword2')
 
-		// Checks that the folder does not exist
-		if (fs.existsSync('files/uploads/testing')) {
-			fs.rmdirSync('files/uploads/testing', { recursive: true })
-		}
-
-		expect(fs.existsSync('files/uploads/testing')).toBeFalsy()
 		const expectName = await upload.hashFileName('dummy.txt')
 
 		// Upload file to directory and check directory was created
 		const returnVal = await upload.uploadFile('testing/dummy.txt', 'dummy.txt', 'testing', 'testTarget')
-		expect(fs.existsSync('files/uploads/testing')).toBeTruthy() // Checks that the folder was created successfully
+
+		let existing = false
+		await fs.stat('files/uploads/testing', (err) => {
+			if (err) throw err
+		})
+		existing = true
+
+		expect(existing).toBeTruthy() // Checks that the folder was created successfully
+
 		// Checks return value was correct
 		expect(returnVal[0]).toBe(0)
 		expect(returnVal[1]).toBe(expectName)
@@ -75,21 +84,39 @@ describe('uploadFile()', () => {
 		sql = 'INSERT INTO users(user, pass) VALUES(?, ?);'
 		await upload.db.run(sql, 'testTarget', 'beefyPassword2')
 
-		if (fs.existsSync('files/uploads/testing') === false) {
-			// Creates the folder
-			fs.mkdirSync('files/uploads/testing', { recursive: true })
-		}
+		// Creates the folder
+		fs.mkdir('files/uploads/testing', { recursive: true }, err => {
+			if (err) throw err
+		})
+		fs.writeFile('files/uploads/testing/exist.txt', 'This file exists', err => {
+			if (err) throw err
+		})
 
-		expect(fs.existsSync('files/uploads/testing')).toBeTruthy()
+		let folderExists = false
+		await fs.stat('files/uploads/testing', (err) => {
+			if (err) throw err
+		})
+		folderExists = true
+		expect(folderExists).toBeTruthy()
 
 		// Upload file to directory
 		const returnVal = await upload.uploadFile('testing/dummy.txt', 'dummy.txt', 'testing', 'testTarget')
 		const expectName = await upload.hashFileName('dummy.txt')
 
 		// Checks that the folder was not removed
-		expect(fs.existsSync('files/uploads/testing')).toBeTruthy()
-		// Checks that the folder was not created inside the existing directory
-		expect(fs.existsSync('files/uploads/testing/testing')).toBeFalsy()
+		let existing = false
+		await fs.stat('files/uploads/testing', (err) => {
+			if (err) throw err
+		})
+		existing = true
+		expect(existing).toBeTruthy()
+		// Checks that the contents of the folder were not deleted
+		let fileExists = false
+		await fs.stat('files/uploads/testing/exist.txt', (err) => {
+			if (err) throw err
+		})
+		fileExists = true
+		expect(fileExists).toBeTruthy()
 		// Checks return value was correct
 		expect(returnVal[0]).toBe(0)
 		expect(returnVal[1]).toBe(expectName)
