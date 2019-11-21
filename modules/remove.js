@@ -72,19 +72,15 @@ module.exports = class Remove {
 	}
 
 	async removeFileFromDB(user, hashName, ext) {
-		// Remove file from the database
 		try {
 			// Checks if the file exists before it runs the deletion
 			const sqlSelect = 'SELECT COUNT(hash_id) as records FROM files WHERE user_upload = ? AND hash_id = ?;'
 			const checkExists = await this.db.get(sqlSelect, user, hashName)
 			// If the file is not in the database, return appropriate status code
-			if(checkExists.records === 0) {
-				return -1
-			}
+			if(checkExists.records === 0) return -1
 
 			const sqlDel = 'DELETE FROM files WHERE hash_id = ? AND extension = ? AND user_upload = ?;'
 			this.db.run(sqlDel, hashName, ext, user)
-
 			return 0
 		} catch (err) {
 			return -2
