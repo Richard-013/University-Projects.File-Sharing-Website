@@ -32,7 +32,12 @@ describe('removeFile()', () => {
 		const checkDB = await remove.db.get(sqlSelect, 'testing', 'a94a8fe5ccb19ba61c4c0873d391e987982fbbd3')
 
 		// Check the mocked upload worked
-		expect(fs.existsSync('files/uploads/testing/a94a8fe5ccb19ba61c4c0873d391e987982fbbd3.txt')).toBeTruthy()
+		let existing = false
+		await fs.stat('files/uploads/testing/a94a8fe5ccb19ba61c4c0873d391e987982fbbd3.txt', (err) => {
+			if (err) throw err
+		})
+		existing = true // If stat executes successfully existing will be true, else an error is thrown before this line is executed
+		expect(existing).toBeTruthy()
 		expect(checkDB.records).not.toBe(0)
 
 		// Removes the file from the database and the server
@@ -99,7 +104,12 @@ describe('removeFile()', () => {
 		const checkDB = await remove.db.get(sqlSelect, 'testing', 'a94a8fe5ccb19ba61c4c0873d391e987982fbbd3')
 
 		// Check the mocked upload worked
-		expect(fs.existsSync('files/uploads/testing/a94a8fe5ccb19ba61c4c0873d391e987982fbbd3.txt')).toBeTruthy()
+		let existing = false
+		await fs.stat('files/uploads/testing/a94a8fe5ccb19ba61c4c0873d391e987982fbbd3.txt', (err) => {
+			if (err) throw err
+		})
+		existing = true
+		expect(existing).toBeTruthy()
 		expect(checkDB.records).not.toBe(0)
 
 		// Removes the file from the database and the server, without giving the extension
@@ -225,15 +235,6 @@ describe('doesFileExist()', () => {
 		done()
 	})
 
-	test('returns false if extension is null', async done => {
-		expect.assertions(1)
-		const remove = await new Remove()
-
-		// Runs doesFileExist with null extension
-		expect(await remove.doesFileExist('test', 'a94a8fe', null)).toBeFalsy()
-		done()
-	})
-
 	test('returns false if no arguments given', async done => {
 		expect.assertions(1)
 		const remove = await new Remove()
@@ -308,14 +309,20 @@ describe('removeFileFromServer()', () => {
 		})
 
 		// Check the mocked upload worked
-		expect(fs.existsSync('files/uploads/testing/a94a8fe5ccb19ba61c4c0873d391e987982fbbd3.txt')).toBeTruthy()
+		let existing = false
+		await fs.stat('files/uploads/testing/a94a8fe5ccb19ba61c4c0873d391e987982fbbd3.txt', (err) => {
+			if (err) throw err
+		})
+		existing = true
+		expect(existing).toBeTruthy()
 
 		// Remove the file from the server
 		const returnVal = await remove.removeFileFromServer(
 			'testing', 'a94a8fe5ccb19ba61c4c0873d391e987982fbbd3', 'txt')
 
 		// Test if removal was a success
-		expect(fs.existsSync('files/uploads/testing/a94a8fe5ccb19ba61c4c0873d391e987982fbbd3.txt')).toBeFalsy()
+		await expect(fs.stat('files/uploads/testing/a94a8fe5ccb19ba61c4c0873d391e987982fbbd3.txt'))
+			.rejects.toThrow()
 		expect(returnVal).toBe(0)
 
 		done() // Finish the test
@@ -507,8 +514,10 @@ describe('removeExpiredFiles()', () => {
 		expect(returnVal).toBe(0) // Check for successful execution
 
 		// Check files were removed
-		expect(fs.existsSync('files/uploads/testing/a94a8fe.txt')).toBeFalsy()
-		expect(fs.existsSync('files/uploads/testing/b05b9gf.cpp')).toBeFalsy()
+		await expect(fs.stat('files/uploads/testing/a94a8fe.txt'))
+			.rejects.toThrow()
+		await expect(fs.stat('files/uploads/testing/b05b9gf.cpp'))
+			.rejects.toThrow()
 
 		expect(stubDate).toHaveBeenCalled() // Checks the stub was called
 
@@ -542,9 +551,19 @@ describe('removeExpiredFiles()', () => {
 
 		expect(returnVal).toBe(1) // Check for successful execution
 
-		// Check files were removed
-		expect(fs.existsSync('files/uploads/testing/a94a8fe.txt')).toBeTruthy()
-		expect(fs.existsSync('files/uploads/testing/b05b9gf.cpp')).toBeTruthy()
+		// Check files were not removed
+		let existing = false
+		await fs.stat('files/uploads/testing/a94a8fe.txt', (err) => {
+			if (err) throw err
+		})
+		existing = true
+		expect(existing).toBeTruthy()
+		existing = false
+		await fs.stat('files/uploads/testing/a94a8fe.txt', (err) => {
+			if (err) throw err
+		})
+		existing = true
+		expect(existing).toBeTruthy()
 
 		expect(stubDate).toHaveBeenCalled() // Checks the stub was called
 
