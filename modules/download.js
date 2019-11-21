@@ -11,7 +11,8 @@ module.exports = class Download {
 			this.db = await sqlite.open(dbName)
 			// Creates a table to store details about uploaded files
 			const sqlFiles = 'CREATE TABLE IF NOT EXISTS files' +
-				'(hash_id TEXT PRIMARY KEY, file_name TEXT, extension TEXT, user_upload TEXT, upload_time INTEGER, target_user TEXT);'
+				'(hash_id TEXT PRIMARY KEY, file_name TEXT, extension TEXT,' +
+				'user_upload TEXT, upload_time INTEGER, target_user TEXT);'
 			await this.db.run(sqlFiles)
 			return this
 		})()
