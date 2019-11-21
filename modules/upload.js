@@ -107,17 +107,14 @@ module.exports = class Upload {
 	}
 
 	async getExtension(name) {
-		// If no name is given throw an error
 		if (!name) {
-			throw new Error('No file name passed (getExtension)')
+			throw new Error('No file name passed (getExtension)') // If no name is given throw an error
 		}
 		const nameSplit = name.split('.')
-		// If a file doesn't have an extension throw an error
 		if (nameSplit.length <= 1) {
-			throw new Error('File name is invalid: No extension found (getExtension)')
+			throw new Error('File name is invalid: No extension found (getExtension)') // If a file doesn't have an extension throw an error
 		} else {
-			// Gets the extension from the end of the file name
-			const ext = nameSplit.pop()
+			const ext = nameSplit.pop() // Gets the extension from the end of the file name
 			return ext
 		}
 	}
