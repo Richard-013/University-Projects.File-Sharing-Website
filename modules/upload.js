@@ -91,14 +91,12 @@ module.exports = class Upload {
 	}
 
 	async hashFileName(name) {
-		// Throws an error if there is no file name
 		if (!name) {
-			throw new Error('No file name passed (fileName)')
+			throw new Error('No file name passed (fileName)') // Throws an error if there is no file name
 		}
 		const nameSplit = name.split('.')
-		// Throws an error if there is no extension
 		if (nameSplit.length <= 1) {
-			throw new Error('File name is invalid: No extension found (fileName)')
+			throw new Error('File name is invalid: No extension found (fileName)') // Throws an error if there is no extension
 		} else {
 			nameSplit.pop()
 			const nameNoExt = nameSplit.join()
