@@ -754,7 +754,7 @@ describe('getFileSize()', () => {
 		const download = await new Download()
 
 		await expect(download.getFileSize(undefined, 'testing', 'txt')).rejects
-			.toEqual(Error('Undefined parameters not accepted'))
+			.toEqual(Error('Undefined arguments not accepted'))
 		done()
 	})
 
@@ -763,7 +763,7 @@ describe('getFileSize()', () => {
 		const download = await new Download()
 
 		await expect(download.getFileSize('hk47ad.db', undefined, 'txt')).rejects
-			.toEqual(Error('Undefined parameters not accepted'))
+			.toEqual(Error('Undefined arguments not accepted'))
 		done()
 	})
 
@@ -772,7 +772,7 @@ describe('getFileSize()', () => {
 		const download = await new Download()
 
 		await expect(download.getFileSize('123abc', 'testing', undefined)).rejects
-			.toEqual(Error('Undefined parameters not accepted'))
+			.toEqual(Error('Undefined arguments not accepted'))
 		done()
 	})
 
@@ -781,7 +781,7 @@ describe('getFileSize()', () => {
 		const download = await new Download()
 
 		await expect(download.getFileSize()).rejects
-			.toEqual(Error('Undefined parameters not accepted'))
+			.toEqual(Error('Undefined arguments not accepted'))
 		done()
 	})
 })
