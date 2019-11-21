@@ -1,6 +1,7 @@
 /* eslint-disable no-magic-numbers */
 'use strict'
 
+// Module Imports
 const sqlite = require('sqlite-async')
 const fs = require('fs-extra')
 
@@ -24,9 +25,8 @@ module.exports = class Download {
 		if (hash === undefined || hash === '') throw new Error('No file name given, file cannot be located')
 		if (await this.verifyUserAccess(hash, source, current) === false) throw new Error('Invalid access permissions')
 		else {
-			// Runs sql to find stored file name
 			const sql = 'SELECT * FROM files WHERE user_upload = ? AND hash_id = ?;'
-			const record = await this.db.get(sql, source, hash)
+			const record = await this.db.get(sql, source, hash) // Runs sql to find stored file name
 			const ext = record.extension
 			// Combines the hashed file name and extension with the user's username to generate the file path
 			const filePath = `files/uploads/${source}/${hash}.${ext}`
@@ -37,38 +37,36 @@ module.exports = class Download {
 	async verifyUserAccess(hashName, sourceUser, currentUser) {
 		if (hashName === undefined || sourceUser === undefined || currentUser === undefined) return false
 		try {
-			// Checks that the current user is allowed to download chosen file
 			const sql = 'SELECT * FROM files WHERE user_upload = ? AND hash_id = ?;'
-			const file = await this.db.get(sql, sourceUser, hashName)
+			const file = await this.db.get(sql, sourceUser, hashName) // Checks that the current user is allowed to download chosen file
 			if (file === undefined) return false
-			else if (file.target_user === currentUser) return true
+			else if (file.target_user === currentUser) return true // If user has access, return true
 			else return false
 		} catch (err) {
-			return false
+			return false // If the file does not exist or permissions cannot be checked, return false
 		}
 	}
 
 	async getAvailableFiles(currentUser) {
 		// Gets the file name and user for all available files
-		if (currentUser === undefined || currentUser === '') return 1
+		if (currentUser === undefined || currentUser === '') return 1 // Returns status code
 		const files = []
 		try {
 			const sql = 'SELECT * FROM files WHERE target_user = ?;'
 			await this.db.each(sql, [currentUser], (_err, row) => {
 				const file = [row.hash_id, row.file_name, row.user_upload, row.extension, row.upload_time]
-				files.push(file)
+				files.push(file) // Adds retrieved data to the files array
 			})
 
 			return files
 		} catch (error) {
-			return -1
+			return -1 // Returns status code
 		}
 	}
 
 	async determineFileCat(extension) {
-		// Determines file type category for use with icons on file list
 		if(extension === undefined) return 'generic'
-		return this.checkCommonTypes(extension)
+		return this.checkCommonTypes(extension) // Determines file type category
 	}
 
 	async checkCommonTypes(extension) {
@@ -142,7 +140,7 @@ module.exports = class Download {
 				}
 			}
 		} catch (err) {
-			return 'N/A'
+			return 'N/A' // Returns N/A if file size cannot be determined
 		}
 	}
 
@@ -154,18 +152,17 @@ module.exports = class Download {
 			const fileList = []
 			for (const file of availableFiles) {
 				const uploadDate = await new Date(file[4] * 60000)
-				const fileInfo = {
+				const fileInfo = { // Creates an object filled with file information
 					fileName: file[1],
 					uploader: file[2],
 					fileType: file[3],
 					fileSize: await this.getFileSize(file[0], file[2], file[3]),
 					fileCat: await this.determineFileCat(file[3]),
-					// Converts time into hours till deletion
-					timeTillDelete: await Math.floor(Math.floor(file[4] - (Date.now() - 259200000) / 60000) / 60),
+					timeTillDelete: await Math.floor(Math.floor(file[4] - (Date.now() - 259200000) / 60000) / 60), // Converts time into hours till deletion
 					dateUploaded: await uploadDate.toLocaleString(), // Converts stored time into the upload date
 					url: `${this.siteURL}/file?h=${file[0]}&u=${file[2]}` // Generates share url
 				}
-				fileList.push(fileInfo)
+				fileList.push(fileInfo) // Adds object to array of files
 			}
 			return fileList
 		}
