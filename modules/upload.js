@@ -21,12 +21,14 @@ module.exports = class Upload {
 		})()
 	}
 
-	// eslint-disable-next-line complexity
 	async uploadFile(path, originalName, sourceUser, targetUser) {
+		// Tests arguments are valid before proceeding
 		if (path === undefined || originalName === undefined) return [1, 'No file or path specified for upload']
-		if (sourceUser === undefined || await this.checkValidUser(sourceUser) === false) return [1, 'Invalid user attempted upload']
-		if (targetUser === undefined || await this.checkValidUser(targetUser) === false) return [1, 'Selected user does not exist']
-		if (fs.existsSync(path) === false) return [1, 'Selected file does not exist']
+		if (await this.checkValidUser(sourceUser) === false) return [1, 'Invalid user attempted upload']
+		if (await this.checkValidUser(targetUser) === false) return [1, 'Selected user does not exist']
+		const validPath = await fs.stat(path).catch(() => [1, 'Selected file does not exist'])
+		if (validPath[0] === 1) return validPath
+
 		// Checks if a directory already exists for the user
 		if (fs.existsSync(`files/uploads/${sourceUser}`) !== true) {
 			fs.mkdirSync(`files/uploads/${sourceUser}`, { recursive: true }) // Make a directory if it doesn't exist
