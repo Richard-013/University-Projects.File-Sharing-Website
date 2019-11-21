@@ -70,22 +70,21 @@ module.exports = class Upload {
 
 	async checkUploadRes(statusCode, hashID) {
 		let message = ''
-		// Uses the status code from addToDB to determine the appropriate message to give the user
 		switch (statusCode) {
-			case 0:
+			case 0: // Success case
 				if (hashID === undefined || hashID === '') {
 					message = 'No hashID given'
 				} else {
 					message = hashID
 				}
 				return [0, message]
-			case -2:
+			case -2: // Error case 1
 				message = 'User has already uploaded a file with the same name'
 				return [1, message]
-			case -3:
+			case -3: // Error case 2
 				message = 'Database error has occurred, please try again'
 				return [1, message]
-			default:
+			default: // Any other case defaults here
 				message = 'Something went wrong'
 				return [1, message]
 		}
