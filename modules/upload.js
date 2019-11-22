@@ -10,10 +10,12 @@ const sqlite = require('sqlite-async')
  * Upload Module.
  * @module upload
  */
+
 module.exports = class Upload {
 	/**
 	* Upload Module constructor that sets up required database and tables.
 	* @class upload
+	* @memberof module:upload
 	*/
 	constructor(dbName = ':memory:') {
 		return (async() => {
@@ -33,6 +35,7 @@ module.exports = class Upload {
 	/**
 	* Uploads a file to the server and the database.
 	* @async
+	* @memberof module:upload
 	* @param   {string} path - Path to the file being uploaded.
 	* @param   {string} originalName - Original name of the file.
 	* @param   {string} sourceUser - Username of the user uploading the file.
@@ -66,6 +69,7 @@ module.exports = class Upload {
 	/**
 	* Checks if a username belongs to a valid user.
 	* @async
+	* @memberof module:upload
 	* @param   {string} username - Username of account being checked.
 	* @returns {boolean} - Returns true if user is valid, false in any other case
 	*/
@@ -84,6 +88,7 @@ module.exports = class Upload {
 	/**
 	* Creates a new file name, a hashed ID and a extension for the file being uploaded
 	* @async
+	* @memberof module:upload
 	* @param   {string} name - Name of the file taken straight from the upload form.
 	* @returns {array} ][{string} saveName, {string} hashID, {string} ext] - saveName: name file is saved under, hashID: unique id for file, ext: file extension (type)
 	*/
@@ -102,6 +107,7 @@ module.exports = class Upload {
 	/**
 	* Takes a status code and the hash ID of the chosen file and returns an appropriate message
 	* @async
+	* @memberof module:upload
 	* @param   {integer} statusCode - Status of the upload operations
 	* @param   {string} name - Name of the file taken straight from the upload form.
 	* @returns {array} ][{integer} result, {string} message] - result: code to mark success or fail of upload, message: returns relevant message based on the statusCode
@@ -132,6 +138,7 @@ module.exports = class Upload {
 	/**
 	* Hashes the name of the file using sha1 standards.
 	* @async
+	* @memberof module:upload
 	* @param   {string} name - Name of the file straight from the upload form.
 	* @returns {string} hashName - Returns a hashed version of the file name (minus the extension), name is hashed using sha1 standard
 	* @throws  {EmptyFileName} No file name passed (fileName).
@@ -156,6 +163,7 @@ module.exports = class Upload {
 	/**
 	* Separates the extension from the filename.
 	* @async
+	* @memberof module:upload
 	* @param   {string} name - Name of the file straight from the upload form.
 	* @returns {string} ext - Returns the extension of the file as a string
 	* @throws  {EmptyFileName} No file name passed (getExtension).
@@ -177,6 +185,7 @@ module.exports = class Upload {
 	/**
 	* Adds the details of the file and its upload to the database
 	* @async
+	* @memberof module:upload
 	* @param   {string} hashID - Hashed name of the file.
 	* @param   {string} fileName - Name of the file straight from the upload form.
 	* @param   {string} ext - Separated extension of the file as a string.
@@ -212,6 +221,7 @@ module.exports = class Upload {
 	/**
 	* Adds the details of the file and its upload to the database
 	* @async
+	* @memberof module:upload
 	* @returns {integer} uploadTime - Retuns unix time in minutes (not ms as is the default)
 	*/
 	async getUploadTime() {

@@ -14,6 +14,7 @@ module.exports = class User {
 	/**
 	* User Module constructor that sets up required database and table.
 	* @class user
+	* @memberof module:user
 	*/
 	constructor(dbName = ':memory:') {
 		return (async() => {
@@ -27,6 +28,7 @@ module.exports = class User {
 	/**
 	* Registers a user on the system.
 	* @async
+	* @memberof module:user
 	* @param   {string} user - Username for the new user.
 	* @param   {string} pass - Password of the new user.
 	* @returns {boolean} returns true on success.
@@ -51,6 +53,7 @@ module.exports = class User {
 	/**
 	* Uploads an avatar.
 	* @async
+	* @memberof module:user
 	* @param   {string} path - Path to the file
 	* @param   {string} name - Name of the file.
 	* @param   {string} username - Password of the new user.
@@ -73,6 +76,7 @@ module.exports = class User {
 	/**
 	* Logs a user on to the system.
 	* @async
+	* @memberof module:user
 	* @param   {string} username - Path to the file
 	* @param   {string} password - Name of the file.
 	* @returns {boolean} returns true on successful login, false otherwise.

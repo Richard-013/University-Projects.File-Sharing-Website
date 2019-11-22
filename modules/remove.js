@@ -13,6 +13,7 @@ module.exports = class Remove {
 	/**
 	* Remove Module constructor that sets up required database and table.
 	* @class remove
+	* @memberof module:remove
 	*/
 	constructor(dbName = ':memory:') {
 		return (async() => {
@@ -29,6 +30,7 @@ module.exports = class Remove {
 	/**
 	* Removes a file from the server and the database.
 	* @async
+	* @memberof module:remove
 	* @param   {string} user - Username of the user who uploaded the file.
 	* @param   {string} hashName - Hash ID of the file.
 	* @param   {string} extension - File extension as a string (Can be left empty and extension will be found).
@@ -62,6 +64,7 @@ module.exports = class Remove {
 	/**
 	* Checks if a file exists or not, is a blocking function as it decides whether to perform server-side deletions.
 	* @async
+	* @memberof module:remove
 	* @param   {string} user - Username of the user who uploaded the file.
 	* @param   {string} hashName - Hash ID of the file.
 	* @param   {string} extension - File extension as a string (Can be left empty and extension will be found).
@@ -78,6 +81,7 @@ module.exports = class Remove {
 	/**
 	* Gets the extension of a file from the database.
 	* @async
+	* @memberof module:remove
 	* @param   {string} user - Username of the user who uploaded the file.
 	* @param   {string} hashName - Hash ID of the file.
 	* @returns {string} returns the extension in string format.
@@ -101,6 +105,7 @@ module.exports = class Remove {
 	/**
 	* Removes a file from the server.
 	* @async
+	* @memberof module:remove
 	* @param   {string} user - Username of the user who uploaded the file.
 	* @param   {string} hashName - Hash ID of the file.
 	* @param   {string} ext - Extension of the file.
@@ -114,6 +119,7 @@ module.exports = class Remove {
 	/**
 	* Removes a file from the database.
 	* @async
+	* @memberof module:remove
 	* @param   {string} user - Username of the user who uploaded the file.
 	* @param   {string} hashName - Hash ID of the file.
 	* @param   {string} ext - Extension of the file.
@@ -139,6 +145,7 @@ module.exports = class Remove {
 	* Creates a list of all files that have existed for at least three days.
 	* Each subarray returned is formatted: [hashID, fileName, sourceUser, fileExtension, timeOfUpload]
 	* @async
+	* @memberof module:remove
 	* @returns {array} returns an array of arrays, where each subarray contains information about the file.
 	* @throws  {DatabaseIssue} An issue occured when checking for expired files.
 	*/
@@ -160,6 +167,7 @@ module.exports = class Remove {
 	/**
 	* Removes old files from the server and the database.
 	* @async
+	* @memberof module:remove
 	* @returns {integer} returns 0 on success, 1 if there are no expired files.
 	* @throws  {DeleteIssue} There was an error whilst removing old files.
 	*/

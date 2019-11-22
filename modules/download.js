@@ -13,6 +13,7 @@ module.exports = class Download {
 	/**
 	* Download Module constructor that sets up required database and tables.
 	* @class download
+	* @memberof module:download
 	*/
 	constructor(dbName = ':memory:', siteURL = 'http://localhost:8080') {
 		return (async() => {
@@ -30,6 +31,7 @@ module.exports = class Download {
 	/**
 	* Gets the filepath to the desired file on the server for a user so they can download it.
 	* @async
+	* @memberof module:download
 	* @param   {string} current - Username of the currently logged in user.
 	* @param   {string} source - Username of the user who uploaded the file.
 	* @param   {string} hash - Hash ID of the file.
@@ -57,6 +59,7 @@ module.exports = class Download {
 	/**
 	* Verifys that a user has access to the selected file
 	* @async
+	* @memberof module:download
 	* @param   {string} hashName - Hash ID of the file.
 	* @param   {string} sourceUser - Username of the user who uploaded the file.
 	* @param   {string} currentUser - Username of the currently logged in user.
@@ -79,6 +82,7 @@ module.exports = class Download {
 	* Get all files available to the current user
 	* Each subarray returned is formatted: [hashID, fileName, sourceUser, fileExtension, timeOfUpload]
 	* @async
+	* @memberof module:download
 	* @param   {string} currentUser - Username of the currently logged in user.
 	* @returns {array} returns an array of arrays, each sub-array containing of file information
 	* @returns {integer} returns a status code if something goes wrong
@@ -103,6 +107,7 @@ module.exports = class Download {
 	/**
 	* Determines the category/type of file, this is used to assign files an icon when displayed in the list
 	* @async
+	* @memberof module:download
 	* @param   {string} extension - File extension such as 'txt' or 'docx' (Do not include the .)
 	* @returns {string} returns the file category as a string such as 'generic' or 'audio'
 	*/
@@ -114,6 +119,7 @@ module.exports = class Download {
 	/**
 	* Compares the extension to lists of common extension types to determine category
 	* @async
+	* @memberof module:download
 	* @param   {string} extension - File extension such as 'txt' or 'docx' (Do not include the .)
 	* @returns {string} returns the file category as a string
 	*/
@@ -146,6 +152,7 @@ module.exports = class Download {
 	/**
 	* Compares the extension to lists of uncommon extension types if category was not determined by common types
 	* @async
+	* @memberof module:download
 	* @param   {string} extension - File extension such as 'txt' or 'docx' (Do not include the .)
 	* @returns {string} returns the file category as a string such as 'web' or 'fonts'
 	* @returns {string} returns the file category as a 'generic' if it cannot be identified
@@ -179,6 +186,7 @@ module.exports = class Download {
 	/**
 	* Determines the size of a file on the server
 	* @async
+	* @memberof module:download
 	* @param   {string} hashName - Hash ID of the file
 	* @param   {string} username - Username of the user who uploaded the file
 	* @param   {string} ext - File extension such as 'txt' or 'docx' (Do not include the .)
@@ -215,6 +223,7 @@ module.exports = class Download {
 	* Generates an array of objects which contain information about each available file
 	* File info objects contain the following fields: fileName, uploader, fileType, fileSize, fileCat, timeTillDelete, dateUploaded, url
 	* @async
+	* @memberof module:download
 	* @param   {string} currentUser - Username of the user currently logged in.
 	* @returns {array} returns an array of objects that give information on each file
 	* @throws  {DatabaseError} Database error.
