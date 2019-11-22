@@ -53,7 +53,8 @@ describe('uploadAvatar()', () => {
 				'avatars': {}
 			},
 			'example': {
-				'image.png': Buffer.from([8, 6, 7, 5, 3, 0, 9])
+				'image.png': Buffer.from([8, 6, 7, 5, 3, 0, 9]),
+				'notImage.txt': 'This is not an image'
 			}
 		})
 	})
@@ -129,6 +130,16 @@ describe('uploadAvatar()', () => {
 		await expect(account.uploadAvatar('example/image.png', 'image.png', ''))
 			.rejects.toEqual(Error('No Username'))
 
+		done()
+	})
+
+	test('rejects non-image avatars correctly', async done => {
+		expect.assertions(1)
+		const account = await new Accounts()
+
+		// Upload text avatar
+		await expect(account.uploadAvatar('example/notImage.txt', 'notImage.txt', 'BadUser'))
+			.rejects.toEqual(Error('Avatar file must be an image'))
 		done()
 	})
 })
