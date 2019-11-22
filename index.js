@@ -145,9 +145,8 @@ router.post('/upload', koaBody, async ctx => {
 		const targetUser = ctx.request.body.targetuser // Gets target user (user to share file with)
 		const upload = await new Upload(dbName)
 		// Attempts to upload file to the server, returns a status code to work with
-		const uploadResult = await upload.uploadFile(path, name, ctx.session.username, targetUser)
-		if (uploadResult[0] === 0) ctx.redirect(`/shareFile?h=${uploadResult[1]}`) // Successful upload
-		else ctx.redirect(`/upload?message=${uploadResult[1]}`) // Unsuccessful upload
+		const uploadResult = await upload.uploadFile(path, name, ctx.session.username, targetUser) // Throws error if not successful
+		ctx.redirect(`/shareFile?h=${uploadResult}`) // Successful upload
 	} catch (err) {
 		await ctx.render('error', { message: err.message })
 	}
