@@ -44,11 +44,11 @@ module.exports = class Upload {
 	*/
 	async uploadFile(path, originalName, sourceUser, targetUser) {
 		// Tests arguments are valid before proceeding
-		if (path === undefined || originalName === undefined) return [1, 'No file or path specified for upload']
-		if (await this.checkValidUser(sourceUser) === false) return [1, 'Invalid user attempted upload']
-		if (await this.checkValidUser(targetUser) === false) return [1, 'Selected user does not exist']
+		if (path === undefined || originalName === undefined) throw new Error('No file or path specified for upload')
+		if (await this.checkValidUser(sourceUser) === false) throw new Error('Invalid user attempted upload')
+		if (await this.checkValidUser(targetUser) === false) throw new Error('Selected user does not exist')
 		const validPath = await fs.stat(path).catch(() => [1, 'Selected file does not exist'])
-		if (validPath[0] === 1) return validPath
+		if (validPath[0] === 1) throw new Error(validPath[1])
 
 		// Checks if a directory already exists for the user
 		await Promise.all([fs.stat('files'), fs.stat('files/uploads'), fs.stat(`files/uploads/${sourceUser}`)])
