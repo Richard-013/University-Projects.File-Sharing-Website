@@ -65,6 +65,8 @@ module.exports = class User {
 		}
 		const nameSplit = name.split('.')
 		const ext = nameSplit.pop()
+		const image = ['ai', 'bmp', 'gif', 'ico', 'jpeg', 'jpg', 'png', 'ps', 'psd', 'svg', 'tif', 'tiff']
+		if (!image.includes(ext)) throw new Error('Avatar file must be an image')
 		await fs.copy(path, `public/avatars/${username}.${ext}`)
 	}
 
