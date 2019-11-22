@@ -1,4 +1,3 @@
-
 'use strict'
 
 const Accounts = require('../modules/user.js')
@@ -10,7 +9,9 @@ describe('register()', () => {
 	test('register a valid account', async done => {
 		expect.assertions(1)
 		const account = await new Accounts()
+
 		const register = await account.register('doej', 'password')
+
 		expect(register).toBe(true)
 		done()
 	})
@@ -19,6 +20,7 @@ describe('register()', () => {
 		expect.assertions(1)
 		const account = await new Accounts()
 		await account.register('doej', 'password')
+
 		await expect( account.register('doej', 'password') )
 			.rejects.toEqual( Error('username "doej" already in use') )
 		done()
@@ -27,6 +29,7 @@ describe('register()', () => {
 	test('error if blank username', async done => {
 		expect.assertions(1)
 		const account = await new Accounts()
+
 		await expect( account.register('', 'password') )
 			.rejects.toEqual( Error('missing username') )
 		done()
@@ -35,6 +38,7 @@ describe('register()', () => {
 	test('error if blank password', async done => {
 		expect.assertions(1)
 		const account = await new Accounts()
+
 		await expect( account.register('doej', '') )
 			.rejects.toEqual( Error('missing password') )
 		done()
@@ -49,7 +53,8 @@ describe('uploadAvatar()', () => {
 				'avatars': {}
 			},
 			'example': {
-				'image.png': Buffer.from([8, 6, 7, 5, 3, 0, 9])
+				'image.png': Buffer.from([8, 6, 7, 5, 3, 0, 9]),
+				'notImage.txt': 'This is not an image'
 			}
 		})
 	})
@@ -64,9 +69,12 @@ describe('uploadAvatar()', () => {
 		await account.uploadAvatar('example/image.png', 'image.png', 'tester')
 
 		// Check upload worked
-		const success = fs.existsSync('public/avatars/tester.png')
-		expect(success).toBeTruthy()
-
+		let existing = false
+		await fs.stat('public/avatars/tester.png', (err) => {
+			if (err) throw err
+		})
+		existing = true
+		expect(existing).toBeTruthy()
 		done()
 	})
 
@@ -78,7 +86,6 @@ describe('uploadAvatar()', () => {
 		const returnVal = await account.uploadAvatar(undefined, 'image.png', 'tester')
 
 		expect(returnVal).toBe(0)
-
 		done()
 	})
 
@@ -90,7 +97,6 @@ describe('uploadAvatar()', () => {
 		const returnVal = await account.uploadAvatar('example/image.png', undefined, 'tester')
 
 		expect(returnVal).toBe(0)
-
 		done()
 	})
 
@@ -102,7 +108,6 @@ describe('uploadAvatar()', () => {
 		const returnVal = await account.uploadAvatar(undefined, undefined, 'tester')
 
 		expect(returnVal).toBe(0)
-
 		done()
 	})
 
@@ -127,14 +132,26 @@ describe('uploadAvatar()', () => {
 
 		done()
 	})
+
+	test('rejects non-image avatars correctly', async done => {
+		expect.assertions(1)
+		const account = await new Accounts()
+
+		// Upload text avatar
+		await expect(account.uploadAvatar('example/notImage.txt', 'notImage.txt', 'BadUser'))
+			.rejects.toEqual(Error('Avatar file must be an image'))
+		done()
+	})
 })
 
 describe('login()', () => {
 	test('log in with valid credentials', async done => {
 		expect.assertions(1)
 		const account = await new Accounts()
+
 		await account.register('doej', 'password')
 		const valid = await account.login('doej', 'password')
+
 		expect(valid).toBe(true)
 		done()
 	})
@@ -142,7 +159,9 @@ describe('login()', () => {
 	test('invalid username', async done => {
 		expect.assertions(1)
 		const account = await new Accounts()
+
 		await account.register('doej', 'password')
+
 		await expect( account.login('roej', 'password') )
 			.rejects.toEqual( Error('username "roej" not found') )
 		done()
@@ -151,7 +170,9 @@ describe('login()', () => {
 	test('invalid password', async done => {
 		expect.assertions(1)
 		const account = await new Accounts()
+
 		await account.register('doej', 'password')
+
 		await expect( account.login('doej', 'bad') )
 			.rejects.toEqual( Error('invalid password for account "doej"') )
 		done()
