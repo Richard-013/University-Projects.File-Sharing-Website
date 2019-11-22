@@ -16,7 +16,7 @@ describe('uploadFile()', () => {
 	afterEach(mock.restore)
 
 	test('file is uploaded to the server', async done => {
-		expect.assertions(3)
+		expect.assertions(2)
 		const upload = await new Upload()
 
 		// Adds users to database
@@ -39,14 +39,13 @@ describe('uploadFile()', () => {
 		expect(existing).toBeTruthy()
 
 		// Checks return value was correct
-		expect(returnVal[0]).toBe(0)
-		expect(returnVal[1]).toBe(expectName)
+		expect(returnVal).toBe(expectName)
 
 		done() // Finish the test
 	})
 
 	test('directory path is created if it does not exist', async done => {
-		expect.assertions(3)
+		expect.assertions(2)
 		const upload = await new Upload()
 
 		// Adds users to database
@@ -69,13 +68,12 @@ describe('uploadFile()', () => {
 		expect(existing).toBeTruthy() // Checks that the folder was created successfully
 
 		// Checks return value was correct
-		expect(returnVal[0]).toBe(0)
-		expect(returnVal[1]).toBe(expectName)
+		expect(returnVal).toBe(expectName)
 		done()
 	})
 
 	test('directory path is not created if it already exists', async done => {
-		expect.assertions(5)
+		expect.assertions(4)
 		const upload = await new Upload()
 
 		// Adds users to database
@@ -118,8 +116,7 @@ describe('uploadFile()', () => {
 		fileExists = true
 		expect(fileExists).toBeTruthy()
 		// Checks return value was correct
-		expect(returnVal[0]).toBe(0)
-		expect(returnVal[1]).toBe(expectName)
+		expect(returnVal).toBe(expectName)
 		done()
 	})
 
@@ -178,7 +175,7 @@ describe('uploadFile()', () => {
 	})
 
 	test('user has already uploaded the file to the database', async done => {
-		expect.assertions(3)
+		expect.assertions(2)
 		const upload = await new Upload()
 		const hashName = await upload.hashFileName('dummy.txt')
 
@@ -190,18 +187,16 @@ describe('uploadFile()', () => {
 
 		// Adds file to the database
 		const initialInsert = await upload.addToDB(hashName, 'dummy', 'txt', 'testing', 'testTarget')
-		expect(initialInsert).toBe(0)
+		expect(initialInsert).toBe(0) // Checks that the initial insert had no issue
 
 		// Upload file which will attempt to add it to the database again
-		const returnVal = await upload.uploadFile('testing/dummy.txt', 'dummy.txt', 'testing', 'testTarget')
-		expect(returnVal[0]).toBe(1)
-		expect(returnVal[1]).toBe('User has already uploaded a file with the same name')
-
+		await expect(upload.uploadFile('testing/dummy.txt', 'dummy.txt', 'testing', 'testTarget')).rejects
+			.toEqual(Error('User has already uploaded a file with the same name'))
 		done()
 	})
 
 	test('database error occurs', async done => {
-		expect.assertions(2)
+		expect.assertions(1)
 		const upload = await new Upload()
 
 		// Adds users to database
@@ -215,10 +210,8 @@ describe('uploadFile()', () => {
 		await upload.db.run(sql)
 
 		// Upload attempt should detect a database error and respond accordingly
-		const returnVal = await upload.uploadFile('testing/dummy.txt', 'dummy.txt', 'testing', 'testTarget')
-		expect(returnVal[0]).toBe(1)
-		expect(returnVal[1]).toBe('Database error has occurred, please try again')
-
+		await expect(upload.uploadFile('testing/dummy.txt', 'dummy.txt', 'testing', 'testTarget')).rejects
+			.toEqual(Error('Database error has occurred, please try again'))
 		done()
 	})
 
@@ -444,7 +437,7 @@ describe('checkUploadRes()', () => {
 		const upload = await new Upload()
 
 		const serverMessage = await upload.checkUploadRes(0)
-		expect(serverMessage[0]).toBe(0)
+		expect(serverMessage[0]).toBe(1)
 		expect(serverMessage[1]).toBe('No hashID given')
 
 		done()
@@ -455,7 +448,7 @@ describe('checkUploadRes()', () => {
 		const upload = await new Upload()
 
 		const serverMessage = await upload.checkUploadRes(0, '')
-		expect(serverMessage[0]).toBe(0)
+		expect(serverMessage[0]).toBe(1)
 		expect(serverMessage[1]).toBe('No hashID given')
 
 		done()

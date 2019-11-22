@@ -59,7 +59,8 @@ module.exports = class Upload {
 		await fs.copy(path, `files/uploads/${sourceUser}/${fileDetails[0]}`) // Copies the file to the server
 		const dbInsert = await this.addToDB(fileDetails[1], originalName, fileDetails[2], sourceUser, targetUser) // Adds file details to the database
 		const serverMessage = await this.checkUploadRes(dbInsert, fileDetails[1])
-		return serverMessage // Returns message for server to use
+		if (serverMessage[0] === 1) throw new Error(serverMessage[1])
+		return serverMessage[1] // Returns message for server to use
 	}
 
 	/**
@@ -111,6 +112,7 @@ module.exports = class Upload {
 			case 0: // Success case
 				if (hashID === undefined || hashID === '') {
 					message = 'No hashID given'
+					return [1, message]
 				} else {
 					message = hashID
 				}

@@ -40,6 +40,7 @@ const expiryCheckInterval = 300000 // Three minutes
  * @name Home Page
  * @route {GET} /
  * @authentication This route requires cookie-based authentication.
+ * @queryparam {string} msg - optional message to display on the page.
  */
 router.get('/', async ctx => {
 	try {
@@ -86,6 +87,8 @@ router.post('/register', koaBody, async ctx => {
  *
  * @name Login Page
  * @route {GET} /login
+ * @queryparam {string} msg - optional message to display on the page.
+ * @queryparam {string} user - optional to include username.
  */
 router.get('/login', async ctx => {
 	const data = {}
@@ -119,6 +122,7 @@ router.post('/login', async ctx => {
  * @name Upload Page
  * @route {GET} /upload
  * @authentication This route requires cookie-based authentication.
+ * @queryparam {string} message - optional message to display on the page.
  */
 router.get('/upload', async ctx => {
 	try {
@@ -145,9 +149,8 @@ router.post('/upload', koaBody, async ctx => {
 		const targetUser = ctx.request.body.targetuser // Gets target user (user to share file with)
 		const upload = await new Upload(dbName)
 		// Attempts to upload file to the server, returns a status code to work with
-		const uploadResult = await upload.uploadFile(path, name, ctx.session.username, targetUser)
-		if (uploadResult[0] === 0) ctx.redirect(`/shareFile?h=${uploadResult[1]}`) // Successful upload
-		else ctx.redirect(`/upload?message=${uploadResult[1]}`) // Unsuccessful upload
+		const uploadResult = await upload.uploadFile(path, name, ctx.session.username, targetUser) // Throws error if not successful
+		ctx.redirect(`/shareFile?h=${uploadResult}`) // Successful upload
 	} catch (err) {
 		await ctx.render('error', { message: err.message })
 	}
@@ -159,6 +162,8 @@ router.post('/upload', koaBody, async ctx => {
  * @name File Sharing Page
  * @route {GET} /shareFile
  * @authentication This route requires cookie-based authentication.
+ * @queryparam {string} message - optional message to display on the page.
+ * @queryparam {string} h - hash of the file that was uploaded.
  */
 router.get('/shareFile', async ctx => {
 	try {
@@ -175,6 +180,7 @@ router.get('/shareFile', async ctx => {
  * @name File List Page
  * @route {GET} /fileList
  * @authentication This route requires cookie-based authentication.
+ * @queryparam {string} message - optional message to display on the page.
  */
 router.get('/fileList', async ctx => {
 	try {
@@ -195,6 +201,8 @@ router.get('/fileList', async ctx => {
  * @name File Download Page
  * @route {GET} /file
  * @authentication This route requires cookie-based authentication.
+ * @queryparam {string} u - user who uploaded the file.
+ * @queryparam {string} h - hash id of the file.
  */
 router.get('/file', async ctx => {
 	try {
