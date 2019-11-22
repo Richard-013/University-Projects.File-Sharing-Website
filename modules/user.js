@@ -1,23 +1,37 @@
-
 'use strict'
 
+// Module Imports
 const bcrypt = require('bcrypt-promise')
 const fs = require('fs-extra')
 const sqlite = require('sqlite-async')
 const saltRounds = 10
 
+/**
+ * User Module.
+ * @module user
+ */
 module.exports = class User {
-
+	/**
+	* User Module constructor that sets up required database and table.
+	* @class user
+	*/
 	constructor(dbName = ':memory:') {
 		return (async() => {
 			this.db = await sqlite.open(dbName)
-			// we need this table to store the user accounts
 			const sql = 'CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, user TEXT, pass TEXT);'
-			await this.db.run(sql)
+			await this.db.run(sql) // Creates the table to store user details
 			return this
 		})()
 	}
 
+	/**
+	* Registers a user on the system.
+	* @async
+	* @param   {string} user - Username for the new user.
+	* @param   {string} pass - Password of the new user.
+	* @returns {boolean} returns true on success.
+	* @throws  {UsernameInUse} username [user] already in use.
+	*/
 	async register(user, pass) {
 		try {
 			if(user.length === 0) throw new Error('missing username')
@@ -34,9 +48,18 @@ module.exports = class User {
 		}
 	}
 
+	/**
+	* Uploads an avatar.
+	* @async
+	* @param   {string} path - Path to the file
+	* @param   {string} name - Name of the file.
+	* @param   {string} username - Password of the new user.
+	* @returns {integer} returns 0 if no file is uploaded.
+	* @throws  {NoUsername} No Username.
+	*/
 	async uploadAvatar(path, name, username) {
 		if (username === undefined || username.length === 0 ) throw new Error('No Username')
-		if(path === undefined || name === undefined) {
+		if(path === undefined || name === undefined || name === '') {
 			// Allows the user to not upload an avatar if they so choose
 			return 0
 		}
@@ -45,6 +68,14 @@ module.exports = class User {
 		await fs.copy(path, `public/avatars/${username}.${ext}`)
 	}
 
+	/**
+	* Logs a user on to the system.
+	* @async
+	* @param   {string} username - Path to the file
+	* @param   {string} password - Name of the file.
+	* @returns {boolean} returns true on successful login, false otherwise.
+	* @throws  {NoUsername} No Username.
+	*/
 	async login(username, password) {
 		try {
 			let sql = `SELECT count(id) AS count FROM users WHERE user="${username}";`
