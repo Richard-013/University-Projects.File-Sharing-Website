@@ -64,9 +64,12 @@ describe('uploadAvatar()', () => {
 		await account.uploadAvatar('example/image.png', 'image.png', 'tester')
 
 		// Check upload worked
-		const success = fs.existsSync('public/avatars/tester.png')
-		expect(success).toBeTruthy()
-
+		let existing = false
+		await fs.stat('public/avatars/tester.png', (err) => {
+			if (err) throw err
+		})
+		existing = true
+		expect(existing).toBeTruthy()
 		done()
 	})
 
