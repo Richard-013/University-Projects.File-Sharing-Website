@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: modules/download.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: modules/download.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/* eslint-disable no-magic-numbers */
+'use strict'
+
+// Module Imports
+const sqlite = require('sqlite-async')
+const fs = require('fs-extra')
+
+/**
+ * Download Module.
+ * @module download
+ */
+module.exports = class Download {
+	/**
+	* Download Module constructor that sets up required database and tables.
+	* @class download
+	* @memberof module:download
+	*/
+	constructor(dbName = ':memory:', siteURL = 'http://localhost:8080') {
+		return (async() => {
+			this.siteURL = siteURL
+			this.db = await sqlite.open(dbName)
+			// Creates a table to store details about uploaded files
+			const sqlFiles = 'CREATE TABLE IF NOT EXISTS files' +
+				'(hash_id TEXT PRIMARY KEY, file_name TEXT, extension TEXT,' +
+				'user_upload TEXT, upload_time INTEGER, target_user TEXT);'
+			await this.db.run(sqlFiles)
+			return this
+		})()
+	}
+
+	/**
+	* Gets the filepath to the desired file on the server for a user so they can download it.
+	* @async
+	* @memberof module:download
+	* @param   {string} current - Username of the currently logged in user.
+	* @param   {string} source - Username of the user who uploaded the file.
+	* @param   {string} hash - Hash ID of the file.
+	* @returns {string} filePath - Path to file on the server
+	* @throws  {EmptyCurrentUsername} User not logged in.
+	* @throws  {EmptySourceUsername} No username given, file cannot be located.
+	* @throws  {EmptyHashID} No file name given, file cannot be located.
+	* @throws  {InvalidAccess} Invalid access permissions.
+	*/
+	async getFilePath(current, source, hash) {
+		if (current === undefined || current === '') throw new Error('User not logged in')
+		if (source === undefined || source === '') throw new Error('No username given, file cannot be located')
+		if (hash === undefined || hash === '') throw new Error('No file name given, file cannot be located')
+		if (await this.verifyUserAccess(hash, source, current) === false) throw new Error('Invalid access permissions')
+		else {
+			const sql = 'SELECT * FROM files WHERE user_upload = ? AND hash_id = ?;'
+			const record = await this.db.get(sql, source, hash) // Runs sql to find stored file name
+			const ext = record.extension
+			// Combines the hashed file name and extension with the user's username to generate the file path
+			const filePath = `files/uploads/${source}/${hash}.${ext}`
+			return filePath
+		}
+	}
+
+	/**
+	* Verifys that a user has access to the selected file
+	* @async
+	* @memberof module:download
+	* @param   {string} hashName - Hash ID of the file.
+	* @param   {string} sourceUser - Username of the user who uploaded the file.
+	* @param   {string} currentUser - Username of the currently logged in user.
+	* @returns {boolean} true if the user has access, false if they do not or if the file does not exist
+	*/
+	async verifyUserAccess(hashName, sourceUser, currentUser) {
+		if (hashName === undefined || sourceUser === undefined || currentUser === undefined) return false
+		try {
+			const sql = 'SELECT * FROM files WHERE user_upload = ? AND hash_id = ?;'
+			const file = await this.db.get(sql, sourceUser, hashName) // Checks that the current user is allowed to download chosen file
+			if (file === undefined) return false
+			else if (file.target_user === currentUser) return true // If user has access, return true
+			else return false
+		} catch (err) {
+			return false // If the file does not exist or permissions cannot be checked, return false
+		}
+	}
+
+	/**
+	* Get all files available to the current user
+	* Each subarray returned is formatted: [hashID, fileName, sourceUser, fileExtension, timeOfUpload]
+	* @async
+	* @memberof module:download
+	* @param   {string} currentUser - Username of the currently logged in user.
+	* @returns {array} returns an array of arrays, each sub-array containing of file information
+	* @returns {integer} returns a status code if something goes wrong
+	*/
+	async getAvailableFiles(currentUser) {
+		// Gets the file name and user for all available files
+		if (currentUser === undefined || currentUser === '') return 1 // Returns status code
+		const files = []
+		try {
+			const sql = 'SELECT * FROM files WHERE target_user = ?;'
+			await this.db.each(sql, [currentUser], (_err, row) => {
+				const file = [row.hash_id, row.file_name, row.user_upload, row.extension, row.upload_time]
+				files.push(file) // Adds retrieved data to the files array
+			})
+
+			return files
+		} catch (error) {
+			return -1 // Returns status code
+		}
+	}
+
+	/**
+	* Determines the category/type of file, this is used to assign files an icon when displayed in the list
+	* @async
+	* @memberof module:download
+	* @param   {string} extension - File extension such as 'txt' or 'docx' (Do not include the .)
+	* @returns {string} returns the file category as a string such as 'generic' or 'audio'
+	*/
+	async determineFileCat(extension) {
+		if(extension === undefined) return 'generic'
+		return this.checkCommonTypes(extension) // Determines file type category
+	}
+
+	/**
+	* Compares the extension to lists of common extension types to determine category
+	* @async
+	* @memberof module:download
+	* @param   {string} extension - File extension such as 'txt' or 'docx' (Do not include the .)
+	* @returns {string} returns the file category as a string
+	*/
+	async checkCommonTypes(extension) {
+		// Checks if file is an audio file
+		const audio = ['aif', 'cda', 'mid', 'midi', 'mp3', 'mpa', 'ogg', 'wav', 'wma', 'wpl']
+		if (audio.includes(extension)) return 'audio'
+		// Checks if file is an image file
+		const image = ['ai', 'bmp', 'gif', 'ico', 'jpeg', 'jpg', 'png', 'ps', 'psd', 'svg', 'tif', 'tiff']
+		if (image.includes(extension)) return 'image'
+		// Checks if file is a video file
+		const video = ['3g2', '3gp', 'avi', 'flv', 'h264', 'm4v', 'mkv', 'mov', 'mp4', 'mpg', 'mpeg', 'rm', 'swf', 'vob', 'wmv']
+		if (video.includes(extension)) return 'video'
+		// Checks if file is a compressed file
+		const zip = ['7z', 'arj', 'deb', 'pkg', 'rar', 'rpm', 'targ.gz', 'gz', 'z', 'zip']
+		if (zip.includes(extension)) return 'zip'
+		// Checks if file is a written document file
+		const write = ['doc', 'docx', 'pdf', 'rtf', 'tex', 'txt', 'wks', 'wps', 'wpd']
+		if (write.includes(extension)) return 'write'
+		// Checks if file is a presentation file
+		const present = ['key', 'odp', 'pps', 'ppt', 'pptx']
+		if (present.includes(extension)) return 'present'
+		// Checks if file is a spreadsheet file
+		const sheet = ['ods', 'xlr', 'xls', 'xlsx']
+		if (sheet.includes(extension)) return 'sheet'
+		// Check for more uncommon file types
+		return await this.checkUncommonTypes(extension)
+	}
+
+	/**
+	* Compares the extension to lists of uncommon extension types if category was not determined by common types
+	* @async
+	* @memberof module:download
+	* @param   {string} extension - File extension such as 'txt' or 'docx' (Do not include the .)
+	* @returns {string} returns the file category as a string such as 'web' or 'fonts'
+	* @returns {string} returns the file category as a 'generic' if it cannot be identified
+	*/
+	async checkUncommonTypes(extension) {
+		// Checks if file is a font file
+		const fonts = ['fnt', 'fon', 'otf', 'ttf']
+		if (fonts.includes(extension)) return 'fonts'
+		// Checks if file is a programming file
+		const code = ['asl', 'c', 'class', 'cpp', 'cs', 'h', 'java', 'js', 'py', 'sh', 'swift', 'vb']
+		if (code.includes(extension)) return 'code'
+		// Checks if file is an executable file
+		const exec = ['apk', 'bat', 'bin', 'cgi', 'pl', 'com', 'exe', 'gadget', 'jar', 'wsf']
+		if (exec.includes(extension)) return 'exec'
+		// Checks if file is a database file
+		const db = ['csv', 'dat', 'db', 'dbf', 'json', 'log', 'mdb', 'sav', 'sql', 'tar', 'xml']
+		if (db.includes(extension)) return 'db'
+		// Checks if file is a web file
+		const web = ['asp', 'aspx', 'cer', 'cfm', 'css', 'htm', 'html', 'jsp', 'part', 'php', 'rss', 'xhtml']
+		if (web.includes(extension)) return 'web'
+		// Checks if file is a disk image file
+		const iso = ['bin', 'dmg', 'iso', 'toast', 'vcd']
+		if (iso.includes(extension)) return 'iso'
+		// Checks if file is a system file
+		const sys = ['bak', 'cab', 'cfg', 'cpl', 'cur', 'dll', 'dmp', 'drv', 'icns', 'ico', 'ini', 'lnk', 'msi', 'sys', 'tmp']
+		if (sys.includes(extension)) return 'sys'
+		// If none of the above, return genric file category
+		return 'generic'
+	}
+
+	/**
+	* Determines the size of a file on the server
+	* @async
+	* @memberof module:download
+	* @param   {string} hashName - Hash ID of the file
+	* @param   {string} username - Username of the user who uploaded the file
+	* @param   {string} ext - File extension such as 'txt' or 'docx' (Do not include the .)
+	* @returns {string} if size is under 1024 bytes, file size is returned in a string such as '24 Bytes'
+	* @returns {string} if size is under 1024 kilobytes, file size is returned in a string such as '560 KB'
+	* @returns {string} if size is over 1024 kilobytes, file size is returned in a string such as '78 MB'
+	* @returns {string} if size cannot be determined returns 'N/A'
+	* @throws  {EmptyArgument} Undefined arguments not accepted.
+	*/
+	async getFileSize(hashName, username, ext) {
+		if (hashName === undefined || username === undefined || ext === undefined) {
+			throw new Error('Undefined arguments not accepted')
+		}
+		const filepath = `files/uploads/${username}/${hashName}.${ext}`
+		try {
+			const stats = await fs.stat(filepath)
+			const sizeBytes = stats['size']
+			if (sizeBytes &lt; 1024) return `${sizeBytes.toString()} Bytes`
+			else {
+				const sizeKB = Math.round(sizeBytes / 1024 * 10) / 10 // Size rounded to 1dp
+				if (sizeKB &lt; 1024) {
+					return `${sizeKB.toString()} KB`
+				} else {
+					const sizeMB = Math.round(sizeKB / 1024 * 10) / 10 // Size rounded to 1dp
+					return `${sizeMB.toString()} MB`
+				}
+			}
+		} catch (err) {
+			return 'N/A' // Returns N/A if file size cannot be determined
+		}
+	}
+
+	/**
+	* Generates an array of objects which contain information about each available file
+	* File info objects contain the following fields: fileName, uploader, fileType, fileSize, fileCat, timeTillDelete, dateUploaded, url
+	* @async
+	* @memberof module:download
+	* @param   {string} currentUser - Username of the user currently logged in.
+	* @returns {array} returns an array of objects that give information on each file
+	* @throws  {DatabaseError} Database error.
+	* @throws  {NotLoggedIn} User not logged in.
+	*/
+	async generateFileList(currentUser) {
+		const availableFiles = await this.getAvailableFiles(currentUser)
+		if (availableFiles === -1) throw new Error('Database error')
+		if (availableFiles === 1) throw new Error('User not logged in')
+		else {
+			const fileList = []
+			for (const file of availableFiles) {
+				const uploadDate = await new Date(file[4] * 60000)
+				const fileInfo = { // Creates an object filled with file information
+					fileName: file[1],
+					uploader: file[2],
+					fileType: file[3],
+					fileSize: await this.getFileSize(file[0], file[2], file[3]),
+					fileCat: await this.determineFileCat(file[3]),
+					timeTillDelete: await Math.floor(Math.floor(file[4] - (Date.now() - 259200000) / 60000) / 60), // Converts time into hours till deletion
+					dateUploaded: await uploadDate.toLocaleString(), // Converts stored time into the upload date
+					url: `${this.siteURL}/file?h=${file[0]}&amp;u=${file[2]}` // Generates share url
+				}
+				fileList.push(fileInfo) // Adds object to array of files
+			}
+			return fileList
+		}
+	}
+}
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-download.html">download</a></li><li><a href="module-remove.html">remove</a></li><li><a href="module-upload.html">upload</a></li><li><a href="module-user.html">user</a></li></ul><h3>Classes</h3><ul><li><a href="module-download.download.html">download</a></li><li><a href="module-remove.remove.html">remove</a></li><li><a href="module-upload.upload.html">upload</a></li><li><a href="module-user.user.html">user</a></li></ul><h3>Global</h3><ul><li><a href="global.html#FileDownloadPage">File Download Page</a></li><li><a href="global.html#FileListPage">File List Page</a></li><li><a href="global.html#FileSharingPage">File Sharing Page</a></li><li><a href="global.html#HomePage">Home Page</a></li><li><a href="global.html#LogOutPage">Log Out Page</a></li><li><a href="global.html#LoginPage">Login Page</a></li><li><a href="global.html#LoginScript">Login Script</a></li><li><a href="global.html#RegisterPage">Register Page</a></li><li><a href="global.html#RegisterScript">Register Script</a></li><li><a href="global.html#UploadPage">Upload Page</a></li><li><a href="global.html#UploadScript">Upload Script</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Fri Nov 22 2019 16:51:06 GMT+0000 (Greenwich Mean Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
