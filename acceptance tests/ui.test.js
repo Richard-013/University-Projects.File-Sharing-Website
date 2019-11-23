@@ -22,18 +22,18 @@ const toMatchImageSnapshot = configureToMatchImageSnapshot({
 })
 expect.extend({ toMatchImageSnapshot })
 
-beforeAll(async() => {
-	browser = await puppeteer.launch({ headless: true, slowMo: delayMS, args: [`--window-size=${width},${height}`] })
-	page = await browser.newPage()
-	har = new PuppeteerHar(page)
-	await page.setViewport({ width, height })
-})
+describe('Log In and Register', () => {
+	beforeEach(async () => {
+		browser = await puppeteer.launch({ headless: true, slowMo: delayMS, args: [`--window-size=${width},${height}`] })
+		page = await browser.newPage()
+		har = new PuppeteerHar(page)
+		await page.setViewport({ width, height })
+	})
 
-afterAll(() => browser.close()) // https://github.com/GoogleChrome/puppeteer/issues/561
+	afterEach(() => browser.close()) // https://github.com/GoogleChrome/puppeteer/issues/561
 
-describe('todo list', () => {
 	test('Register and Log In', async done => {
-		// start generating a trace file
+		// Begin generating a trace file
 		await page.tracing.start({ path: 'trace/register_and_log_in_har.json', screenshots: true })
 		await har.start({ path: 'trace/register_and_log_in_trace.har' })
 		// ARRANGE
