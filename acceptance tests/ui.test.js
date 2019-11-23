@@ -78,5 +78,39 @@ describe('todo list', () => {
 		await har.stop()
 		done()
 	}, 16000)
+
+	test('Log In - Existing Account', async done => {
+		// Begin generating a trace file
+		await page.tracing.start({ path: 'trace/log_in_har.json', screenshots: true })
+		await har.start({ path: 'trace/log_in_trace.har' })
+		// ARRANGE
+		await page.goto('http://localhost:8080', { timeout: 30000, waitUntil: 'load' })
+		await page.goto('http://localhost:8080', { timeout: 30000, waitUntil: 'load' })
+		// take a screenshot and save to the file system
+		await page.screenshot({ path: 'screenshots/login.png' })
+
+		// ACT
+		// Complete login and submit form
+		await page.type('input[name=user]', username)
+		await page.type('input[name=pass]', password)
+		await page.click('input[type=submit]')
+		await page.waitForSelector('h1')
+		// await page.waitFor(1000) // sometimes you need a second delay
+
+		// ASSERT
+		// Check log in page has loaded
+		const title = await page.title()
+		expect(title).toBe('Home Page')
+
+		// Take screenshot
+		const image = await page.screenshot()
+		// Compare to the screenshot from the previous run
+		expect(image).toMatchImageSnapshot()
+		// Stop logging to the trace files
+		await page.tracing.stop()
+		await har.stop()
+		done()
+	}, 16000)
+
 })
 
