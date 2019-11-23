@@ -12,7 +12,10 @@ echo Removing Previous Database Files
 rm -rf *.db
 echo Previous Database Files Removed
 echo Starting Server and Running Tests
+echo ------------------------------------
 node index.js&
 node_modules/.bin/jest --runInBand --detectOpenHandles acceptance\ tests/* # Normal Acceptance Test Running
 #node_modules/.bin/jest --runInBand --detectOpenHandles --updateSnapshot acceptance\ tests/* # Update Snapshots
-read -p "Tests Complete\nPress Enter to Continue"
+echo ------------------------------------
+echo Tests Complete
+read -p "Press Enter to Continue"
