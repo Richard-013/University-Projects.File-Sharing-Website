@@ -787,3 +787,63 @@ describe('getFileSize()', () => {
 		done()
 	})
 })
+
+describe('getFileName()', () => {
+
+	test('gets the file name correctly', async done => {
+		expect.assertions(1)
+		const download = await new Download()
+		// Upload files to test with
+		const sql = 'INSERT INTO files (hash_id, file_name, extension, user_upload, target_user) VALUES(?, ?, ?, ?, ?)'
+		await download.db.run(sql, 'a94a8fe5', 'test.txt', 'txt', 'tester', 'testTarget')
+		// Get path to the file
+		const returnVal = await download.getFileName('tester', 'a94a8fe5')
+
+		expect(returnVal).toBe('test.txt')
+
+		done() // Finish the test
+	})
+
+	test('returns untitled when there is no source username given', async done => {
+		expect.assertions(1)
+		const download = await new Download()
+		// Run function with no source username
+		// Upload file
+		const sql = 'INSERT INTO files (hash_id, file_name, extension, user_upload, target_user) VALUES(?, ?, ?, ?, ?)'
+		await download.db.run(sql, 'a94a8fe5', 'test.txt', 'txt', 'tester', 'testTarget')
+		// Attempt to get path to the file
+		const returnVal = await download.getFileName(undefined, 'a94a8fe5')
+
+		expect(returnVal).toBe('untitled')
+		done()
+	})
+
+	test('retuns untitled when there is no hash name given', async done => {
+		expect.assertions(1)
+		const download = await new Download()
+		// Run function with no hash name
+		// Upload file
+		const sql = 'INSERT INTO files (hash_id, file_name, extension, user_upload, target_user) VALUES(?, ?, ?, ?, ?)'
+		await download.db.run(sql, 'a94a8fe5', 'test.txt', 'txt', 'tester', 'testTarget')
+		// Attempt to get path to the file
+		const returnVal = await download.getFileName('tester', undefined)
+
+		expect(returnVal).toBe('untitled')
+		done()
+	})
+
+	test('returns untitled when there are no arguments given', async done => {
+		expect.assertions(1)
+		const download = await new Download()
+		// Run function with no arguments
+		// Upload file
+		const sql = 'INSERT INTO files (hash_id, file_name, extension, user_upload, target_user) VALUES(?, ?, ?, ?, ?)'
+		await download.db.run(sql, 'a94a8fe5', 'test.txt', 'txt', 'tester', 'testTarget')
+		// Attempt to get path to the file
+		const returnVal = await download.getFileName()
+
+		expect(returnVal).toBe('untitled')
+
+		done()
+	})
+})
