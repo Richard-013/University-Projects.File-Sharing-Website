@@ -252,4 +252,26 @@ module.exports = class Download {
 			return fileList
 		}
 	}
+
+	/**
+	* Generates an array of objects which contain information about each available file
+	* File info objects contain the following fields: fileName, uploader, fileType, fileSize, fileCat, timeTillDelete, dateUploaded, url
+	* @async
+	* @memberof module:download
+	* @param   {string} source - Username of the user who uploaded the file.
+	* @param   {string} hash - Hash id of the file.
+	* @returns {string} returns the file name or untitled (if the name could not be acquired).
+	*/
+	async getFileName(source, hash) {
+		try {
+			if (source === undefined || source === '') throw new Error('No username given, file cannot be located')
+			if (hash === undefined || hash === '') throw new Error('No file name given, file cannot be located')
+			const sql = 'SELECT * FROM files WHERE user_upload = ? AND hash_id = ?;'
+			const record = await this.db.get(sql, source, hash) // Runs sql to find stored file name
+			const fileName = record.file_name
+			return fileName
+		} catch (err) {
+			return 'untitled'
+		}
+	}
 }

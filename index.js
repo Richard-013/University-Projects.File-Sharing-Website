@@ -4,6 +4,7 @@
 'use strict'
 
 // Module Imports
+const fs = require('fs')
 const Koa = require('koa')
 const Router = require('koa-router')
 const views = require('koa-views')
@@ -210,13 +211,16 @@ router.get('/file', async ctx => {
 		const download = await new Download(dbName)
 		const [sourceUser, hash] = [ctx.query.u, ctx.query.h]
 		const filePath = await download.getFilePath(ctx.session.username, sourceUser, hash) // Throws if cannot access
-		ctx.attachment(filePath) // Lets the user donwload the file
+		const fileName = await download.getFileName(sourceUser, hash)
+		ctx.statusCode = 200
+		ctx.body = fs.createReadStream(filePath)
+		ctx.set('Content-disposition', `attachment; filename=${fileName}`) // Lets the user download the file
 		const remover = await new Remove(dbName)
 		const timer = 500000 // Sets timer amount
 		setTimeout(() => {
 			remover.removeFile(sourceUser, hash)
 		}, timer) // Delete the file after approx. 5 minutes to allow user time to download it
-		await ctx.render('download')
+		//await ctx.render('download')
 	} catch (err) {
 		await ctx.render('error', { message: err.message })
 	}
