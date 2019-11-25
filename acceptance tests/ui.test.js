@@ -266,4 +266,76 @@ describe('File Upload', () => {
 	}, 16000)
 })
 
+describe('File Download', () => {
+	beforeEach(async() => {
+		browser = await puppeteer.launch({ headless: true, slowMo: delayMS, args: [`--window-size=${width},${height}`] })
+		page = await browser.newPage()
+		har = new PuppeteerHar(page)
+		await page.setViewport({ width, height })
+	})
 
+	afterEach(() => browser.close())
+
+	test('Log In and Download File', async done => {
+		// Begin generating a trace file
+		await page.tracing.start({ path: 'trace/log_in_and_download_har.json', screenshots: true })
+		await har.start({ path: 'trace/log_in_and_download_trace.har' })
+		// ARRANGE
+		await page.goto('http://localhost:8080', { timeout: 30000, waitUntil: 'load' })
+		await page.goto('http://localhost:8080', { timeout: 30000, waitUntil: 'load' })
+		// take a screenshot and save to the file system
+		await page.screenshot({ path: 'screenshots/log_in_and_download.png' })
+
+		// ACT
+		// Log In
+		await page.type('input[name=user]', username)
+		await page.type('input[name=pass]', password)
+		await page.click('input[type=submit]')
+		await page.waitForSelector('h1')
+		// await page.waitFor(1000) // sometimes you need a second delay
+
+		// ASSERT
+		// Check log in page has loaded
+		let title = await page.title()
+		expect(title).toBe('Home Page')
+
+		// ACT
+		// Go to file list
+		await page.click('[name=fileList]')
+		await page.waitForSelector('h1')
+
+		// ASSERT
+		// Check File List Has Loaded
+		title = await page.title()
+		expect(title).toBe('Available Files')
+		// Check file is in the list
+		expect(await page.evaluate(() => document.querySelector('p').innerText)).toBe('File Name: testing.txt')
+
+		// ACT
+		// Download the file
+		await page._client.send('Page.setDownloadBehavior', {
+			behavior: 'allow',
+			downloadPath: '__dirname/downloads/'
+		})
+		const downloadElements = await page.$x('//a[contains(., \'Download\')]')
+		await downloadElements[0].click()
+
+		// ASSERT
+		// Check file was downloaded
+		let existing = false
+		await fs.stat('acceptance tests/downloads/testing.txt', (err) => {
+			if (err) throw err
+		})
+		existing = true // If stat executes successfully existing will be true, else an error is thrown
+		expect(existing).toBeTruthy()
+
+		// Take screenshot
+		const image = await page.screenshot()
+		// Compare to the screenshot from the previous run
+		expect(image).toMatchImageSnapshot()
+		// Stop logging to the trace files
+		await page.tracing.stop()
+		await har.stop()
+		done()
+	}, 16000)
+})
