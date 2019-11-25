@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 
 set -e
-echo Beginning Automated Acceptance Tests
+echo --------------------------
+echo Automated Acceptance Tests
+echo --------------------------
 echo Creating Screenshots Directory
 mkdir -p screenshots
 echo Screenshots Directory Created
@@ -11,6 +13,15 @@ echo Trace Directory Created
 echo Removing Previous Database Files
 rm -rf *.db
 echo Previous Database Files Removed
+echo Remove Old Server Files
+rm -rf files/uploads
+echo Old Server Files Removed
+echo Remove Download Test Files
+rm -rf acceptance\ tests/downloads
+echo Old Download Test Removed
+echo Creating New Download Test Directory
+mkdir -p acceptance\ tests/downloads
+echo Download Test Directory Created
 echo Starting Server and Running Tests
 echo ------------------------------------
 node index.js&
