@@ -240,7 +240,8 @@ describe('generateFileList()', () => {
 		const expectDate = await new Date(26236193 * 60000)
 		const date = await expectDate.toLocaleString()
 
-		const sql = 'INSERT INTO files (hash_id, file_name, extension, user_upload, upload_time, target_user) VALUES(?, ?, ?, ?, ?, ?)'
+		const sql = 'INSERT INTO files (hash_id, file_name, extension, user_upload, upload_time, target_user)' +
+			'VALUES(?, ?, ?, ?, ?, ?)'
 		await download.db.run(sql, 'a94a8fe', 'test.txt', 'txt', 'tester', 26236193, 'testTarget')
 
 		let files = await download.generateFileList('testTarget')
@@ -278,7 +279,8 @@ describe('generateFileList()', () => {
 		const expectDate = await new Date(26236193 * 60000)
 		const date = await expectDate.toLocaleString()
 
-		const sql = 'INSERT INTO files (hash_id, file_name, extension, user_upload, upload_time, target_user) VALUES(?, ?, ?, ?, ?, ?)'
+		const sql = 'INSERT INTO files (hash_id, file_name, extension, user_upload, upload_time, target_user)' +
+			'VALUES(?, ?, ?, ?, ?, ?)'
 		await download.db.run(sql, 'a94a8fe', 'test.txt', 'txt', 'tester', 26236193, 'testTarget')
 		await download.db.run(sql, 'b5453qe', 'main.cpp', 'cpp', 'tester', 26236193, 'testTarget')
 
@@ -754,7 +756,7 @@ describe('getFileSize()', () => {
 		const download = await new Download()
 
 		await expect(download.getFileSize(undefined, 'testing', 'txt')).rejects
-			.toEqual(Error('Undefined parameters not accepted'))
+			.toEqual(Error('Undefined arguments not accepted'))
 		done()
 	})
 
@@ -763,7 +765,7 @@ describe('getFileSize()', () => {
 		const download = await new Download()
 
 		await expect(download.getFileSize('hk47ad.db', undefined, 'txt')).rejects
-			.toEqual(Error('Undefined parameters not accepted'))
+			.toEqual(Error('Undefined arguments not accepted'))
 		done()
 	})
 
@@ -772,7 +774,7 @@ describe('getFileSize()', () => {
 		const download = await new Download()
 
 		await expect(download.getFileSize('123abc', 'testing', undefined)).rejects
-			.toEqual(Error('Undefined parameters not accepted'))
+			.toEqual(Error('Undefined arguments not accepted'))
 		done()
 	})
 
@@ -781,7 +783,67 @@ describe('getFileSize()', () => {
 		const download = await new Download()
 
 		await expect(download.getFileSize()).rejects
-			.toEqual(Error('Undefined parameters not accepted'))
+			.toEqual(Error('Undefined arguments not accepted'))
+		done()
+	})
+})
+
+describe('getFileName()', () => {
+
+	test('gets the file name correctly', async done => {
+		expect.assertions(1)
+		const download = await new Download()
+		// Upload files to test with
+		const sql = 'INSERT INTO files (hash_id, file_name, extension, user_upload, target_user) VALUES(?, ?, ?, ?, ?)'
+		await download.db.run(sql, 'a94a8fe5', 'test.txt', 'txt', 'tester', 'testTarget')
+		// Get path to the file
+		const returnVal = await download.getFileName('tester', 'a94a8fe5')
+
+		expect(returnVal).toBe('test.txt')
+
+		done() // Finish the test
+	})
+
+	test('returns untitled when there is no source username given', async done => {
+		expect.assertions(1)
+		const download = await new Download()
+		// Run function with no source username
+		// Upload file
+		const sql = 'INSERT INTO files (hash_id, file_name, extension, user_upload, target_user) VALUES(?, ?, ?, ?, ?)'
+		await download.db.run(sql, 'a94a8fe5', 'test.txt', 'txt', 'tester', 'testTarget')
+		// Attempt to get path to the file
+		const returnVal = await download.getFileName(undefined, 'a94a8fe5')
+
+		expect(returnVal).toBe('untitled')
+		done()
+	})
+
+	test('retuns untitled when there is no hash name given', async done => {
+		expect.assertions(1)
+		const download = await new Download()
+		// Run function with no hash name
+		// Upload file
+		const sql = 'INSERT INTO files (hash_id, file_name, extension, user_upload, target_user) VALUES(?, ?, ?, ?, ?)'
+		await download.db.run(sql, 'a94a8fe5', 'test.txt', 'txt', 'tester', 'testTarget')
+		// Attempt to get path to the file
+		const returnVal = await download.getFileName('tester', undefined)
+
+		expect(returnVal).toBe('untitled')
+		done()
+	})
+
+	test('returns untitled when there are no arguments given', async done => {
+		expect.assertions(1)
+		const download = await new Download()
+		// Run function with no arguments
+		// Upload file
+		const sql = 'INSERT INTO files (hash_id, file_name, extension, user_upload, target_user) VALUES(?, ?, ?, ?, ?)'
+		await download.db.run(sql, 'a94a8fe5', 'test.txt', 'txt', 'tester', 'testTarget')
+		// Attempt to get path to the file
+		const returnVal = await download.getFileName()
+
+		expect(returnVal).toBe('untitled')
+
 		done()
 	})
 })

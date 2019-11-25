@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: modules/user.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: modules/user.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>'use strict'
+
+// Module Imports
+const bcrypt = require('bcrypt-promise')
+const fs = require('fs-extra')
+const sqlite = require('sqlite-async')
+const saltRounds = 10
+
+/**
+ * User Module.
+ * @module user
+ */
+module.exports = class User {
+	/**
+	* User Module constructor that sets up required database and table.
+	* @class user
+	* @memberof module:user
+	*/
+	constructor(dbName = ':memory:') {
+		return (async() => {
+			this.db = await sqlite.open(dbName)
+			const sql = 'CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, user TEXT, pass TEXT);'
+			await this.db.run(sql) // Creates the table to store user details
+			return this
+		})()
+	}
+
+	/**
+	* Registers a user on the system.
+	* @async
+	* @memberof module:user
+	* @param   {string} user - Username for the new user.
+	* @param   {string} pass - Password of the new user.
+	* @returns {boolean} returns true on success.
+	* @throws  {UsernameInUse} username [user] already in use.
+	*/
+	async register(user, pass) {
+		try {
+			if(user.length === 0) throw new Error('missing username')
+			if(pass.length === 0) throw new Error('missing password')
+			let sql = `SELECT COUNT(id) as records FROM users WHERE user="${user}";`
+			const data = await this.db.get(sql)
+			if(data.records !== 0) throw new Error(`username "${user}" already in use`)
+			pass = await bcrypt.hash(pass, saltRounds)
+			sql = `INSERT INTO users(user, pass) VALUES("${user}", "${pass}")`
+			await this.db.run(sql)
+			return true
+		} catch(err) {
+			throw err
+		}
+	}
+
+	/**
+	* Uploads an avatar.
+	* @async
+	* @memberof module:user
+	* @param   {string} path - Path to the file
+	* @param   {string} name - Name of the file.
+	* @param   {string} username - Password of the new user.
+	* @returns {integer} returns 0 if no file is uploaded.
+	* @throws  {NoUsername} No Username.
+	*/
+	async uploadAvatar(path, name, username) {
+		if (username === undefined || username.length === 0 ) throw new Error('No Username')
+		if(path === undefined || name === undefined || name === '') {
+			// Allows the user to not upload an avatar if they so choose
+			return 0
+		}
+		const nameSplit = name.split('.')
+		const ext = nameSplit.pop()
+		const image = ['ai', 'bmp', 'gif', 'ico', 'jpeg', 'jpg', 'png', 'ps', 'psd', 'svg', 'tif', 'tiff']
+		if (!image.includes(ext)) throw new Error('Avatar file must be an image')
+		await fs.copy(path, `public/avatars/${username}.${ext}`)
+	}
+
+	/**
+	* Logs a user on to the system.
+	* @async
+	* @memberof module:user
+	* @param   {string} username - Path to the file
+	* @param   {string} password - Name of the file.
+	* @returns {boolean} returns true on successful login, false otherwise.
+	* @throws  {NoUsername} No Username.
+	*/
+	async login(username, password) {
+		try {
+			let sql = `SELECT count(id) AS count FROM users WHERE user="${username}";`
+			const records = await this.db.get(sql)
+			if(!records.count) throw new Error(`username "${username}" not found`)
+			sql = `SELECT pass FROM users WHERE user = "${username}";`
+			const record = await this.db.get(sql)
+			const valid = await bcrypt.compare(password, record.pass)
+			if(valid === false) throw new Error(`invalid password for account "${username}"`)
+			return true
+		} catch(err) {
+			throw err
+		}
+	}
+
+}
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-download.html">download</a></li><li><a href="module-remove.html">remove</a></li><li><a href="module-upload.html">upload</a></li><li><a href="module-user.html">user</a></li></ul><h3>Classes</h3><ul><li><a href="module-download.download.html">download</a></li><li><a href="module-remove.remove.html">remove</a></li><li><a href="module-upload.upload.html">upload</a></li><li><a href="module-user.user.html">user</a></li></ul><h3>Global</h3><ul><li><a href="global.html#FileDownloadPage">File Download Page</a></li><li><a href="global.html#FileListPage">File List Page</a></li><li><a href="global.html#FileSharingPage">File Sharing Page</a></li><li><a href="global.html#HomePage">Home Page</a></li><li><a href="global.html#LogOutPage">Log Out Page</a></li><li><a href="global.html#LoginPage">Login Page</a></li><li><a href="global.html#LoginScript">Login Script</a></li><li><a href="global.html#RegisterPage">Register Page</a></li><li><a href="global.html#RegisterScript">Register Script</a></li><li><a href="global.html#UploadPage">Upload Page</a></li><li><a href="global.html#UploadScript">Upload Script</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Mon Nov 25 2019 17:25:00 GMT+0000 (Greenwich Mean Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
