@@ -33,7 +33,7 @@ const defaultPort = 8080
 const port = process.env.PORT || defaultPort
 const dbName = 'website.db'
 const domainName = 'http://localhost:8080'
-const expiryCheckInterval = 300000 // Three minutes
+const expiryCheckInterval = 200000 // Two Minutes
 
 /**
  * The secure home page.
@@ -153,7 +153,7 @@ router.post('/upload', koaBody, async ctx => {
 		const uploadResult = await upload.uploadFile(path, name, ctx.session.username, targetUser) // Throws error if not successful
 		ctx.redirect(`/shareFile?h=${uploadResult}`) // Successful upload
 	} catch (err) {
-		await ctx.render('error', { message: err.message })
+		await ctx.redirect(`/upload?message=${err.message}`)
 	}
 })
 
@@ -216,7 +216,7 @@ router.get('/file', async ctx => {
 		ctx.body = fs.createReadStream(filePath)
 		ctx.set('Content-disposition', `attachment; filename=${fileName}`) // Lets the user download the file
 		const remover = await new Remove(dbName)
-		const timer = 500000 // Sets timer amount
+		const timer = 60000 // Sets timer amount (1 Minute)
 		setTimeout(() => {
 			remover.removeFile(sourceUser, hash)
 		}, timer) // Delete the file after approx. 5 minutes to allow user time to download it

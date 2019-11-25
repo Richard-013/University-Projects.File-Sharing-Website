@@ -254,8 +254,7 @@ module.exports = class Download {
 	}
 
 	/**
-	* Generates an array of objects which contain information about each available file
-	* File info objects contain the following fields: fileName, uploader, fileType, fileSize, fileCat, timeTillDelete, dateUploaded, url
+	* Retrieves the name of the chosen file
 	* @async
 	* @memberof module:download
 	* @param   {string} source - Username of the user who uploaded the file.
