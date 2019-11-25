@@ -1,5 +1,6 @@
 'use strict'
 
+const fs = require('fs')
 const puppeteer = require('puppeteer')
 const { configureToMatchImageSnapshot } = require('jest-image-snapshot')
 const PuppeteerHar = require('puppeteer-har')
@@ -23,7 +24,7 @@ const toMatchImageSnapshot = configureToMatchImageSnapshot({
 expect.extend({ toMatchImageSnapshot })
 
 describe('Log In and Register', () => {
-	beforeEach(async () => {
+	beforeEach(async() => {
 		browser = await puppeteer.launch({ headless: true, slowMo: delayMS, args: [`--window-size=${width},${height}`] })
 		page = await browser.newPage()
 		har = new PuppeteerHar(page)
@@ -50,7 +51,6 @@ describe('Log In and Register', () => {
 		await page.type('input[name=pass]', password)
 		await page.click('input[type=submit]')
 		await page.waitForSelector('h1')
-		// await page.waitFor(1000) // sometimes you need a second delay
 
 		// ASSERT
 		// Check log in page has loaded
@@ -95,7 +95,6 @@ describe('Log In and Register', () => {
 		await page.type('input[name=pass]', password)
 		await page.click('input[type=submit]')
 		await page.waitForSelector('h1')
-		// await page.waitFor(1000) // sometimes you need a second delay
 
 		// ASSERT
 		// Check log in page has loaded
@@ -134,10 +133,10 @@ describe('Log In and Register', () => {
 		let title = await page.title()
 		expect(title).toBe('Home Page')
 
+		// ACT
 		// Attempt log out
 		await page.click('[name=logout]')
 		await page.waitForSelector('h1')
-		// await page.waitFor(1000) // sometimes you need a second delay
 
 		// ASSERT
 		// Check log in page has loaded
@@ -154,4 +153,117 @@ describe('Log In and Register', () => {
 		done()
 	}, 16000)
 })
+
+describe('File Upload', () => {
+	beforeEach(async() => {
+		browser = await puppeteer.launch({ headless: true, slowMo: delayMS, args: [`--window-size=${width},${height}`] })
+		page = await browser.newPage()
+		har = new PuppeteerHar(page)
+		await page.setViewport({ width, height })
+	})
+
+	afterEach(() => browser.close())
+
+	test('Log In and Upload File', async done => {
+		// Begin generating a trace file
+		await page.tracing.start({ path: 'trace/log_in_and_upload_har.json', screenshots: true })
+		await har.start({ path: 'trace/log_in_and_upload_trace.har' })
+		// ARRANGE
+		await page.goto('http://localhost:8080', { timeout: 30000, waitUntil: 'load' })
+		await page.goto('http://localhost:8080', { timeout: 30000, waitUntil: 'load' })
+		// take a screenshot and save to the file system
+		await page.screenshot({ path: 'screenshots/log_in_and_upload.png' })
+
+		// ACT
+		// Log In
+		await page.type('input[name=user]', username)
+		await page.type('input[name=pass]', password)
+		await page.click('input[type=submit]')
+		await page.waitForSelector('h1')
+		// await page.waitFor(1000) // sometimes you need a second delay
+
+		// ASSERT
+		// Check log in page has loaded
+		let title = await page.title()
+		expect(title).toBe('Home Page')
+
+		// ACT
+		await page.click('[name=upload]')
+		await page.waitForSelector('h1')
+
+		// ASSERT
+		// Check Upload Page Has Loaded
+		title = await page.title()
+		expect(title).toBe('Upload A File')
+
+		// ACT
+		// Upload a file
+		await page.type('[name=targetuser]', username)
+		const filePath = './acceptance tests/testing.txt'
+		const input = await page.$('input[type=file]')
+		await input.uploadFile(filePath)
+		await page.click('input[type=submit]')
+		await page.waitForSelector('h1')
+
+		// ASSERT
+		// Check Upload Succeeded
+		title = await page.title()
+		expect(title).toBe('Share Your File')
+
+		// Take screenshot
+		const image = await page.screenshot()
+		// Compare to the screenshot from the previous run
+		expect(image).toMatchImageSnapshot()
+		// Stop logging to the trace files
+		await page.tracing.stop()
+		await har.stop()
+		done()
+	}, 16000)
+
+	test('See File in File List', async done => {
+		// Begin generating a trace file
+		await page.tracing.start({ path: 'trace/see_file_in_list_har.json', screenshots: true })
+		await har.start({ path: 'trace/see_file_in_list_trace.har' })
+		// ARRANGE
+		await page.goto('http://localhost:8080', { timeout: 30000, waitUntil: 'load' })
+		await page.goto('http://localhost:8080', { timeout: 30000, waitUntil: 'load' })
+		// take a screenshot and save to the file system
+		await page.screenshot({ path: 'screenshots/see_file_in_list.png' })
+
+		// ACT
+		// Log In
+		await page.type('input[name=user]', username)
+		await page.type('input[name=pass]', password)
+		await page.click('input[type=submit]')
+		await page.waitForSelector('h1')
+		// await page.waitFor(1000) // sometimes you need a second delay
+
+		// ASSERT
+		// Check log in page has loaded
+		let title = await page.title()
+		expect(title).toBe('Home Page')
+
+		// ACT
+		// Go to file list
+		await page.click('[name=fileList]')
+		await page.waitForSelector('h1')
+
+		// ASSERT
+		// Check File List Has Loaded
+		title = await page.title()
+		expect(title).toBe('Available Files')
+		// Check file is in the list
+		expect(await page.evaluate(() => document.querySelector('p').innerText)).toBe('File Name: testing.txt')
+
+		// Take screenshot
+		const image = await page.screenshot()
+		// Compare to the screenshot from the previous run
+		expect(image).toMatchImageSnapshot()
+		// Stop logging to the trace files
+		await page.tracing.stop()
+		await har.stop()
+		done()
+	}, 16000)
+})
+
 
