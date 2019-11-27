@@ -18,18 +18,31 @@
     <!-- If a message is passed to the page, display it here -->
     {{/if}}
 
-    {{#each files}}
-    <img src="icons/{{this.fileCat}}.png" alt="File Type: {{this.fileCat}} height="50" width="50"/>
-    <p><b>File Name:</b> {{this.fileName}}</p>
-    <p><b>Uploaded By:</b> {{this.uploader}}</p>
-    <p><b>File Type:</b> {{this.fileType}}</p>
-    <p><b>File Size:</b> {{this.fileSize}}</p>
-    <p><b>Time Until Deleted:</b> {{this.timeTillDelete}} Hours</p>
-    <p><b>Uploaded On:</b> {{this.dateUploaded}}</p>
-    <a href="{{this.url}}">Download this file</a>
-    <br/>
-    {{/each}}
+    <table style="width:90%" align="center">
+        <tr>
+            <th>File</th>
+            <th>Uploaded By</th>
+            <th>File Type</th>
+            <th>File Size</th>
+            <th>Hrs. Till Deletion</th>
+            <th>Uploaded At</th>
+            <th>Link</th>
+        </tr>
+        {{#each files}}
+            <tr>
+                <td> <img src="icons/{{this.fileCat}}.png" alt="File Type: {{this.fileCat}}" height=" 50" width="50"/> <p>{{this.fileName}}</p> </td>
+                <td>{{this.uploader}}</td>
+                <td>{{this.fileType}}</td>
+                <td>{{this.fileSize}}</td>
+                <td>{{this.timeTillDelete}}</td>
+                <td>{{this.dateUploaded}}</td>
+                <td><a href="{{this.url}}">Download this file</a></td>
+            </tr>
+        {{/each}}
+    </table>
 
-    <p><a href="/">Back</a></p>
+    <form action="/" class="backButton">
+        <input type="submit" value="Back" />
+    </form>
 
 </html>
