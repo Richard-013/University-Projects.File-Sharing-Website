@@ -19,14 +19,17 @@
     {{/if}}
 
     {{#if link}}
-    <p>Here is your link: {{link}}</p>
+    <p class="linkDetails">Here is your link:</p>
+    <p class="linkDetails">{{link}}</p>
     <!-- Displays the link to the user -->
     
-    <a href="mailto:?subject=I wanted you to see this site&amp;body=Here's a file I wanted to share with you {{link}}"
-        title="Share by Email">
-    Share this link by email</a>
+    <form action="mailto:?subject=I wanted you to see this site&amp;body=Here's a file I wanted to share with you {{link}}" title="Share by Email">
+        <input type="submit" value="Share By Email" />
+    </form>
     {{/if}}
 
-    <p><a href="/" name="back">Back</a></p>
+    <form action="/" class="backButton">
+        <input type="submit" value="Back" />
+    </form>
 
 </html>
