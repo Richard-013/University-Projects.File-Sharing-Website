@@ -39,16 +39,16 @@ describe('Log In and Register', () => {
 		await har.start({ path: 'trace/register_and_log_in_trace.har' })
 		// ARRANGE
 		await page.goto('http://localhost:8080', { timeout: 30000, waitUntil: 'load' })
-		await page.goto('http://localhost:8080', { timeout: 30000, waitUntil: 'load' })
 		// take a screenshot and save to the file system
 		await page.screenshot({ path: 'screenshots/require_login.png' })
 
 		// ACT
 		// Go to the registration page
-		await page.click('[name=goRegister]')
+		await page.click('form[name="registerBtn"] > input[type=submit]')
+		await page.waitForSelector('h1')
 		// Complete registration and submit form
-		await page.type('input[name=user]', username)
-		await page.type('input[name=pass]', password)
+		await page.type('input[name="user"]', username)
+		await page.type('input[name="pass"]', password)
 		await page.click('input[type=submit]')
 		await page.waitForSelector('h1')
 
@@ -59,8 +59,8 @@ describe('Log In and Register', () => {
 
 		// ACT
 		// Log in using newly registered details
-		await page.type('input[name=user]', username)
-		await page.type('input[name=pass]', password)
+		await page.type('input[name="user"]', username)
+		await page.type('input[name="pass"]', password)
 		await page.click('input[type=submit]')
 		await page.waitForSelector('h1')
 
@@ -85,19 +85,18 @@ describe('Log In and Register', () => {
 		await har.start({ path: 'trace/log_in_trace.har' })
 		// ARRANGE
 		await page.goto('http://localhost:8080', { timeout: 30000, waitUntil: 'load' })
-		await page.goto('http://localhost:8080', { timeout: 30000, waitUntil: 'load' })
 		// take a screenshot and save to the file system
 		await page.screenshot({ path: 'screenshots/login.png' })
 
 		// ACT
 		// Complete login and submit form
-		await page.type('input[name=user]', username)
-		await page.type('input[name=pass]', password)
+		await page.type('input[name="user"]', username)
+		await page.type('input[name="pass"]', password)
 		await page.click('input[type=submit]')
 		await page.waitForSelector('h1')
 
 		// ASSERT
-		// Check log in page has loaded
+		// Check home page has loaded
 		const title = await page.title()
 		expect(title).toBe('Home Page')
 
@@ -117,14 +116,13 @@ describe('Log In and Register', () => {
 		await har.start({ path: 'trace/log_out_trace.har' })
 		// ARRANGE
 		await page.goto('http://localhost:8080', { timeout: 30000, waitUntil: 'load' })
-		await page.goto('http://localhost:8080', { timeout: 30000, waitUntil: 'load' })
 		// take a screenshot and save to the file system
 		await page.screenshot({ path: 'screenshots/log-out.png' })
 
 		// ACT
 		// Log in using existing details
-		await page.type('input[name=user]', username)
-		await page.type('input[name=pass]', password)
+		await page.type('input[name="user"]', username)
+		await page.type('input[name="pass"]', password)
 		await page.click('input[type=submit]')
 		await page.waitForSelector('h1')
 
@@ -135,7 +133,7 @@ describe('Log In and Register', () => {
 
 		// ACT
 		// Attempt log out
-		await page.click('[name=logout]')
+		await page.click('form[name="logoutBtn"] > input[type=submit]')
 		await page.waitForSelector('h1')
 
 		// ASSERT
@@ -170,25 +168,24 @@ describe('File Upload', () => {
 		await har.start({ path: 'trace/log_in_and_upload_trace.har' })
 		// ARRANGE
 		await page.goto('http://localhost:8080', { timeout: 30000, waitUntil: 'load' })
-		await page.goto('http://localhost:8080', { timeout: 30000, waitUntil: 'load' })
 		// take a screenshot and save to the file system
 		await page.screenshot({ path: 'screenshots/log_in_and_upload.png' })
 
 		// ACT
 		// Log In
-		await page.type('input[name=user]', username)
-		await page.type('input[name=pass]', password)
+		await page.type('input[name="user"]', username)
+		await page.type('input[name="pass"]', password)
 		await page.click('input[type=submit]')
 		await page.waitForSelector('h1')
 		// await page.waitFor(1000) // sometimes you need a second delay
 
 		// ASSERT
-		// Check log in page has loaded
+		// Check home page has loaded
 		let title = await page.title()
 		expect(title).toBe('Home Page')
 
 		// ACT
-		await page.click('[name=upload]')
+		await page.click('input[type=submit]')
 		await page.waitForSelector('h1')
 
 		// ASSERT
@@ -198,7 +195,7 @@ describe('File Upload', () => {
 
 		// ACT
 		// Upload a file
-		await page.type('[name=targetuser]', username)
+		await page.type('[name="targetuser"]', username)
 		const filePath = './acceptance tests/testing.txt'
 		const input = await page.$('input[type=file]')
 		await input.uploadFile(filePath)
@@ -206,7 +203,7 @@ describe('File Upload', () => {
 		await page.waitForSelector('h1')
 
 		// ASSERT
-		// Check Upload Succeeded
+		// Check Upload Succeed and share page loaded
 		title = await page.title()
 		expect(title).toBe('Share Your File')
 
@@ -226,26 +223,25 @@ describe('File Upload', () => {
 		await har.start({ path: 'trace/see_file_in_list_trace.har' })
 		// ARRANGE
 		await page.goto('http://localhost:8080', { timeout: 30000, waitUntil: 'load' })
-		await page.goto('http://localhost:8080', { timeout: 30000, waitUntil: 'load' })
 		// take a screenshot and save to the file system
 		await page.screenshot({ path: 'screenshots/see_file_in_list.png' })
 
 		// ACT
 		// Log In
-		await page.type('input[name=user]', username)
-		await page.type('input[name=pass]', password)
+		await page.type('input[name="user"]', username)
+		await page.type('input[name="pass"]', password)
 		await page.click('input[type=submit]')
 		await page.waitForSelector('h1')
 		// await page.waitFor(1000) // sometimes you need a second delay
 
 		// ASSERT
-		// Check log in page has loaded
+		// Check home page has loaded
 		let title = await page.title()
 		expect(title).toBe('Home Page')
 
 		// ACT
 		// Go to file list
-		await page.click('[name=fileList]')
+		await page.click('form[name="fileListBtn"] > input[type=submit]')
 		await page.waitForSelector('h1')
 
 		// ASSERT
@@ -253,7 +249,7 @@ describe('File Upload', () => {
 		title = await page.title()
 		expect(title).toBe('Available Files')
 		// Check file is in the list
-		expect(await page.evaluate(() => document.querySelector('p').innerText)).toBe('File Name: testing.txt')
+		expect(await page.evaluate(() => document.querySelector('p').innerText)).toBe('testing.txt')
 
 		// Take screenshot
 		const image = await page.screenshot()
@@ -282,26 +278,25 @@ describe('File Download', () => {
 		await har.start({ path: 'trace/log_in_and_download_trace.har' })
 		// ARRANGE
 		await page.goto('http://localhost:8080', { timeout: 30000, waitUntil: 'load' })
-		await page.goto('http://localhost:8080', { timeout: 30000, waitUntil: 'load' })
 		// take a screenshot and save to the file system
 		await page.screenshot({ path: 'screenshots/log_in_and_download.png' })
 
 		// ACT
 		// Log In
-		await page.type('input[name=user]', username)
-		await page.type('input[name=pass]', password)
+		await page.type('input[name="user"]', username)
+		await page.type('input[name="pass"]', password)
 		await page.click('input[type=submit]')
 		await page.waitForSelector('h1')
 		// await page.waitFor(1000) // sometimes you need a second delay
 
 		// ASSERT
-		// Check log in page has loaded
+		// Check home page has loaded
 		let title = await page.title()
 		expect(title).toBe('Home Page')
 
 		// ACT
 		// Go to file list
-		await page.click('[name=fileList]')
+		await page.click('form[name="fileListBtn"] > input[type=submit]')
 		await page.waitForSelector('h1')
 
 		// ASSERT
@@ -309,7 +304,7 @@ describe('File Download', () => {
 		title = await page.title()
 		expect(title).toBe('Available Files')
 		// Check file is in the list
-		expect(await page.evaluate(() => document.querySelector('p').innerText)).toBe('File Name: testing.txt')
+		expect(await page.evaluate(() => document.querySelector('p').innerText)).toBe('testing.txt')
 
 		// ACT
 		// Download the file

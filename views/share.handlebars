@@ -23,12 +23,12 @@
     <p class="linkDetails">{{link}}</p>
     <!-- Displays the link to the user -->
     
-    <form action="mailto:?subject=I wanted you to see this site&amp;body=Here's a file I wanted to share with you {{link}}" title="Share by Email">
+    <form action="mailto:?subject=I wanted you to see this site&amp;body=Here's a file I wanted to share with you {{link}}" title="Share by Email" name="emailBtn">
         <input type="submit" value="Share By Email" />
     </form>
     {{/if}}
 
-    <form action="/" class="backButton">
+    <form action="/" class="backButton" name="backBtn">
         <input type="submit" value="Back" />
     </form>
 
