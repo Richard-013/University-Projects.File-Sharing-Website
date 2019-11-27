@@ -4,9 +4,69 @@ body {
   }
   
   .msg {
-    border: 1px solid red;
+    text-align: center;
+    border-left: 10px solid red;
+    background-color: rgb(255, 180, 160);
     font-weight: bold;
     color: red;
     padding: 1em;
   }
-  
+
+  h1 {
+    text-align: center;
+  }
+
+  h3 {
+    text-align: center;
+  }
+
+  form {
+    text-align: center;
+    vertical-align: middle;
+  }
+
+  table {
+    border: 1px solid black;
+    border-collapse: collapse;
+  }
+
+  th {
+    border: 1px solid black;
+    padding: 15px;
+    text-align: center;
+    background-color: darkgrey;
+  }
+
+  td {
+    border: 1px solid black;
+    padding: 15px;
+    text-align: center;
+  }
+
+  tr {
+    background-color: white;
+  }
+
+  tr:hover {background-color: whitesmoke;}
+
+  .backButton {
+    padding: 1em;
+  }
+
+  .linkDetails {
+    padding: 1px;
+    text-align: center;
+  }
+
+  #uploadButton {
+    padding: 1em;
+  }
+
+  #fileListButton {
+    padding: 1em;
+  }
+
+  #logoutButton {
+    text-align: right;
+    padding: 2em;
+  }

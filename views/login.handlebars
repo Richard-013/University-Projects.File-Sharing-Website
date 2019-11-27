@@ -6,7 +6,7 @@
 		<meta charset="utf-8">
 		<title>Log In</title>
 		<meta name="description" content="form to add new books">
-		<meta name="author" content="Mark Tyers & Richard Horton">
+		<meta name="author" content="Richard Horton">
 		<link href="style.css" type="text/css" rel="stylesheet" />
 	</head>
 	<body>
@@ -15,10 +15,12 @@
  			<p class="msg">{{msg}}</p>
 		{{/if}}
 		<form action="/login" method="post">
-			<p>Username:<br /><input type="text" name="user" placeholder="your username" value="{{user}}" autofocus></p>
-			<p>Password:<br /><input type="password" name="pass" placeholder="your password" value=""></p>
+			<p>Username<br /><input type="text" name="user" placeholder="your username" value="{{user}}" autofocus></p>
+			<p>Password<br /><input type="password" name="pass" placeholder="your password" value=""></p>
 			<p><input type="submit" value="Log in"></p>
 		</form>
-		<p><a href="/register" name="goRegister">Register</a></p>
+		<form action="/register">
+			<input type="submit" value="Register" />
+		</form>
 	</body>
 </html>
