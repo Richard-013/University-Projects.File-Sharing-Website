@@ -6,7 +6,7 @@
 		<meta charset="utf-8">
 		<title>Home Page</title>
 		<meta name="description" content="form to add new books">
-		<meta name="author" content="Mark Tyers & Richard Horton">
+		<meta name="author" content="Richard Horton">
 		<link href="style.css" type="text/css" rel="stylesheet" />
 	</head>
 	<body>
@@ -14,9 +14,15 @@
 		<h3>Welcome to File Share</h3>
 		
 
-		<p><a href="/upload" name="upload">Upload A File</a></p>
+		<form action="/upload" id="uploadButton">
+			<input type="submit" value="Upload A File" />
+		</form>
 
-		<p><a href="/fileList" name="fileList">Select A File To Download</a></p>
+		<form action="/fileList" id="fileListButton">
+			<input type="submit" value="View Available Files" />
+		</form>
 
-		<p><a href="/logout" name="logout">Log Out</a></p>
+		<form action="/logout" id="logoutButton">
+			<input type="submit" value="Log Out" />
+		</form>
 </html>
