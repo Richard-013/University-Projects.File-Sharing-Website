@@ -14,13 +14,13 @@
 		{{#if msg}}
  			<p class="msg">{{msg}}</p>
 		{{/if}}
-		<form action="/login" method="post">
+		<form action="/login" method="post" name="loginForm">
 			<p>Username<br /><input type="text" name="user" placeholder="your username" value="{{user}}" autofocus></p>
 			<p>Password<br /><input type="password" name="pass" placeholder="your password" value=""></p>
 			<p><input type="submit" value="Log in"></p>
 		</form>
-		<form action="/register">
-			<input type="submit" value="Register" />
+		<form action="/register" name="registerBtn">
+			<input type="submit" value="Register" name="goRegister"/>
 		</form>
 	</body>
 </html>
