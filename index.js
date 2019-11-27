@@ -113,7 +113,7 @@ router.post('/login', async ctx => {
 		ctx.session.username = body.user // Stores username in cookie for reference
 		return ctx.redirect('/?msg=you are now logged in...')
 	} catch(err) {
-		await ctx.render('error', {message: err.message})
+		await ctx.render('login', {msg: err.message})
 	}
 })
 
