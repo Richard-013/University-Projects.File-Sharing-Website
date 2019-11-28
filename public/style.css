@@ -58,6 +58,10 @@ body {
     text-align: center;
   }
 
+  #linkHolder {
+    text-align: center;
+  }
+
   #uploadButton {
     padding: 1em;
   }
