@@ -23,9 +23,9 @@
     <p class="linkDetails">{{link}}</p>
     <!-- Displays the link to the user -->
     
-    <form action="mailto:?subject=I wanted you to see this site&amp;body=Here's a file I wanted to share with you {{link}}" title="Share by Email" name="emailBtn">
-        <input type="submit" value="Share By Email" />
-    </form>
+    <div id="linkHolder">
+        <a align="center" href="mailto:?subject=The file you asked for&amp;body=Here's a file I wanted to share with you {{link}}">Share by Email</a>
+    </div>
     {{/if}}
 
     <form action="/" class="backButton" name="backBtn">
