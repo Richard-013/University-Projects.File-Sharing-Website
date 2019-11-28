@@ -1,6 +1,8 @@
 # 340CT Coursework
 ## File Sharing
 
+Current Release: V1.1
+
 This is the repository for my 340CT Coursework, it is a dynamic website that allows users to upload, download, and share files between one another.
 
 The code provided allows you to run the site as a server. Currently the server is set up to run as a local host site on port 8080.
