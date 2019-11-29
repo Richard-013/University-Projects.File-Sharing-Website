@@ -215,12 +215,12 @@ router.get('/file', async ctx => {
 		ctx.statusCode = 200
 		ctx.body = fs.createReadStream(filePath)
 		ctx.set('Content-disposition', `attachment; filename=${fileName}`) // Lets the user download the file
-		const remover = await new Remove(dbName)
-		const timer = 60000 // Sets timer amount (1 Minute)
+		const remover = await new Remove(this.dbName)
+		const timer = 20000 // Sets timer amount (20 Seconds)
 		setTimeout(() => {
 			remover.removeFile(sourceUser, hash)
-		}, timer) // Delete the file after approx. 5 minutes to allow user time to download it
-		//await ctx.render('download')
+		}, timer) // Delete the file after approx. 20 seconds to allow user time to download it
+		await ctx.render('download')
 	} catch (err) {
 		await ctx.render('error', { message: err.message })
 	}
