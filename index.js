@@ -220,7 +220,6 @@ router.get('/file', async ctx => {
 		setTimeout(() => {
 			remover.removeFile(sourceUser, hash)
 		}, timer) // Delete the file after approx. 20 seconds to allow user time to download it
-		await ctx.render('download')
 	} catch (err) {
 		await ctx.render('error', { message: err.message })
 	}
