@@ -1,6 +1,7 @@
 # File Sharing Website
 
 Current Release: V1.1
+Note: This is not the original repository for this project and so the branches used during its development are not available to view
 
 This is the repository for my file sharing site. It is a dynamic website that allows users to upload, download, and share files between one another.
 
